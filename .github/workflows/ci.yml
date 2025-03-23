@@ -100,11 +100,9 @@ jobs:
       - name: Restore build cache
         uses: actions/cache@v4
         with:
-          path: build
+          path: .cmake-deps
           # Create a cache key based on the OS and the hash of CMakeLists.txt
           key: ${{ runner.os }}-build-${{ hashFiles('CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-build-
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:
@@ -112,7 +110,7 @@ jobs:
           options: -v ${{ github.workspace }}:/app -w /app
           run: |
             mkdir -p build && cd build
-            cmake .. -DCMAKE_BUILD_TYPE=Debug
+            cmake .. -DCMAKE_BUILD_TYPE=Debug -DCPM_SOURCE_CACHE=.cmake-deps
             cmake --build .
 
   test:
@@ -126,11 +124,9 @@ jobs:
       - name: Restore build cache
         uses: actions/cache@v4
         with:
-          path: build
+          path: .cmake-deps
           # Create a cache key based on the OS and the hash of CMakeLists.txt
           key: ${{ runner.os }}-build-${{ hashFiles('CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-build-
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:
