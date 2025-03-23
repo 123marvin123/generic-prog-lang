@@ -89,6 +89,7 @@ jobs:
           file: Dockerfile
           cache-from: type=gha,scope=${{ github.repository }}
           cache-to: type=gha,mode=max,scope=${{ github.repository }}
+          tags: ${{ github.repository_owner }}/${{ github.repository }}:dev
 
   test:
     name: Test
