@@ -14,18 +14,21 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
-    T__14 = 15, CONCEPT = 16, FUNCTION = 17, NAMESPACE = 18, DESCRIPTION = 19, 
-    GENERICIMPL = 20, REQUIRES = 21, LBRACE = 22, RBRACE = 23, VARARGS = 24, 
-    REAL = 25, BOOL = 26, NUMBER = 27, STRING = 28, IDENTIFIER = 29, WHITESPACE = 30, 
-    COMMENT = 31, LINE_COMMENT = 32, OTHER = 33
+    T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
+    T__20 = 21, CONCEPT = 22, FUNCTION = 23, NAMESPACE = 24, DESCRIPTION = 25, 
+    GENERICIMPL = 26, REQUIRES = 27, FAMILY = 28, LBRACE = 29, RBRACE = 30, 
+    VARARGS = 31, REAL = 32, BOOL = 33, NUMBER = 34, STRING = 35, IDENTIFIER = 36, 
+    WHITESPACE = 37, COMMENT = 38, LINE_COMMENT = 39, OTHER = 40
   };
 
   enum {
-    RuleTranslationUnit = 0, RuleStmnt = 1, RuleConceptDefinitionStmnt = 2, 
-    RuleConceptDefinitionBases = 3, RuleNamespaceStmnt = 4, RuleFunctionStmnt = 5, 
-    RuleFunctionBody = 6, RuleFunctionBodyStmnt = 7, RuleParameterList = 8, 
-    RuleParameter = 9, RuleExpression = 10, RulePlaceholderOrQualifiedId = 11, 
-    RuleConceptPlaceholder = 12, RuleQualifiedIdentifier = 13, RuleLiteral = 14
+    RuleTranslationUnit = 0, RuleStmnt = 1, RuleFamilyStmnt = 2, RuleFamilyHeader = 3, 
+    RuleFamilyBody = 4, RuleFamilyBodyStmnt = 5, RuleConceptDefinitionStmnt = 6, 
+    RuleConceptDefinitionBases = 7, RuleNamespaceStmnt = 8, RuleFunctionStmnt = 9, 
+    RuleFunctionBody = 10, RuleFunctionBodyStmnt = 11, RuleParameterList = 12, 
+    RuleParameter = 13, RuleExpression = 14, RulePlaceholderOrQualifiedId = 15, 
+    RuleConceptPlaceholder = 16, RuleTypename = 17, RuleQualifiedIdentifier = 18, 
+    RuleLiteral = 19
   };
 
   explicit CongParser(antlr4::TokenStream *input);
@@ -47,6 +50,10 @@ public:
 
   class TranslationUnitContext;
   class StmntContext;
+  class FamilyStmntContext;
+  class FamilyHeaderContext;
+  class FamilyBodyContext;
+  class FamilyBodyStmntContext;
   class ConceptDefinitionStmntContext;
   class ConceptDefinitionBasesContext;
   class NamespaceStmntContext;
@@ -58,6 +65,7 @@ public:
   class ExpressionContext;
   class PlaceholderOrQualifiedIdContext;
   class ConceptPlaceholderContext;
+  class TypenameContext;
   class QualifiedIdentifierContext;
   class LiteralContext; 
 
@@ -90,6 +98,67 @@ public:
   };
 
   StmntContext* stmnt();
+
+  class  FamilyStmntContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *name = nullptr;
+    FamilyStmntContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *FAMILY();
+    FamilyBodyContext *familyBody();
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    std::vector<FamilyHeaderContext *> familyHeader();
+    FamilyHeaderContext* familyHeader(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  FamilyStmntContext* familyStmnt();
+
+  class  FamilyHeaderContext : public antlr4::ParserRuleContext {
+  public:
+    CongParser::TypenameContext *type = nullptr;
+    FamilyHeaderContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    TypenameContext *typename_();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  FamilyHeaderContext* familyHeader();
+
+  class  FamilyBodyContext : public antlr4::ParserRuleContext {
+  public:
+    FamilyBodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *LBRACE();
+    antlr4::tree::TerminalNode *RBRACE();
+    std::vector<FamilyBodyStmntContext *> familyBodyStmnt();
+    FamilyBodyStmntContext* familyBodyStmnt(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  FamilyBodyContext* familyBody();
+
+  class  FamilyBodyStmntContext : public antlr4::ParserRuleContext {
+  public:
+    FamilyBodyStmntContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  FamilyBodyStmntContext* familyBodyStmnt();
 
   class  ConceptDefinitionStmntContext : public antlr4::ParserRuleContext {
   public:
@@ -346,6 +415,19 @@ public:
   };
 
   ConceptPlaceholderContext* conceptPlaceholder();
+
+  class  TypenameContext : public antlr4::ParserRuleContext {
+  public:
+    TypenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    QualifiedIdentifierContext *qualifiedIdentifier();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  TypenameContext* typename_();
 
   class  QualifiedIdentifierContext : public antlr4::ParserRuleContext {
   public:

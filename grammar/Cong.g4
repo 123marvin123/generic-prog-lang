@@ -10,6 +10,22 @@ stmnt
     | functionStmnt
     ;
 
+familyStmnt
+    : FAMILY name=IDENTIFIER (familyHeader (',' familyHeader)*)? familyBody
+    ;
+
+familyHeader
+    : IDENTIFIER ':' type=typename
+    ;
+
+familyBody
+    : LBRACE familyBodyStmnt* RBRACE
+    ;
+
+familyBodyStmnt
+    : 'void'
+    ;
+
 conceptDefinitionStmnt
     : CONCEPT name=IDENTIFIER ('(' 'description' ':' desc=STRING ')')? conceptDefinitionBases?';'
     ;
@@ -60,6 +76,15 @@ conceptPlaceholder
     : '<' name=IDENTIFIER '>'
     ;
 
+typename
+    : 'String'
+    | 'Number'
+    | 'Real'
+    | 'Bool'
+    | 'Void'
+    | qualifiedIdentifier
+    ;
+
 // Allows for a qualified identifier, e.g., ::Math::Family
 qualifiedIdentifier: ('::')? IDENTIFIER ('::' IDENTIFIER)*;
 
@@ -77,6 +102,7 @@ NAMESPACE: 'namespace';
 DESCRIPTION: 'description';
 GENERICIMPL: 'generic';
 REQUIRES: 'requires';
+FAMILY: 'family';
 
 LBRACE: '{';
 RBRACE: '}';

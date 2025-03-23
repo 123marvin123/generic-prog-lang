@@ -14,10 +14,11 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
-    T__14 = 15, CONCEPT = 16, FUNCTION = 17, NAMESPACE = 18, DESCRIPTION = 19, 
-    GENERICIMPL = 20, REQUIRES = 21, LBRACE = 22, RBRACE = 23, VARARGS = 24, 
-    REAL = 25, BOOL = 26, NUMBER = 27, STRING = 28, IDENTIFIER = 29, WHITESPACE = 30, 
-    COMMENT = 31, LINE_COMMENT = 32, OTHER = 33
+    T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
+    T__20 = 21, CONCEPT = 22, FUNCTION = 23, NAMESPACE = 24, DESCRIPTION = 25, 
+    GENERICIMPL = 26, REQUIRES = 27, FAMILY = 28, LBRACE = 29, RBRACE = 30, 
+    VARARGS = 31, REAL = 32, BOOL = 33, NUMBER = 34, STRING = 35, IDENTIFIER = 36, 
+    WHITESPACE = 37, COMMENT = 38, LINE_COMMENT = 39, OTHER = 40
   };
 
   explicit CongLexer(antlr4::CharStream *input);
