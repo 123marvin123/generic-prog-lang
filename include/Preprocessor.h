@@ -9,6 +9,7 @@
 #include <regex>
 #include <unordered_set>
 #include <filesystem>
+#include <format>
 
 struct Preprocessor
 {
