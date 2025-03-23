@@ -1,0 +1,25 @@
+#import "other.txt";
+
+namespace testing {
+    namespace other {
+        concept Test(
+            description: "just a test"
+        ) : Object & Boolean;
+    }
+}
+
+fun isModelOf(a: <T>, b: <K>) -> Boolean {
+    description { "checks if a is a model of b" }
+}
+
+fun assign(a: <T>, b: T) -> T {
+    description { "assigns a to b" }
+}
+
+fun isEqual(a: <T>, b: <K>) -> Boolean {
+    description { "checks if a is equal to b" }
+}
+
+fun isNotEqual(a: <T>, b: <K>) -> Boolean {
+    description { "checks if a is not equal to b" }
+}

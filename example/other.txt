@@ -1,0 +1,4 @@
+fun id(a: <T>) -> T {
+    description { "the argument itself" }
+    generic { a }
+}
