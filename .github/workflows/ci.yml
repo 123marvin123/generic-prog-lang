@@ -101,17 +101,27 @@ jobs:
 
   compile:
     name: Compile C++
+    needs:
+      - build-docker
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+      - name: Restore build cache
+        uses: actions/cache@v2
+        with:
+          path: build
+          # Create a cache key based on the OS and the hash of CMakeLists.txt
+          key: ${{ runner.os }}-build-${{ hashFiles('CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:
           image: ghcr.io/${{ github.repository }}:dev
           options: -v ${{ github.workspace }}:/app -w /app
           run: |
-            mkdir build && cd build
+            mkdir -p build && cd build
             cmake .. -DCMAKE_BUILD_TYPE=Debug
             cmake --build .
   
