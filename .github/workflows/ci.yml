@@ -79,6 +79,10 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
+      - name: 📦 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
       - name: 📦 Cache Docker layers
         uses: actions/cache@v4
         with:
@@ -88,7 +92,8 @@ jobs:
             ${{ runner.os }}-buildx-
       - name: 🚀 Build Docker image
         run: |
-          docker build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache -t ${{ github.repository }} .
+          docker buildx create --use
+          docker buildx build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache --progress=plain -t ${{ github.repository }} .
       - name: 📦 Create and configure build directory
         run: |
           docker run --rm -v $(pwd):/app -w /app ${{ github.repository }} bash -c "mkdir -p build && cd build && cmake .."
