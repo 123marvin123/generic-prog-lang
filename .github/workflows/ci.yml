@@ -27,7 +27,7 @@ jobs:
           - {
             name: "Windows Latest MinGW", artifact: "Windows-MinGW",
             os: windows-2025,
-            cc: "gcc-14", cxx: "g++-14"
+            cc: "gcc", cxx: "g++"
           }
           - {
             name: "Ubuntu Latest GCC", artifact: "Linux",
