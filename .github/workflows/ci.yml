@@ -72,39 +72,23 @@ jobs:
         uses: creyD/prettier_action@v4.3
         with:
           prettier_options: --write **/*.{json,js,md,yaml}
-
-  build:
-    name: Build
+  build-docker:
+    name: Build Docker
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
-      - name: 📦 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: 🏗 Set up QEMU
+        uses: docker/setup-qemu-action@v3.6.0
+      - name: 🏗 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.10.0
+      - name: 🚀 Build
+        uses: docker/build-push-action@v6.15.0
         with:
-          install: true
-      - name: 📦 Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-      - name: 🚀 Build Docker image
-        run: |
-          docker buildx create --use
-          docker buildx build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache --progress=plain -t ${{ github.repository }} .
-      - name: 📦 Create and configure build directory
-        run: |
-          docker run --rm -v $(pwd):/app -w /app ${{ github.repository }} bash -c "mkdir -p build && cd build && cmake .."
-      - name: 🔨 Build the project
-        run: |
-          docker run --rm -v $(pwd):/app -w /app/build ${{ github.repository }} make all
-      - name: 📂 Archive build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: build/
+          push: true
+          file: Dockerfile
+          cache-from: type=gha,scope=${{ github.repository }}
+          cache-to: type=gha,mode=max,scope=${{ github.repository }}
 
   test:
     name: Test
