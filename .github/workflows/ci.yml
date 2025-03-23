@@ -1,7 +1,6 @@
 ---
 name: CI
 
-# yamllint disable-line rule:truthy
 on:
   push:
   pull_request:
@@ -80,9 +79,16 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
+      - name: 📦 Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: 🚀 Build Docker image
         run: |
-          docker build -t ${{ github.repository }} .
+          docker build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache -t ${{ github.repository }} .
       - name: 📦 Create and configure build directory
         run: |
           docker run --rm -v $(pwd):/app -w /app ${{ github.repository }} bash -c "mkdir -p build && cd build && cmake .."
