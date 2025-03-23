@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   CMAKE_VERSION: "3.29.6"
   NINJA_VERSION: "1.12.1"
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
   CCACHE_VERSION: "4.10"
 
 jobs:
@@ -33,6 +33,11 @@ jobs:
             name: "Ubuntu Latest GCC", artifact: "Linux",
             os: ubuntu-24.04,
             cc: "gcc-14", cxx: "g++-14"
+          }
+          - {
+            name: "macOS Latest Clang", artifact: "macOS",
+            os: macos-latest,
+            cc: "clang", cxx: "clang++"
           }
 
     steps:
