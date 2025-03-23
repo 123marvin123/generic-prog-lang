@@ -4,6 +4,7 @@
 #include "Preprocessor.h"
 #include <fstream>
 #include <sstream>
+#include <format>
 
 std::string Preprocessor::process(const std::filesystem::path& input_file)
 {
