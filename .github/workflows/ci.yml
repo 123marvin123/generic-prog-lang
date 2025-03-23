@@ -62,16 +62,6 @@ jobs:
       - name: 🚀 Run YAMLLint
         uses: frenck/action-yamllint@v1.5
 
-  lint-prettier:
-    name: Prettier
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4
-      - name: 🚀 Run Prettier
-        uses: creyD/prettier_action@v4.3
-        with:
-          prettier_options: --write **/*.{json,js,md,yaml}
   build-docker:
     name: Build Docker
     runs-on: ubuntu-latest
