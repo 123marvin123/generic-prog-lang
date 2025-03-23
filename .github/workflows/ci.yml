@@ -92,7 +92,7 @@ jobs:
 
   test:
     name: Test
-    needs: build
+    needs: build-docker
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
