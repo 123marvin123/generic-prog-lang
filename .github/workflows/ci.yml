@@ -112,6 +112,11 @@ jobs:
             mkdir -p build && cd build
             cmake .. -DCMAKE_BUILD_TYPE=Debug -DCPM_SOURCE_CACHE=.cmake-deps
             cmake --build .
+      - name: Upload compilation
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build/
 
   test:
     name: Run C++ Tests
@@ -127,6 +132,10 @@ jobs:
           path: .cmake-deps
           # Create a cache key based on the OS and the hash of CMakeLists.txt
           key: ${{ runner.os }}-build-${{ hashFiles('CMakeLists.txt') }}
+      - name: Download compilation
+        uses: actions/download-artifact@v4
+        with:
+          name: build
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:
