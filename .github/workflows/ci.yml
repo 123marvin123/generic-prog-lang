@@ -75,9 +75,17 @@ jobs:
   build-docker:
     name: Build Docker
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: https://ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: 🏗 Set up QEMU
         uses: docker/setup-qemu-action@v3.6.0
       - name: 🏗 Set up Docker Buildx
@@ -89,7 +97,7 @@ jobs:
           file: Dockerfile
           cache-from: type=gha,scope=${{ github.repository }}
           cache-to: type=gha,mode=max,scope=${{ github.repository }}
-          tags: ${{ github.repository }}:dev
+          tags: ghcr.io/${{ github.repository }}:dev
 
   test:
     name: Test
