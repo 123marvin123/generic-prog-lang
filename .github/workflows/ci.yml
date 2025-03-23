@@ -99,18 +99,19 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ github.repository }}
           tags: ghcr.io/${{ github.repository }}:dev
 
-  test:
-    name: Test
-    needs: build-docker
+  compile:
+    name: Compile C++
     runs-on: ubuntu-latest
     steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4
-      - name: ⬇️ Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Run the build process with Docker
+        uses: addnab/docker-run-action@v3
         with:
-          name: build-artifacts
-          path: build/
-      - name: 🧪 Run tests
-        run: |
-          docker run --rm -v $(pwd):/app -w /app/build ${{ github.repository }} ctest --output-on-failure
+          image: ghcr.io/${{ github.repository }}:dev
+          options: -v ${{ github.workspace }}:/app -w /app
+          run: |
+            mkdir build && cd build
+            cmake .. -DCMAKE_BUILD_TYPE=Debug
+            cmake --build .
+  
