@@ -37,6 +37,8 @@ public:
 
     virtual std::any visitNamespaceStmnt(CongParser::NamespaceStmntContext *context) = 0;
 
+    virtual std::any visitFamilyFunctionStmnt(CongParser::FamilyFunctionStmntContext *context) = 0;
+
     virtual std::any visitFunctionStmnt(CongParser::FunctionStmntContext *context) = 0;
 
     virtual std::any visitFunctionBody(CongParser::FunctionBodyContext *context) = 0;

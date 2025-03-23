@@ -51,6 +51,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitFamilyFunctionStmnt(CongParser::FamilyFunctionStmntContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitFunctionStmnt(CongParser::FunctionStmntContext *ctx) override {
     return visitChildren(ctx);
   }

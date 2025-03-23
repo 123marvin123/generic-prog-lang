@@ -15,10 +15,10 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
-    T__20 = 21, CONCEPT = 22, FUNCTION = 23, NAMESPACE = 24, DESCRIPTION = 25, 
-    GENERICIMPL = 26, REQUIRES = 27, FAMILY = 28, LBRACE = 29, RBRACE = 30, 
-    VARARGS = 31, REAL = 32, BOOL = 33, NUMBER = 34, STRING = 35, IDENTIFIER = 36, 
-    WHITESPACE = 37, COMMENT = 38, LINE_COMMENT = 39, OTHER = 40
+    CONCEPT = 21, FUNCTION = 22, NAMESPACE = 23, DESCRIPTION = 24, GENERICIMPL = 25, 
+    REQUIRES = 26, FAMILY = 27, LBRACE = 28, RBRACE = 29, VARARGS = 30, 
+    REAL = 31, BOOL = 32, NUMBER = 33, STRING = 34, IDENTIFIER = 35, WHITESPACE = 36, 
+    COMMENT = 37, LINE_COMMENT = 38, OTHER = 39
   };
 
   explicit CongLexer(antlr4::CharStream *input);
