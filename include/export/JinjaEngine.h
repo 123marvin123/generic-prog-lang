@@ -2,8 +2,8 @@
 // Created by Marvin Haschker on 18.03.25.
 //
 
-#ifndef INJAENGINE_H
-#define INJAENGINE_H
+#ifndef JINJAENGINE_H
+#define JINJAENGINE_H
 
 #include "sema/Sema.h"
 #include "export/ConceptDependencyGraph.h"
