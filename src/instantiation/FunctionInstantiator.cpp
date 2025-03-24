@@ -154,7 +154,7 @@ std::any FunctionInstantiator::Visitor::visitQualifiedIdentifier(CongParser::Qua
     return utils::split_fully_qualified_identifier(ctx->getText());
 }
 
-std::any FunctionInstantiator::Visitor::visitConceptPlaceholder(CongParser::ConceptPlaceholderContext* ctx)
+std::any FunctionInstantiator::Visitor::visitPlaceholder(CongParser::PlaceholderContext* ctx)
 {
     return Placeholder{ctx->name->getText()};
 }

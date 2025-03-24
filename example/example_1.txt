@@ -24,7 +24,7 @@ fun isNotEqual(a: <T>, b: <K>) -> Boolean {
     description { "checks if a is not equal to b" }
 }
 
-family Sequence(value: String) : Object {
+family Sequence(element_type: <T>, values: T) : Object {
     fun isEmpty() -> Boolean {
         true
     }

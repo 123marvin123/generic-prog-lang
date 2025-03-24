@@ -63,7 +63,7 @@ public:
 
     virtual std::any visitPlaceholderOrQualifiedId(CongParser::PlaceholderOrQualifiedIdContext *context) = 0;
 
-    virtual std::any visitConceptPlaceholder(CongParser::ConceptPlaceholderContext *context) = 0;
+    virtual std::any visitPlaceholder(CongParser::PlaceholderContext *context) = 0;
 
     virtual std::any visitTypename(CongParser::TypenameContext *context) = 0;
 

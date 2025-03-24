@@ -120,7 +120,11 @@ utils::resolve_fully_qualified_identifier<Concept>(const FQIInfo& fqi, Namespace
         return std::nullopt;
     }
 
-    return curr_ns->find_concept(fqi.identifier).or_else([&fqi,&curr_ns] { return curr_ns->get_parent() ? utils::resolve_fully_qualified_identifier<Concept>(fqi, curr_ns->get_parent()) : std::nullopt; });
+    if (auto c = curr_ns->find_concept(fqi.identifier); c.has_value())
+        return *c;
+
+    return curr_ns->get_parent() ?
+               utils::resolve_fully_qualified_identifier<Concept>(fqi, curr_ns->get_parent()) : std::nullopt;
 }
 
 template <>
@@ -136,5 +140,8 @@ utils::resolve_fully_qualified_identifier<Function>(const FQIInfo& fqi, Namespac
         return std::nullopt;
     }
 
-    return curr_ns->find_function(fqi.identifier).or_else([&fqi,&curr_ns] { return curr_ns->get_parent() ? utils::resolve_fully_qualified_identifier<Function>(fqi, curr_ns->get_parent()) : std::nullopt; });
+    if (auto f = curr_ns->find_function(fqi.identifier); f.has_value())
+        return *f;
+
+    return curr_ns->get_parent() ? utils::resolve_fully_qualified_identifier<Function>(fqi, curr_ns->get_parent()) : std::nullopt;
 }

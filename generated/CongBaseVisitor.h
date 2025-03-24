@@ -103,7 +103,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitConceptPlaceholder(CongParser::ConceptPlaceholderContext *ctx) override {
+  virtual std::any visitPlaceholder(CongParser::PlaceholderContext *ctx) override {
     return visitChildren(ctx);
   }
 

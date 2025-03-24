@@ -56,11 +56,12 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     [[nodiscard]]
     vec<FunctionParameter*> get_parameters() const
     {
-        // Transforms the data parameter into a vec<FunctionParameter*>
-        return
-            data
-            | std::views::transform(utils::ptr_transform)
-            | std::ranges::to<vec<FunctionParameter*>>();
+        vec<FunctionParameter*> result;
+        result.reserve(data.size());
+
+        std::ranges::transform(data, std::back_inserter(result), utils::ptr_transform);
+
+        return result;
     }
 
     void set_description(const std::string& desc)

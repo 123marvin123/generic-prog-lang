@@ -75,10 +75,10 @@ expression
 
 placeholderOrQualifiedId
     : qualifiedIdentifier
-    | conceptPlaceholder
+    | placeholder
     ;
 
-conceptPlaceholder
+placeholder
     : '<' name=IDENTIFIER '>'
     ;
 
@@ -88,6 +88,7 @@ typename
     | 'Real'
     | 'Bool'
     | 'Void'
+    | placeholder
     | qualifiedIdentifier
     ;
 

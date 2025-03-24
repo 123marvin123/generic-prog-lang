@@ -27,7 +27,7 @@ public:
     RuleConceptDefinitionBases = 7, RuleNamespaceStmnt = 8, RuleFamilyFunctionStmnt = 9, 
     RuleFunctionStmnt = 10, RuleFunctionBody = 11, RuleFunctionBodyStmnt = 12, 
     RuleParameterList = 13, RuleParameter = 14, RuleExpression = 15, RulePlaceholderOrQualifiedId = 16, 
-    RuleConceptPlaceholder = 17, RuleTypename = 18, RuleQualifiedIdentifier = 19, 
+    RulePlaceholder = 17, RuleTypename = 18, RuleQualifiedIdentifier = 19, 
     RuleLiteral = 20
   };
 
@@ -65,7 +65,7 @@ public:
   class ParameterContext;
   class ExpressionContext;
   class PlaceholderOrQualifiedIdContext;
-  class ConceptPlaceholderContext;
+  class PlaceholderContext;
   class TypenameContext;
   class QualifiedIdentifierContext;
   class LiteralContext; 
@@ -419,7 +419,7 @@ public:
     PlaceholderOrQualifiedIdContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     QualifiedIdentifierContext *qualifiedIdentifier();
-    ConceptPlaceholderContext *conceptPlaceholder();
+    PlaceholderContext *placeholder();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -428,10 +428,10 @@ public:
 
   PlaceholderOrQualifiedIdContext* placeholderOrQualifiedId();
 
-  class  ConceptPlaceholderContext : public antlr4::ParserRuleContext {
+  class  PlaceholderContext : public antlr4::ParserRuleContext {
   public:
     antlr4::Token *name = nullptr;
-    ConceptPlaceholderContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    PlaceholderContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *IDENTIFIER();
 
@@ -440,12 +440,13 @@ public:
    
   };
 
-  ConceptPlaceholderContext* conceptPlaceholder();
+  PlaceholderContext* placeholder();
 
   class  TypenameContext : public antlr4::ParserRuleContext {
   public:
     TypenameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    PlaceholderContext *placeholder();
     QualifiedIdentifierContext *qualifiedIdentifier();
 
 

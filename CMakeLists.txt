@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 project(masterthesis_transpiler)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 option(ACTIVATE_ASANITIZER "Activate Address Sanitizer" OFF)
 
 include(CTest)
@@ -28,6 +28,13 @@ CPMAddPackage(
         GIT_TAG 4.13.2
         SOURCE_SUBDIR runtime/Cpp
         OPTIONS "ANTLR_BUILD_CPP_TESTS OFF" "ANTLR_BUILD_SHARED OFF"
+)
+
+CPMAddPackage(
+        NAME jinja2cpp
+        URL https://codeload.github.com/123marvin123/Jinja2Cpp/zip/c9226345bcca8c5963996d85be1670d0b719e7ed
+        OPTIONS "JINJA2CPP_BUILD_TESTS OFF"
+        CHECKSUM SHA256=f9d8dfba7f86c6e9236e21f820b934a862881ff4fb8e9123ca8a2ee3144f58de
 )
 
 # Find the ANTLR4 executable
@@ -71,7 +78,7 @@ add_executable(masterthesis_transpiler ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main
 add_dependencies(masterthesis_transpiler generate_grammar_files)
 
 # Link the ANTLR4 runtime library
-target_link_libraries(masterthesis_transpiler antlr4_static nlohmann_json)
+target_link_libraries(masterthesis_transpiler antlr4_static nlohmann_json jinja2cpp)
 
 target_include_directories(masterthesis_transpiler PRIVATE
         ${CMAKE_SOURCE_DIR}/include

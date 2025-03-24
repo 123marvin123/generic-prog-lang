@@ -91,26 +91,31 @@ struct Namespace : SemaIdentifier, SemaContext<Namespace>, SemaContext<Concept>,
     [[nodiscard]]
     vec<Concept*> concepts() const
     {
-        return
-            SemaContext<Concept>::data
-            | std::views::transform(utils::ptr_transform)
-            | std::ranges::to<vec<Concept*>>();
+        vec<Concept*> result;
+        result.reserve(SemaContext<Concept>::data.size());
+
+        std::ranges::transform(SemaContext<Concept>::data, std::back_inserter(result), utils::ptr_transform);
+        return result;
     }
 
     [[nodiscard]]
     vec<Namespace*> namespaces() const
     {
-        return SemaContext<Namespace>::data
-            | std::views::transform(utils::ptr_transform)
-            | std::ranges::to<vec<Namespace*>>();
+        vec<Namespace*> result;
+        result.reserve(SemaContext<Namespace>::data.size());
+
+        std::ranges::transform(SemaContext<Namespace>::data, std::back_inserter(result), utils::ptr_transform);
+        return result;
     }
 
     [[nodiscard]]
     vec<Function*> functions() const
     {
-        return SemaContext<Function>::data
-            | std::views::transform(utils::ptr_transform)
-            | std::ranges::to<vec<Function*>>();
+        vec<Function*> result;
+        result.reserve(SemaContext<Function>::data.size());
+
+        std::ranges::transform(SemaContext<Function>::data, std::back_inserter(result), utils::ptr_transform);
+        return result;
     }
 
     [[nodiscard]]
