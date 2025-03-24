@@ -24,4 +24,4 @@ private:
     FunctionDependencyGraph function_graph;
 };
 
-#endif //INJAENGINE_H
+#endif //JINJAENGINE_H
