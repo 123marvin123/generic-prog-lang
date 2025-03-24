@@ -101,6 +101,6 @@ struct jinja2::TypeReflection<Concept> : TypeReflected<Concept>
 
         return accessors;
     }
-};;
+};
 
 #endif // CONCEPT_H
