@@ -8,6 +8,7 @@
 #include <vector>
 #include <set>
 #include <memory>
+#include <optional>
 
 template <class T>
 using s_ptr = std::shared_ptr<T>;
