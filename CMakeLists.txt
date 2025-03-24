@@ -93,7 +93,7 @@ file(GLOB_RECURSE TEST_FILES ${CMAKE_SOURCE_DIR}/test/**/*.cpp ${CMAKE_SOURCE_DI
 foreach (TEST_FILE ${TEST_FILES})
     get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_FILE} ${SRC_FILES})
-    target_link_libraries(${TEST_NAME} antlr4_static nlohmann_json CppUTest)
+    target_link_libraries(${TEST_NAME} antlr4_static nlohmann_json CppUTest jinja2cpp)
     target_include_directories(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/include
             ${CMAKE_SOURCE_DIR}/libs/termcolor
