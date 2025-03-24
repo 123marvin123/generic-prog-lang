@@ -17,6 +17,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    if: github.event_name != 'push' || github.event.pull_request == null
     outputs:
       tag: ${{ steps.git.outputs.tag }}
     strategy:
