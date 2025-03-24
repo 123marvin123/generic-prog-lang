@@ -7,7 +7,7 @@
 
 #include "Debug.h"
 #include "sema/SemaIdentifier.h"
-#include "inja/json.hpp"
+#include "jinja2cpp/reflected_value.h"
 
 template <class T>
 concept IsConcept = IsIdentifier<T> && requires(const T& t, std::string name, Namespace* ns)
@@ -67,8 +67,6 @@ struct Concept final : SemaIdentifier, Introspection<Concept>
 
     struct DebugVisitor;
 
-    explicit operator inja::json() const;
-
 protected:
     std::set<const Concept*> bases;
     opt<std::string> description = std::nullopt;
@@ -88,5 +86,21 @@ struct Concept::DebugVisitor final : BaseDebugVisitor
 
     void visitConcept(const Concept& c) override;
 };
+
+template<>
+struct jinja2::TypeReflection<Concept> : TypeReflected<Concept>
+{
+    static auto& GetAccessors()
+    {
+        static std::unordered_map<std::string, FieldAccessor> accessors = {
+            {"name", [](const Concept& c) {return c.get_identifier();}},
+            {"full_name", [](const Concept& c) { return c.get_full_name();}},
+            {"description", [](const Concept& c) {return c.get_description().value_or("");}},
+            //TODO: add bases and namespace reflected
+        };
+
+        return accessors;
+    }
+};;
 
 #endif // CONCEPT_H

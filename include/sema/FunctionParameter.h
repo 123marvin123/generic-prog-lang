@@ -10,6 +10,7 @@
 #include "Decls.h"
 #include "Debug.h"
 #include "sema/Concept.h"
+#include "jinja2cpp/reflected_value.h"
 
 struct FunctionParameter : SemaElement, Introspection<FunctionParameter>
 {
@@ -32,17 +33,22 @@ struct FunctionParameter : SemaElement, Introspection<FunctionParameter>
 
     void set_function(const Function* fn) { function = fn; }
 
-    [[nodiscard]]
-    virtual explicit operator inja::json() const
-    {
-        return inja::json{{"name", get_identifier()}};
-    }
-
     struct DebugVisitor;
 
 private:
     std::string name;
     const Function* function;
+};
+
+template<> struct jinja2::TypeReflection<FunctionParameter> : TypeReflected<FunctionParameter>
+{
+    static auto& GetAccessors()
+    {
+        static std::unordered_map<std::string, FieldAccessor> accessors = {
+            {"name", [](const FunctionParameter& p) { return p.get_identifier(); }}
+        };
+        return accessors;
+    }
 };
 
 struct FunctionParameter::DebugVisitor : BaseDebugVisitor
@@ -69,21 +75,29 @@ struct ConcreteFunctionParameter final : FunctionParameter, Introspection<Concre
     [[nodiscard]]
     const Concept* get_type() const { return type; }
 
-    [[nodiscard]]
-    explicit operator inja::json() const override
-    {
-        auto json = FunctionParameter::operator inja::json();
-        json["type"] = "concrete_function_parameter";
-        json["concept"] = type->operator inja::json();
-
-        return json;
-    };
-
     struct DebugVisitor;
 
 private:
     const Concept* type;
 };
+
+template<> struct jinja2::TypeReflection<ConcreteFunctionParameter> : TypeReflected<ConcreteFunctionParameter>
+{
+    static auto& GetAccessors()
+    {
+        static auto parent = TypeReflection<FunctionParameter>::GetAccessors();
+
+        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
+
+        accessors.insert({
+            {"type", [](const FunctionParameter&) { return "concrete_function_parameter"; }},
+            {"concept", [](const ConcreteFunctionParameter& p) { return Reflect(*p.get_type()); }},
+        });
+
+        return accessors;
+    }
+};
+
 
 struct ConcreteFunctionParameter::DebugVisitor final : FunctionParameter::DebugVisitor
 {
@@ -110,19 +124,27 @@ struct PlaceholderFunctionParameter final : FunctionParameter, Introspection<Pla
         return type_placeholder;
     }
 
-    [[nodiscard]]
-    explicit operator inja::json() const override
-    {
-        auto base = FunctionParameter::operator inja::json();
-        base["type"] = "placeholder_function_parameter";
-        base["placeholder_id"] = type_placeholder;
-        return base;
-    };
-
     struct DebugVisitor;
 
 private:
     const std::string type_placeholder;
+};
+
+template<> struct jinja2::TypeReflection<PlaceholderFunctionParameter> : TypeReflected<PlaceholderFunctionParameter>
+{
+    static auto& GetAccessors()
+    {
+        static auto parent = TypeReflection<FunctionParameter>::GetAccessors();
+
+        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
+
+        accessors.insert({
+            {"type", [](const FunctionParameter&) { return "placeholder_function_parameter"; }},
+            {"placeholder_id", [](const PlaceholderFunctionParameter& p) { return p.get_type_placeholder_name(); }},
+        });
+
+        return accessors;
+    }
 };
 
 struct PlaceholderFunctionParameter::DebugVisitor final : FunctionParameter::DebugVisitor
@@ -147,18 +169,28 @@ struct DependentFunctionParameter final : FunctionParameter, Introspection<Depen
     [[nodiscard]]
     const PlaceholderFunctionParameter* get_placeholder() const { return placeholder; }
 
-    [[nodiscard]] explicit operator inja::json() const override
-    {
-        auto base = FunctionParameter::operator inja::json();
-        base["type"] = "dependent_function_parameter";
-        base["dependency"] = placeholder->operator inja::json();
-        return base;
-    };
-
     struct DebugVisitor;
 
 private:
     const PlaceholderFunctionParameter* placeholder;
+};
+
+
+template<> struct jinja2::TypeReflection<DependentFunctionParameter> : TypeReflected<DependentFunctionParameter>
+{
+    static auto& GetAccessors()
+    {
+        static auto parent = TypeReflection<FunctionParameter>::GetAccessors();
+
+        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
+
+        accessors.insert({
+            {"type", [](const FunctionParameter&) { return "dependent_function_parameter"; }},
+            {"dependency", [](const DependentFunctionParameter& p) { return Reflect(*p.get_placeholder()); }},
+        });
+
+        return accessors;
+    }
 };
 
 struct DependentFunctionParameter::DebugVisitor final : FunctionParameter::DebugVisitor

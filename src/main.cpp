@@ -10,7 +10,7 @@
 #include "visitor/FinalizingFunctionVisitor.h"
 
 #include <termcolor/termcolor.hpp>
-#include "export/InjaEngine.h"
+#include "export/JinjaEngine.h"
 
 using namespace antlr4;
 
@@ -64,7 +64,7 @@ int main()
 
     u_ptr<Sema> sema = run_eval(tree);
 
-    InjaEngine engine{sema.get()};
+    JinjaEngine engine{sema.get()};
 
 
     return 0;

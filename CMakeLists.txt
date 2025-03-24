@@ -83,7 +83,6 @@ target_link_libraries(masterthesis_transpiler antlr4_static nlohmann_json jinja2
 target_include_directories(masterthesis_transpiler PRIVATE
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/generated
-        ${CMAKE_SOURCE_DIR}/libs/inja
         ${CMAKE_SOURCE_DIR}/libs/termcolor
 )
 
@@ -97,7 +96,6 @@ foreach (TEST_FILE ${TEST_FILES})
     target_link_libraries(${TEST_NAME} antlr4_static nlohmann_json CppUTest)
     target_include_directories(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/include
-            ${CMAKE_SOURCE_DIR}/libs/inja
             ${CMAKE_SOURCE_DIR}/libs/termcolor
             ${CMAKE_SOURCE_DIR}/generated)
 
