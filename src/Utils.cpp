@@ -159,7 +159,7 @@ DirValidator::DirValidator(const bool& allow_overwrite) : Validator("DIR")
 
             if (!is_empty(dir_path) && !allow_overwrite)
             {
-                return "Output directory exists but is not empty. Use --overwrite-output to replace its contents";
+                return "Output directory exists but is not empty. Use --purge to replace its contents";
             }
         }
         else

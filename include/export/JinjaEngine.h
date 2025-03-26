@@ -23,16 +23,18 @@ enum class LanguageMode
 
 struct JinjaEngine final
 {
-    explicit JinjaEngine(Sema* sema);
+    JinjaEngine(Sema* sema, std::filesystem::path output_folder, std::filesystem::path template_folder, bool purge_output);
 
     [[nodiscard]]
     const Sema* get_sema() const { return sema; }
 
     [[nodiscard]]
-    std::string process(LanguageMode, const std::filesystem::path& interface_path) const;
+    vec<std::filesystem::path> process(LanguageMode) const;
 
 private:
     Sema* sema;
+    std::filesystem::path output_folder, template_folder;
+    bool purge_output;
 
     ConceptDependencyGraph concept_graph;
     FunctionDependencyGraph function_graph;

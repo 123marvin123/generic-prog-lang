@@ -9,9 +9,18 @@
 
 struct JinjaPythonExport final : LangExport
 {
-    explicit JinjaPythonExport(Sema* sema, const vec<const Concept*>& c, const vec<const Function*>& f) : LangExport(sema, c, f) {};
+    explicit JinjaPythonExport(Sema* sema, const std::filesystem::path& /*template_folder*/,
+                                std::filesystem::path out,
+                               const vec<const Concept*>& c,
+                               const vec<const Function*>& f) :
+        LangExport(sema, std::move(out), c, f)
+    {
+    };
 
-    std::string process(const std::filesystem::path&) override { throw std::runtime_error("Not implemented"); }
+    vec<std::filesystem::path> process() override
+    {
+        throw std::runtime_error("Not implemented");
+    }
 };
 
 #endif //JINJAPYTHONEXPORT_H

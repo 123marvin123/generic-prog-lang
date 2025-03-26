@@ -1,9 +1,0 @@
-{% from "macros/c++/concept.j2" import ConceptDefinition with context %}
-#include <tuple>
-
-{% for c_id in get_concept_ids() %}
-
-{% set current_concept = get_concept(c_id) %}
-{{ ConceptDefinition(current_concept) }}
-
-{% endfor %}

@@ -5,3 +5,8 @@ namespace {{ namespaces | join('::') }} {
 }
 {% else %}{{ caller() }}{% endif %}
 {% endmacro %}
+{% macro NamespaceIncludeGuardName(namespaces=[]) %}
+{%- if namespaces | length > 0 -%}
+{{ namespaces | join('_') | upper }}
+{%- endif -%}
+{% endmacro %}
