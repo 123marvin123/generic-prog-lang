@@ -90,7 +90,7 @@ template<> struct jinja2::TypeReflection<ConcreteFunctionParameter> : TypeReflec
         static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
 
         accessors.insert({
-            {"type", [](const FunctionParameter&) { return "concrete_function_parameter"; }},
+            {"type", [](const ConcreteFunctionParameter&) { return "concrete_function_parameter"; }},
             {"concept", [](const ConcreteFunctionParameter& p) { return Reflect(*p.get_type()); }},
         });
 
@@ -139,7 +139,7 @@ template<> struct jinja2::TypeReflection<PlaceholderFunctionParameter> : TypeRef
         static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
 
         accessors.insert({
-            {"type", [](const FunctionParameter&) { return "placeholder_function_parameter"; }},
+            {"type", [](const PlaceholderFunctionParameter&) { return "placeholder_function_parameter"; }},
             {"placeholder_id", [](const PlaceholderFunctionParameter& p) { return p.get_type_placeholder_name(); }},
         });
 
@@ -185,7 +185,7 @@ template<> struct jinja2::TypeReflection<DependentFunctionParameter> : TypeRefle
         static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
 
         accessors.insert({
-            {"type", [](const FunctionParameter&) { return "dependent_function_parameter"; }},
+            {"type", [](const DependentFunctionParameter&) { return "dependent_function_parameter"; }},
             {"dependency", [](const DependentFunctionParameter& p) { return Reflect(*p.get_placeholder()); }},
         });
 

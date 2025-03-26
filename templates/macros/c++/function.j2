@@ -1,0 +1,8 @@
+{% from "macros/c++/namespace.j2" import NamespaceChain with context %}
+{% macro FunctionDefinition(def) %}
+{% call NamespaceChain(def.ns) %}
+void {{def.name}}() {
+    return;
+}
+{% endcall %}
+{% endmacro %}

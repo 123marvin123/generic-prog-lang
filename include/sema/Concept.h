@@ -8,6 +8,7 @@
 #include "Debug.h"
 #include "sema/SemaIdentifier.h"
 #include "jinja2cpp/reflected_value.h"
+#include "Utils.h"
 
 template <class T>
 concept IsConcept = IsIdentifier<T> && requires(const T& t, std::string name, Namespace* ns)
@@ -93,10 +94,24 @@ struct jinja2::TypeReflection<Concept> : TypeReflected<Concept>
     static auto& GetAccessors()
     {
         static std::unordered_map<std::string, FieldAccessor> accessors = {
-            {"name", [](const Concept& c) {return c.get_identifier();}},
-            {"full_name", [](const Concept& c) { return c.get_full_name();}},
-            {"description", [](const Concept& c) {return c.get_description().value_or("");}},
-            //TODO: add bases and namespace reflected
+            {"name", [](const Concept& c) {return c.get_identifier(); }},
+            {"full_name", [](const Concept& c) { return c.get_full_name(); }},
+            {"description", [](const Concept& c) { return c.get_description().value_or(""); }},
+            {"bases", [](const Concept& c)
+            {
+                ValuesList l{};
+                l.reserve(c.get_bases().size());
+
+                std::ranges::transform(c.get_bases(), std::back_inserter(l), [](const auto* b) { return Reflect(b); });
+
+                return l;
+            }},
+            {"ns", [](const Concept& c)
+            {
+                const utils::FQIInfo info = utils::split_fully_qualified_identifier(c.get_full_name());
+                ValuesList l(info.namespaces.begin(), info.namespaces.end());
+                return l;
+            }}
         };
 
         return accessors;

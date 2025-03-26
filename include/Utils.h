@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 
+#include <CLI/CLI.hpp>
 #include "Decls.h"
 #include "CongParser.h"
 
@@ -75,5 +76,12 @@ namespace utils
     std::string_view get_string_for_operator(Operator op);
 
 }
+
+
+class DirValidator : public CLI::Validator
+{
+public:
+    explicit DirValidator(const bool& allow_overwrite);
+};
 
 #endif // UTILS_H

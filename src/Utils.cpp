@@ -145,3 +145,32 @@ utils::resolve_fully_qualified_identifier<Function>(const FQIInfo& fqi, Namespac
 
     return curr_ns->get_parent() ? utils::resolve_fully_qualified_identifier<Function>(fqi, curr_ns->get_parent()) : std::nullopt;
 }
+
+DirValidator::DirValidator(const bool& allow_overwrite) : Validator("DIR")
+{
+    func_ = [&allow_overwrite](const std::string& path)
+    {
+        if (const std::filesystem::path dir_path(path); exists(dir_path))
+        {
+            if (!is_directory(dir_path))
+            {
+                return "Output path exists but is not a directory";
+            }
+
+            if (!is_empty(dir_path) && !allow_overwrite)
+            {
+                return "Output directory exists but is not empty. Use --overwrite-output to replace its contents";
+            }
+        }
+        else
+        {
+            std::filesystem::path parent_path = dir_path.parent_path();
+            if (!parent_path.empty() && !exists(parent_path))
+            {
+                return "Parent directory of output path does not exist";
+            }
+        }
+
+        return ""; // Empty string means validation passed
+    };
+}

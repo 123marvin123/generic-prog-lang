@@ -1,0 +1,7 @@
+{% macro NamespaceChain(namespaces=[]) %}
+{% if namespaces | length > 0 %}
+namespace {{ namespaces | join('::') }} {
+{{ caller() }}
+}
+{% else %}{{ caller() }}{% endif %}
+{% endmacro %}
