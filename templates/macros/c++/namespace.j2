@@ -1,0 +1,12 @@
+{% macro NamespaceChain(namespaces=[]) %}
+{% if namespaces | length > 0 %}
+namespace {{ namespaces | join('::') }} {
+{{ caller() }}
+}
+{% else %}{{ caller() }}{% endif %}
+{% endmacro %}
+{% macro NamespaceIncludeGuardName(namespaces=[]) %}
+{%- if namespaces | length > 0 -%}
+{{ namespaces | join('_') | upper }}
+{%- endif -%}
+{% endmacro %}

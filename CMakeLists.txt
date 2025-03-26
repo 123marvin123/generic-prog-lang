@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 project(masterthesis_transpiler)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 option(ACTIVATE_ASANITIZER "Activate Address Sanitizer" OFF)
 
 include(CTest)
@@ -28,6 +28,20 @@ CPMAddPackage(
         GIT_TAG 4.13.2
         SOURCE_SUBDIR runtime/Cpp
         OPTIONS "ANTLR_BUILD_CPP_TESTS OFF" "ANTLR_BUILD_SHARED OFF"
+)
+
+CPMAddPackage(
+        NAME jinja2cpp
+        URL https://codeload.github.com/123marvin123/Jinja2Cpp/zip/c9226345bcca8c5963996d85be1670d0b719e7ed
+        OPTIONS "JINJA2CPP_BUILD_TESTS OFF"
+        CHECKSUM SHA256=f9d8dfba7f86c6e9236e21f820b934a862881ff4fb8e9123ca8a2ee3144f58de
+)
+
+CPMAddPackage(
+        NAME CLI11
+        URL "https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.5.0.tar.gz"
+        OPTIONS "CLI11_BUILD_EXAMPLES OFF" "CLI11_BUILD_TESTS OFF" "CLI11_BUILD_DOCS OFF"
+        CHECKSUM SHA256=17e02b4cddc2fa348e5dbdbb582c59a3486fa2b2433e70a0c3bacb871334fd55
 )
 
 # Find the ANTLR4 executable
@@ -71,12 +85,11 @@ add_executable(masterthesis_transpiler ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main
 add_dependencies(masterthesis_transpiler generate_grammar_files)
 
 # Link the ANTLR4 runtime library
-target_link_libraries(masterthesis_transpiler antlr4_static nlohmann_json)
+target_link_libraries(masterthesis_transpiler antlr4_static nlohmann_json jinja2cpp CLI11)
 
 target_include_directories(masterthesis_transpiler PRIVATE
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/generated
-        ${CMAKE_SOURCE_DIR}/libs/inja
         ${CMAKE_SOURCE_DIR}/libs/termcolor
 )
 
@@ -87,10 +100,9 @@ file(GLOB_RECURSE TEST_FILES ${CMAKE_SOURCE_DIR}/test/**/*.cpp ${CMAKE_SOURCE_DI
 foreach (TEST_FILE ${TEST_FILES})
     get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_FILE} ${SRC_FILES})
-    target_link_libraries(${TEST_NAME} antlr4_static nlohmann_json CppUTest)
+    target_link_libraries(${TEST_NAME} antlr4_static nlohmann_json CppUTest jinja2cpp CLI11)
     target_include_directories(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/include
-            ${CMAKE_SOURCE_DIR}/libs/inja
             ${CMAKE_SOURCE_DIR}/libs/termcolor
             ${CMAKE_SOURCE_DIR}/generated)
 

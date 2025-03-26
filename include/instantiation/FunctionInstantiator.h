@@ -41,7 +41,7 @@ private:
 
         std::any visitQualifiedIdentifier(CongParser::QualifiedIdentifierContext* ctx) override;
 
-        std::any visitConceptPlaceholder(CongParser::ConceptPlaceholderContext* ctx) override;
+        std::any visitPlaceholder(CongParser::PlaceholderContext* ctx) override;
 
     private:
         Namespace* ns;

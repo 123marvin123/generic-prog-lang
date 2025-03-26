@@ -63,30 +63,6 @@ Concept::OperationResult Concept::get_operation_result(const Operator op, const 
     return operation_table[op][this][other];
 }
 
-Concept::operator nlohmann::basic_json<>() const
-{
-    auto json_bases = inja::json::array();
-    auto json_ns = inja::json::array();
-
-    std::ranges::copy(
-        bases | std::views::transform([](const auto* i) { return i->get_full_name(); }),
-        std::back_inserter(json_bases)
-    );
-
-    const auto ns_info = utils::split_fully_qualified_identifier(get_namespace()->get_full_name());
-
-    std::ranges::for_each(ns_info.namespaces, [&json_ns](const auto& item) { json_ns.push_back(item); });
-    if (!ns_info.identifier.empty()) json_ns.push_back(ns_info.identifier);
-
-    return {
-                {"name", get_identifier()},
-                {"full_name", get_full_name()},
-                {"bases", json_bases},
-                {"description", description.value_or("")},
-                {"namespace", json_ns },
-            };
-}
-
 void Concept::DebugVisitor::visitConcept(const Concept& c)
 {
     ss << spaces() << termcolor::blue << "Concept" << termcolor::reset;

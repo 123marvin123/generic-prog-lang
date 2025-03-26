@@ -18,6 +18,7 @@
 #include "Expression.h"
 #include "Utils.h"
 #include "Debug.h"
+#include "jinja2cpp/reflected_value.h"
 
 template<class T, class C>
 concept IsFunction = IsIdentifier<T> && IsConcept<C> && requires(T& t, std::string name, Namespace* ns)
@@ -56,11 +57,12 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     [[nodiscard]]
     vec<FunctionParameter*> get_parameters() const
     {
-        // Transforms the data parameter into a vec<FunctionParameter*>
-        return
-            data
-            | std::views::transform(utils::ptr_transform)
-            | std::ranges::to<vec<FunctionParameter*>>();
+        vec<FunctionParameter*> result;
+        result.reserve(data.size());
+
+        std::ranges::transform(data, std::back_inserter(result), utils::ptr_transform);
+
+        return result;
     }
 
     void set_description(const std::string& desc)
@@ -97,26 +99,11 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     void add_requirement(s_ptr<Expression>);
 
     [[nodiscard]]
-    virtual bool is_dependent() const = 0;
+    virtual bool is_dependent() const { throw std::runtime_error("Not implemented."); };
 
     [[nodiscard]]
     virtual std::variant<const Concept*, PlaceholderFunctionParameter*>
-    get_result() const = 0;
-
-    explicit virtual operator inja::json() const
-    {
-        const vec<FunctionParameter*> params = get_parameters();
-        auto params_json = inja::json::array();
-
-        for (FunctionParameter* p : params)
-            params_json.push_back(p->operator inja::json());
-        /* TODO: Export reqs, desc and generic impls */
-        return inja::json{
-            {"name", get_identifier()},
-            {"full_name", get_full_name()},
-            {"parameter", params_json}
-        };
-    };
+    get_result() const { throw std::runtime_error("Not implemented."); };
 
     struct DebugVisitor;
 
@@ -152,17 +139,6 @@ struct ConcreteFunction final : Function, Introspection<ConcreteFunction>
 
     [[nodiscard]] bool is_dependent() const override { return false; }
 
-    explicit operator inja::json() const override
-    {
-        if (!resulting_concept) throw std::runtime_error("Resulting concept must not be empty");
-
-        auto base = Function::operator inja::json();
-        base["type"] = "concrete_function";
-        base["result_concept"] = resulting_concept->operator inja::json();
-
-        return base;
-    }
-
     struct DebugVisitor;
 
 private:
@@ -193,22 +169,12 @@ struct DependentFunction final : Function, Introspection<DependentFunction>
         return dependency;
     }
 
-    [[nodiscard]]
-    explicit operator inja::json() const override
-    {
-        if (!dependency) throw std::runtime_error("Dependency is empty");
-
-        auto base = Function::operator inja::json();
-        base["type"] = "dependent_function";
-        base["result_dependency"] = dependency->operator inja::json();
-        return base;
-    }
-
     struct DebugVisitor;
 
 private:
     PlaceholderFunctionParameter* dependency;
 };
+
 
 struct Function::DebugVisitor final : BaseDebugVisitor
 {
@@ -221,5 +187,78 @@ struct Function::DebugVisitor final : BaseDebugVisitor
 
     void visitFunction(const Function& f) override;
 };
+
+class FunctionView {
+    const Function* func;
+public:
+    explicit FunctionView(const Function* f) : func(f) {}
+
+    friend struct jinja2::TypeReflection<FunctionView>;
+};
+
+template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionView>
+{
+    static auto& GetAccessors()
+    {
+        static std::unordered_map<std::string, FieldAccessor> accessors = {
+            {"name", [](const FunctionView& f) { return f.func->get_identifier(); }},
+            {"full_name", [](const FunctionView& f) { return f.func->get_full_name(); }},
+            {"description", [](const FunctionView& f) { return f.func->get_description().value_or(""); }},
+            {"ns", [](const FunctionView& f)
+            {
+                const utils::FQIInfo info = utils::split_fully_qualified_identifier(f.func->get_full_name());
+                ValuesList l(info.namespaces.begin(), info.namespaces.end());
+                return l;
+            }},
+            {"params", [](const FunctionView& f)
+            {
+                const auto& params = f.func->get_parameters();
+                ValuesList l{};
+                l.reserve(params.size());
+
+                std::ranges::transform(params, std::back_inserter(l), [](const auto* p) { return Reflect(*p); });
+
+                return l;
+            }},
+            /* TODO: Export reqs and generic impls */
+        };
+
+        return accessors;
+    }
+};
+
+/*
+template<> struct jinja2::TypeReflection<ConcreteFunction> : TypeReflected<ConcreteFunction>
+{
+    static auto& GetAccessors()
+    {
+        static auto parent = TypeReflection<FunctionView>::GetAccessors();
+        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
+
+        accessors.insert({
+            {"type", [](const ConcreteFunction&) { return "concrete_function"; }},
+            {"result_concept", [](const ConcreteFunction& f) { return Reflect(*std::get<const Concept*>(f.get_result())); }}
+        });
+
+        return accessors;
+    }
+};
+
+template<> struct jinja2::TypeReflection<DependentFunction> : TypeReflected<DependentFunction>
+{
+    static auto& GetAccessors()
+    {
+        static auto parent = TypeReflection<FunctionView>::GetAccessors();
+        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
+
+        accessors.insert({
+            {"type", [](const Function&) { return "dependent_function"; }},
+            {"result_dependency", [](const DependentFunction& f) { return Reflect(*std::get<PlaceholderFunctionParameter*>(f.get_result())); }}
+        });
+
+        return accessors;
+    }
+};
+*/
 
 #endif //FUNCTION_H

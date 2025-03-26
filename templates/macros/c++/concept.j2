@@ -1,0 +1,14 @@
+{% from "macros/c++/namespace.j2" import NamespaceChain with context %}
+
+{% macro ConceptDefinition(def) %}
+{% call NamespaceChain(def.ns) %}
+struct Concept{{def.name}} {
+    using Bases = std::tuple<
+    {%- for base in def.bases -%}
+{{base.ns | join('::')}}::Concept{{base.name}}{{', ' if loop.nextitem is defined }}
+    {%- endfor %}>;
+    static char const* name = "{{def.name}}";
+    static char const* description = "{{def.description}}";
+};
+{% endcall %}
+{% endmacro %}

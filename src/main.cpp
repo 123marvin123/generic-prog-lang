@@ -1,71 +1,45 @@
-#include <Preprocessor.h>
 #include <iostream>
-#include <regex>
+#include <CLI/CLI.hpp>
 
-#include "CongLexer.h"
-#include "CongParser.h"
+#include "export/JinjaEngine.h"
+#include "Processor.h"
 
-#include "visitor/DeclarationVisitor.h"
-#include "visitor/DefinitionVisitor.h"
-#include "visitor/FinalizingFunctionVisitor.h"
-
-#include <termcolor/termcolor.hpp>
-#include "export/InjaEngine.h"
-
-using namespace antlr4;
-
-u_ptr<Sema> run_eval(tree::ParseTree* tree)
+int main(const int argc, char** argv)
 {
-    auto sema = std::make_unique<Sema>();
+    CLI::App app{"Generic Programming Language Transpiler"};
+    argv = app.ensure_utf8(argv);
 
-    DeclarationVisitor v{sema.get()};
-    v.visit(tree);
+    std::filesystem::path input_file,
+        output_folder = std::filesystem::current_path() / "output",
+        template_folder = std::filesystem::current_path() / "templates";
+    bool purge_output = false;
 
-    DefinitionVisitor v2{sema.get()};
-    v2.visit(tree);
+    app.add_option("--input", input_file, "Input file")
+       ->required()
+       ->check(CLI::ExistingFile);
 
-    FinalizingFunctionVisitor v3{sema.get()};
-    v3.visit(tree);
+    app.add_option("--output-folder", output_folder, "Output folder")
+        ->default_str(output_folder.string());
 
-    return std::move(sema);
-}
+    app.add_option("--template-folder", template_folder, "Template folder")
+        ->check(CLI::ExistingDirectory)
+        ->default_val(template_folder.string());
 
-int main()
-{
+    app.add_flag("--purge", purge_output,
+                 "Removes all files in the output directory before writing new files");
 
-#ifdef NDEBUG
-    printf("Release configuration!\n");
-#else
-    std::cout << termcolor::red << "Debug Configuration!" << termcolor::reset << std::endl;
-#endif
+    CLI11_PARSE(app, argc, argv);
 
-    Preprocessor preprocessor{};
-    auto code = preprocessor.process("example/example_1.txt");
+    DirValidator validator(purge_output);
+    if (const std::string err_msg = validator(output_folder.string()); !err_msg.empty())
+        return app.exit(CLI::ValidationError(err_msg));
 
-    // Create an input stream from the input string
-    ANTLRInputStream inputStream(code);
+    const Processor p{input_file};
+    const u_ptr<Sema> sema = p.run_sema();
 
-    // Create a lexer that feeds off of the input stream
-    CongLexer lexer(&inputStream);
-
-    // Create a token stream from the lexer
-    CommonTokenStream tokens(&lexer);
-
-    // Create a parser that feeds off the token stream
-    CongParser parser(&tokens);
-
-    // Begin parsing at the 'expr' rule
-    tree::ParseTree* tree = parser.translationUnit();
-
-#ifndef NDEBUG
-    // Print the parse tree (for debugging purposes)
-    std::cout << tree->toStringTree(&parser) << std::endl;
-#endif
-
-    u_ptr<Sema> sema = run_eval(tree);
-
-    InjaEngine engine{sema.get()};
-
+    for (const JinjaEngine engine{sema.get(), output_folder, template_folder, purge_output};
+        const auto& a : engine.process(LanguageMode::Cpp))
+        std::cout << a << std::endl;
 
     return 0;
 }

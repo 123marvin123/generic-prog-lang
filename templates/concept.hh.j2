@@ -1,0 +1,16 @@
+{% from "macros/c++/concept.j2" import ConceptDefinition with context %}
+{% from "macros/c++/namespace.j2" import NamespaceIncludeGuardName with context %}
+#pragma once
+{% set ns_include_guard = NamespaceIncludeGuardName(concept.ns) %}
+#ifndef CONCEPT_{{ ns_include_guard }}{% if ns_include_guard %}_{% endif %}{{ concept.name | upper }}_H
+#define CONCEPT_{{ ns_include_guard }}{% if ns_include_guard %}_{% endif %}{{ concept.name | upper }}_H
+
+#include <tuple>
+
+{% for include in concept.bases %}
+#include <{{ include.name }}.hh>
+{% endfor %}
+
+{{ ConceptDefinition(concept) }}
+
+#endif // CONCEPT_{{ ns_include_guard }}{% if ns_include_guard %}_{% endif %}{{ concept.name | upper }}_H

@@ -23,6 +23,22 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitFamilyStmnt(CongParser::FamilyStmntContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFamilyHeader(CongParser::FamilyHeaderContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFamilyBody(CongParser::FamilyBodyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFamilyBodyStmnt(CongParser::FamilyBodyStmntContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitConceptDefinitionStmnt(CongParser::ConceptDefinitionStmntContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -32,6 +48,10 @@ public:
   }
 
   virtual std::any visitNamespaceStmnt(CongParser::NamespaceStmntContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFamilyFunctionStmnt(CongParser::FamilyFunctionStmntContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -83,7 +103,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitConceptPlaceholder(CongParser::ConceptPlaceholderContext *ctx) override {
+  virtual std::any visitPlaceholder(CongParser::PlaceholderContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitTypename(CongParser::TypenameContext *ctx) override {
     return visitChildren(ctx);
   }
 

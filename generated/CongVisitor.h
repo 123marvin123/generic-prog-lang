@@ -23,11 +23,21 @@ public:
 
     virtual std::any visitStmnt(CongParser::StmntContext *context) = 0;
 
+    virtual std::any visitFamilyStmnt(CongParser::FamilyStmntContext *context) = 0;
+
+    virtual std::any visitFamilyHeader(CongParser::FamilyHeaderContext *context) = 0;
+
+    virtual std::any visitFamilyBody(CongParser::FamilyBodyContext *context) = 0;
+
+    virtual std::any visitFamilyBodyStmnt(CongParser::FamilyBodyStmntContext *context) = 0;
+
     virtual std::any visitConceptDefinitionStmnt(CongParser::ConceptDefinitionStmntContext *context) = 0;
 
     virtual std::any visitConceptDefinitionBases(CongParser::ConceptDefinitionBasesContext *context) = 0;
 
     virtual std::any visitNamespaceStmnt(CongParser::NamespaceStmntContext *context) = 0;
+
+    virtual std::any visitFamilyFunctionStmnt(CongParser::FamilyFunctionStmntContext *context) = 0;
 
     virtual std::any visitFunctionStmnt(CongParser::FunctionStmntContext *context) = 0;
 
@@ -53,7 +63,9 @@ public:
 
     virtual std::any visitPlaceholderOrQualifiedId(CongParser::PlaceholderOrQualifiedIdContext *context) = 0;
 
-    virtual std::any visitConceptPlaceholder(CongParser::ConceptPlaceholderContext *context) = 0;
+    virtual std::any visitPlaceholder(CongParser::PlaceholderContext *context) = 0;
+
+    virtual std::any visitTypename(CongParser::TypenameContext *context) = 0;
 
     virtual std::any visitQualifiedIdentifier(CongParser::QualifiedIdentifierContext *context) = 0;
 
