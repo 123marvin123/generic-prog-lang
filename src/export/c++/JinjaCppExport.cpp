@@ -6,6 +6,19 @@
 #include "jinja2cpp/template.h"
 #include "jinja2cpp/template_env.h"
 
+/**
+ * @brief Generates output files for registered concepts and functions using Jinja2 templates.
+ *
+ * This method iterates over all concepts and functions, rendering their templates and writing the
+ * output to files in the designated output folder. Each file is named using the identifier of the
+ * concept or function with a ".hh" extension. The method reserves vector capacity based on the total
+ * number of items to be processed. If rendering a template fails or an output file cannot be opened,
+ * an error message is logged and a std::runtime_error is thrown.
+ *
+ * @return vec<std::filesystem::path> A vector containing the paths of all successfully generated output files.
+ *
+ * @throws std::runtime_error If an output file cannot be opened or if template rendering fails for a concept or function.
+ */
 vec<std::filesystem::path> JinjaCppExport::process()
 {
     vec<std::filesystem::path> output_files;

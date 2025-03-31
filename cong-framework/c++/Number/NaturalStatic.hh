@@ -11,7 +11,15 @@ namespace cong::lang::core
         struct NaturalStatic
         {
             using Native = Native_;
-            static constexpr Native native() { return native_; }
+            /**
+ * @brief Retrieves the compile-time native value of the natural number.
+ *
+ * This function returns the underlying value stored in the template constant,
+ * making it accessible at compile time for use in constexpr contexts.
+ *
+ * @return The native value associated with the natural number.
+ */
+static constexpr Native native() { return native_; }
         };
     };
 
