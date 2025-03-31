@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CONG_SEQ_LANG_CORE_TUPLE_HH
-#define CONG_SEQ_LANG_CORE_TUPLE_HH
 
 #include "../Boolean/BooleanStatic.hh"
 #include "../Number/NaturalStatic.hh"
@@ -155,7 +153,6 @@ struct Fold
 
 struct Fold1
 {
-  // @todo PROPAGATE Call!?
   template <typename Fun_, typename Tuple_>
   struct Call
   {
@@ -222,5 +219,3 @@ public:
 };
 
 };
-
-#endif

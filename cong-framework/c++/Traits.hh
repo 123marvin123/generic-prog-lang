@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 30.03.25.
-//
-
-#ifndef TRAITS_HH
-#define TRAITS_HH
+#pragma once
 
 #include "Number/NaturalStatic.hh"
 #include "Boolean/BooleanStatic.hh"
@@ -881,5 +876,3 @@ namespace cong::lang::core
     };
   };
 };
-
-#endif //TRAITS_HH

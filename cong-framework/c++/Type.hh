@@ -1,6 +1,3 @@
-#ifndef TYPE_HH
-#define TYPE_HH
-
 #include <utility> // std::remove_*
 
 namespace cong::lang::core {
@@ -29,5 +26,3 @@ namespace cong::lang::core {
     };
 
 };
-
-#endif //TYPE_HH

@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 31.03.25.
-//
-
-#ifndef EXP_HH
-#define EXP_HH
+#pragma once
 
 #include "Seq/Tuple.hh"
 #include "Boolean/BooleanStatic.hh"
@@ -197,5 +192,3 @@ namespace cong::lang {
 
     };
 };
-
-#endif //EXP_HH

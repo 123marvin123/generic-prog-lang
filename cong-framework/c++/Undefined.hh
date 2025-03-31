@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 30.03.25.
-//
-
-#ifndef UNDEFINED_HH
-#define UNDEFINED_HH
+#pragma once
 
 namespace cong::lang::core {
 
@@ -24,5 +19,3 @@ namespace cong::lang::core {
     struct Undefined;
 
 };
-
-#endif //UNDEFINED_HH

@@ -1,6 +1,4 @@
-
-#ifndef NATURALINTERVALLSTATIC_H
-#define NATURALINTERVALLSTATIC_H
+#pragma once
 
 #include "NaturalStatic.hh"
 #include "../Boolean/BooleanStatic.hh"
@@ -103,5 +101,3 @@ namespace cong::lang::core {
       {};
     };
 };
-
-#endif //NATURALINTERVALLSTATIC_H

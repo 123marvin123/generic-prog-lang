@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CONG_BOOLEAN_LANG_CORE_BOOLEANSTATIC_HH
-#define CONG_BOOLEAN_LANG_CORE_BOOLEANSTATIC_HH
 
 #include "Boolean.hh"
 #include "../Type.hh"
@@ -95,5 +93,3 @@ namespace cong::lang::core
       {};
     };
 }
-
-#endif

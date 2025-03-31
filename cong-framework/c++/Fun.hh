@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 30.03.25.
-//
-
-#ifndef FUN_HH
-#define FUN_HH
+#pragma once
 
 namespace cong::lang::core {
 
@@ -90,5 +85,3 @@ namespace cong::lang::core {
             } \
         }; \
     }
-
-#endif //FUN_HH

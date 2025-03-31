@@ -1,5 +1,4 @@
-#ifndef NATURALSTATIC_H
-#define NATURALSTATIC_H
+#pragma once
 
 #include "Natural.hh"
 #include "../Type.hh"
@@ -86,6 +85,7 @@ namespace cong::lang::core
                   Native_ native_>
         struct Dispatch_<intern::NaturalStatic<Native_, native_>>
         {
+            static_assert(native_ != natInf, "Overflow");
             using Type = intern::NaturalStatic<Native_, native_ + 1>;
         };
     public:
@@ -105,6 +105,7 @@ namespace cong::lang::core
                   Native_ native_>
         struct Dispatch_<intern::NaturalStatic<Native_, native_>>
         {
+            static_assert(native_ != 0, "Underflow");
             using Type = intern::NaturalStatic<Native_, native_ - 1>;
         };
     public:
@@ -145,6 +146,7 @@ namespace cong::lang::core
                   Native_ native2_>
         struct Dispatch_<intern::NaturalStatic<Native_, native1_>, intern::NaturalStatic<Native_, native2_>>
         {
+            static_assert(native2_ <= native1_, "Subtraction would result in negative value");
             using Type = intern::NaturalStatic<Native_, native1_ - native2_>;
         };
     public:
@@ -185,6 +187,7 @@ namespace cong::lang::core
                   Native_ native2_>
         struct Dispatch_<intern::NaturalStatic<Native_, native1_>, intern::NaturalStatic<Native_, native2_>>
         {
+            static_assert(native2_ != 0, "Division by zero");
             using Type = intern::NaturalStatic<Native_, native1_ / native2_>;
         };
     public:
@@ -194,5 +197,3 @@ namespace cong::lang::core
         {};
     };
 };
-
-#endif //NATURALSTATIC_H

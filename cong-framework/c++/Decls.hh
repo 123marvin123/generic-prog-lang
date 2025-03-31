@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 29.03.25.
-//
-
-#ifndef DECLS_HH
-#define DECLS_HH
+#pragma once
 
 #include <tuple>
 #include <utility>                      // for stdlib core functions
@@ -26,6 +21,3 @@ namespace cong::lang::core {
 
 // Boolean
 
-
-
-#endif //DECLS_HH

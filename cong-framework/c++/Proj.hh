@@ -1,5 +1,4 @@
-#ifndef PROJ_HH
-#define PROJ_HH
+#pragma once
 
 #include "Exp.hh"
 #include "Base.hh"
@@ -31,6 +30,7 @@ namespace cong::lang
                 struct Call
                 {
                 private:
+                    static_assert(N_ > 0, "Proj requires N_ >= 1 to avoid invalid offset indexing.");
                     using Offset_ = core::NaturalStatic<N_ - 1>;
                     using Call_ = core::ItemAt::Call<TupleOfExp_, Offset_>;
                 public:
@@ -51,5 +51,3 @@ namespace cong::lang
     using Proj = intern::Exp<local::Proj<N_>>;
 
 };
-
-#endif //PROJ_HH

@@ -1,5 +1,4 @@
-#ifndef BASE_HH
-#define BASE_HH
+#pragma once
 
 #include "Number/NaturalIntervalStatic.hh"
 #include "Boolean/BooleanStatic.hh"
@@ -23,7 +22,7 @@ namespace cong::lang::intern
         using ApplyTime = core::FunStaticMake<core::Invalid>;
         using ApplyValue = core::FunStaticMake<core::Invalid>;
 
-        template <class Spec_, typename Offset_>
+        template <class Spec_, typename /* unused */>
         struct ApplyMember
         {
             template <typename...>
@@ -35,4 +34,3 @@ namespace cong::lang::intern
     };
 };
 
-#endif //BASE_HH

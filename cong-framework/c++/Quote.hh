@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 31.03.25.
-//
-
-#ifndef QUOTE_HH
-#define QUOTE_HH
+#pragma once
 
 #include "Exp.hh"
 #include "Base.hh"
@@ -65,5 +60,3 @@ namespace cong::lang
 
     };
 };
-
-#endif //QUOTE_HH
