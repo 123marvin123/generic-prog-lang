@@ -19,6 +19,16 @@ namespace cong::lang::core {
         struct Call
         {
             using Type = typename FunStatic_::template Call<ArgS_...>::Type;
+            /**
+             * @brief Returns a default-initialized instance of Type.
+             *
+             * This static constexpr method accepts a variable number of arguments, which are used only for
+             * template type deduction, and returns a default-constructed object of type Type.
+             *
+             * @tparam ArgS_ Unused template parameter pack for argument types.
+             * @param argS Provided arguments that do not influence the returned result.
+             * @return A default-constructed object of type Type.
+             */
             static constexpr Type call(ArgS_... argS)
             {
                 return {};
@@ -32,6 +42,18 @@ namespace cong::lang::core {
         struct Call
         {
             using Type = Arg1_;
+            /**
+             * @brief Returns the first argument, ignoring any additional arguments.
+             *
+             * This static constexpr function acts as an identity function by returning the first parameter provided,
+             * while all subsequent arguments are disregarded.
+             *
+             * @tparam Arg1_ The type of the first argument.
+             * @tparam ArgS_ The types of the additional arguments, which are ignored.
+             * @param arg1 The primary value to be returned.
+             * @param ... Unused additional arguments.
+             * @return The value of the first argument.
+             */
             static constexpr Type call(Arg1_ arg1, ArgS_...)
             {
                 return arg1;

@@ -17,11 +17,32 @@ namespace cong::lang {
             using Base_ = Impl_;
         public:
             template <typename... InitS_>
+            /**
+             * @brief Constructs an Exp instance by forwarding initialization parameters.
+             *
+             * This constexpr constructor accepts a variadic set of arguments and forwards them 
+             * to the base class constructor using perfect forwarding. This enables compile-time 
+             * instantiation of expression objects with custom initialization.
+             *
+             * @tparam InitS_ The types of the initialization parameters.
+             * @param initS One or more initialization arguments forwarded to the base class.
+             */
             constexpr Exp(InitS_&&... initS)
               : Base_{std::forward<InitS_>(initS)...}
             {}
 
             template <typename... ExpS_>
+            /**
+             * @brief Binds the current expression with provided subexpressions.
+             *
+             * This operator overload forwards the current expression and the given subexpressions
+             * into the `bind` function, using a default-constructed environment. The result is a new
+             * expression resulting from this binding.
+             *
+             * @tparam ExpS_ Variadic types of the subexpressions.
+             * @param expS Subexpression arguments to bind with the current expression.
+             * @return The result of binding the current expression with the provided subexpressions.
+             */
             constexpr auto operator()(ExpS_&&... expS) const
             {
                 return bind(Environment{},
@@ -91,6 +112,15 @@ namespace cong::lang {
                 using Base_ = ReduceValue::Call<Exp_>;
             public:
                 using Type = typename Base_::Type;
+                /**
+                 * @brief Evaluates the provided expression.
+                 *
+                 * Delegates the evaluation of the given expression to the Base_ implementation
+                 * and returns its computed result.
+                 *
+                 * @param exp The expression to evaluate.
+                 * @return The result of evaluating the expression.
+                 */
                 static constexpr Type
                 call(Exp_ exp)
                 {
@@ -100,6 +130,17 @@ namespace cong::lang {
         };
 
         template <typename... ExpS_>
+        /**
+         * @brief Evaluates one or more expressions.
+         *
+         * Forwards the provided expression(s) to the evaluation mechanism defined by the Eval structure.
+         * The function invokes the static call method of Eval::Call, preserving the value category of each
+         * argument to compute and return the evaluation result.
+         *
+         * @tparam ExpS_ Types of the expression arguments.
+         * @param expS One or more expressions to evaluate.
+         * @return The result of evaluating the provided expression(s) as defined by the evaluation framework.
+         */
         typename Eval::template Call<ExpS_...>::Type eval(ExpS_&&... expS) {
             return Eval::template Call<ExpS_...>::call(std ::forward<ExpS_>(expS)...);
         }
@@ -157,6 +198,17 @@ namespace cong::lang {
                 using Eval_ = Eval::Call<Bind_>;
             public:
                 using Type = typename Eval_::Type;
+                /**
+                 * @brief Evaluates a bound expression in a fresh environment.
+                 *
+                 * Constructs a binding by combining a default-constructed Environment, a new expression (ExpNew_),
+                 * and a tuple of subexpressions (tupleOfExp). This binding is then evaluated via Eval_::call,
+                 * with the result returned as a value of type Type.
+                 *
+                 * @param exp An expression whose type is used for overload resolution (not directly used).
+                 * @param tupleOfExp A tuple of expressions that are bound and evaluated.
+                 * @return Type The result of evaluating the bound expression.
+                 */
                 static constexpr Type
                 call(Exp_ exp, TupleOfExp_ tupleOfExp)
                 {
@@ -180,6 +232,16 @@ namespace cong::lang {
                 using Call_ = typename Fun_::template Call<ExpS_...>;
             public:
                 using Type = typename Call_::Type;
+                /**
+                 * @brief Forwards a tuple of expressions to the underlying call operation.
+                 *
+                 * This function unpacks the provided tuple of expressions and passes them as arguments
+                 * to the call method defined in Call_, returning its result.
+                 *
+                 * @param Exp_ A type tag used for overload resolution associated with the current expression context.
+                 * @param tupleOfExp A tuple containing expressions whose elements are forwarded to the call operator.
+                 * @return Type The result obtained by applying Call_::call to the unpacked tuple elements.
+                 */
                 static constexpr Type
                 call(Exp_, core::Tuple<ExpS_...> tupleOfExp)
                 {

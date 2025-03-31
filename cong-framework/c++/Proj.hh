@@ -35,6 +35,16 @@ namespace cong::lang
                     using Call_ = core::ItemAt::Call<TupleOfExp_, Offset_>;
                 public:
                     using Type = typename Call_::Type;
+                    /**
+                     * @brief Retrieves an element from a tuple of expressions.
+                     *
+                     * This function extracts the element from the provided tuple at the position computed as N_ - 1.
+                     * The parameter `exp` is included to satisfy interface requirements but is not used in the extraction.
+                     *
+                     * @param exp An expression instance (unused) required for interface compatibility.
+                     * @param tupleOfExp A tuple containing expressions from which the element is projected.
+                     * @return The element from `tupleOfExp` located at index (N_ - 1).
+                     */
                     static constexpr
                     Type
                     call(Exp_ exp,

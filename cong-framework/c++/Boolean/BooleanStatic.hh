@@ -12,7 +12,15 @@ namespace cong::lang::core
         struct BooleanStatic
         {
             using Native = Native_;
-            static constexpr Native native() { return native_; }
+            /**
+ * @brief Retrieves the compile-time boolean value.
+ *
+ * This static constexpr function returns the constant boolean value represented
+ * by the template parameter `native_`, allowing access to this value at compile time.
+ *
+ * @return Native The compile-time boolean constant.
+ */
+static constexpr Native native() { return native_; }
         };
     };
 
