@@ -60,7 +60,7 @@ struct ItemAt
                                              typename Plain::Call<Tuple_>::Type
                                              >::type&;
 
-    static Type call(Tuple_ tuple,
+    static Type call(Tuple_& tuple,
                      Offset_)
     {
       return std::get<Offset_::native()>(tuple);
@@ -78,7 +78,7 @@ struct Item
   public:
     using Type = typename ItemAt_::Type;
 
-    static Type call(Tuple_ tuple)
+    static Type call(Tuple_& tuple)
     {
       return ItemAt_::call(std::forward<Tuple_>(tuple), Zero{});
     }
@@ -191,18 +191,18 @@ private:
     using Type = Tuple<typename PlainFun_::template Call<ItemS_>::Type...>;
 
   private:
-    static constexpr Type call_(Fun_ fun,
+    static constexpr Type call_(Fun_&& fun,
                                 ItemS_... itemS)
     {
-      return tuple(fun(itemS)...);
+      return tuple(std::forward<Fun_>(fun)(itemS)...);
     }
   public:
-    static constexpr Type call(Fun_ fun,
+    static constexpr Type call(Fun_&& fun,
                                Tuple<ItemS_...> tuple)
     {
       return std::apply([&fun](ItemS_&... itemS)
                         {
-                          return call_(fun,
+                          return call_(std::forward<Fun_>(fun),
                                        itemS...);
                         },
                         tuple);
