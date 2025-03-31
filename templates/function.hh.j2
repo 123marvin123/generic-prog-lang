@@ -1,5 +1,2 @@
 {% from "macros/c++/function.j2" import FunctionDefinition with context %}
-{% for f_id in get_function_ids() %}
-{% set current_function = get_function(f_id) %}
-{{ FunctionDefinition(current_function) }}
-{% endfor %}
+{{ FunctionDefinition(fun) }}

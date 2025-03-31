@@ -13,7 +13,7 @@ vec<std::filesystem::path> JinjaCppExport::process()
     for (const Concept* c : get_concepts())
     {
         std::filesystem::path out = get_output_folder() / std::format("{}.hh", c->get_identifier());
-        if (const auto res = concept_tpl.RenderAsString({{"concept", jinja2::Reflect(*c)}}); res.has_value())
+        if (const auto res = concept_tpl.RenderAsString({{"concept", jinja2::Reflect(c)}}); res.has_value())
         {
             const std::string& contents = res.value();
 
@@ -31,6 +31,30 @@ vec<std::filesystem::path> JinjaCppExport::process()
         {
             std::cerr << res.error().ToString() << std::endl;
             throw std::runtime_error(std::format("Failed to render template for concept {}", c->get_full_name()));
+        }
+    }
+
+    for (const Function* f : get_functions())
+    {
+        std::filesystem::path out = get_output_folder() / std::format("{}.hh", f->get_identifier());
+        if (const auto res = function_tpl.RenderAsString({{"fun", jinja2::Reflect(FunctionView{f})}}); res.has_value())
+        {
+            const std::string& contents = res.value();
+
+            std::ofstream out_file(out);
+            if (!out_file)
+            {
+                std::cerr << "Failed to open output file: " << out << std::endl;
+                throw std::runtime_error(std::format("Failed to open output file: {}", out.string()));
+            }
+            out_file << contents;
+
+            output_files.push_back(out);
+        }
+        else
+        {
+            std::cerr << res.error().ToString() << std::endl;
+            throw std::runtime_error(std::format("Failed to render template for function {}", f->get_full_name()));
         }
     }
 

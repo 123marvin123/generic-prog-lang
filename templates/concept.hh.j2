@@ -1,11 +1,12 @@
 {% from "macros/c++/concept.j2" import ConceptDefinition with context %}
 {% from "macros/c++/namespace.j2" import NamespaceIncludeGuardName with context %}
 #pragma once
-{% set ns_include_guard = NamespaceIncludeGuardName(concept.ns) %}
-#ifndef CONCEPT_{{ ns_include_guard }}{% if ns_include_guard %}_{% endif %}{{ concept.name | upper }}_H
-#define CONCEPT_{{ ns_include_guard }}{% if ns_include_guard %}_{% endif %}{{ concept.name | upper }}_H
+{% set tmp = NamespaceIncludeGuardName(concept.ns) %}
+{% set ns_include_guard = "CONCEPT_" ~ tmp ~ ("_" if tmp else "") ~ (concept.name | upper) ~ "_H" %}
+#ifndef {{ ns_include_guard }}
+#define {{ ns_include_guard }}
 
-#include <tuple>
+#include <cong/Seq/lang/core/Tuple_forward.hh>
 
 {% for include in concept.bases %}
 #include <{{ include.name }}.hh>
@@ -13,4 +14,4 @@
 
 {{ ConceptDefinition(concept) }}
 
-#endif // CONCEPT_{{ ns_include_guard }}{% if ns_include_guard %}_{% endif %}{{ concept.name | upper }}_H
+#endif // {{ ns_include_guard }}
