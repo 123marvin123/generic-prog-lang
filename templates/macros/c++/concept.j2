@@ -3,7 +3,7 @@
 {% macro ConceptDefinition(def) %}
 {% call NamespaceChain(def.ns) %}
 struct Concept{{def.name}} {
-    using Bases = std::tuple<
+    using Bases = ::cong::lang::core::Tuple<
     {%- for base in def.bases -%}
 {{base.ns | join('::')}}::Concept{{base.name}}{{', ' if loop.nextitem is defined }}
     {%- endfor %}>;
