@@ -1,6 +1,6 @@
 #pragma once
 #ifndef CONG_NUMBER_LANG_CORE_NATURAL_HH
-#define CONG_NUMBEr_LANG_CORE_NATURAL_HH
+#define CONG_NUMBER_LANG_CORE_NATURAL_HH
 
 #include <limits>
 
