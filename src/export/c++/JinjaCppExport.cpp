@@ -4,7 +4,6 @@
 
 #include "export/c++/JinjaCppExport.h"
 
-#include "../../../cmake-build-debug-local/_deps/jinja2cpp-src/include/jinja2cpp/value.h"
 #include "jinja2cpp/template.h"
 #include "jinja2cpp/template_env.h"
 
