@@ -1,7 +1,7 @@
 #pragma once
 
-namespace cong::lang::core {
-
+namespace cong::lang::core
+{
     /**
      * type used to indicate that a type - namely the return type of a function, i.e. the type of the
      * corresponding function call expression - is not valid, i.e. that the type-producing expression
@@ -17,5 +17,4 @@ namespace cong::lang::core {
      */
     // only declared, not to be defined/instantiated
     struct Undefined;
-
 };

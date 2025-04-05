@@ -2,22 +2,34 @@
 {% macro FunctionDefinition(def) %}
 {% call NamespaceChain(def.ns) %}
 {% set Name_ = def.name | title %}
+
+struct Dec{{ Name_ }} {
+    using ParamTupleOfConcept = ::cong::lang::core::Tuple<
+    {%- for param in def.params -%}
+        {%- if param.type == "placeholder_function_parameter" or param.type == "dependent_function_parameter" %}
+{{ ConceptObject.ns | join('::') }}::Concept{{ ConceptObject.name }}
+        {%- else %}
+{{ param.concept.ns | join('::') }}::Concept{{ param.concept.name }}
+        {%- endif %}{{', ' if loop.nextitem is defined }}
+    {%- endfor -%}>;
+};
+
 struct Spec{{ Name_ }} {
     static constexpr char const* name = "{{def.name}}";
     static constexpr char const* description = "{{def.description}}";
 };
 
 template <typename... Exp_>
-using {{ Name_ }} = lang::Bind<
-                lang::intern::Environment,
-                lang::intern::Exp<lang::intern::FunctionImpl<lang::intern::Spec{{ Name_ }}>>,
+using {{ Name_ }} = ::cong::lang::Bind<
+                    ::cong::lang::intern::Environment,
+                ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<Dec{{ Name_ }}, Spec{{ Name_ }}>>,
                 Exp_...>;
 
 template <typename... Exp_>
 constexpr
 {{ Name_ }}<Exp_...> {{def.name}}(Exp_&&... args) {
-    return lang::bind(lang::intern::Environment{},
-                      lang::intern::Exp<lang::intern::FunctionImpl<lang::intern::Spec{{ Name_ }}>>{},
+    return ::cong::lang::bind(::cong::lang::intern::Environment{},
+                      ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<Dec{{ Name_ }}, Spec{{ Name_ }}>>{},
                       std::forward<Exp_>(args)...);
 }
 {% endcall %}

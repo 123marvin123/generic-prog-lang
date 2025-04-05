@@ -8,23 +8,6 @@ stmnt
     : conceptDefinitionStmnt
     | namespaceStmnt
     | functionStmnt
-    | familyStmnt
-    ;
-
-familyStmnt
-    : FAMILY name=IDENTIFIER ('(' familyHeader (',' familyHeader)* ')')? conceptDefinitionBases familyBody
-    ;
-
-familyHeader
-    : IDENTIFIER ':' type=typename
-    ;
-
-familyBody
-    : LBRACE familyBodyStmnt* RBRACE
-    ;
-
-familyBodyStmnt
-    : familyFunctionStmnt
     ;
 
 conceptDefinitionStmnt
@@ -37,11 +20,6 @@ conceptDefinitionBases
 
 namespaceStmnt
     : NAMESPACE name=IDENTIFIER LBRACE stmnt* RBRACE
-    ;
-
-// in the body of the function, we should also allow statements (e.g. changing the state)
-familyFunctionStmnt
-    : FUNCTION name=IDENTIFIER parameterList ('->' type=qualifiedIdentifier)? LBRACE expression+ RBRACE
     ;
 
 functionStmnt
@@ -82,16 +60,6 @@ placeholder
     : '<' name=IDENTIFIER '>'
     ;
 
-typename
-    : 'String'
-    | 'Number'
-    | 'Real'
-    | 'Bool'
-    | 'Void'
-    | placeholder
-    | qualifiedIdentifier
-    ;
-
 // Allows for a qualified identifier, e.g., ::Math::Family
 qualifiedIdentifier: ('::')? IDENTIFIER ('::' IDENTIFIER)*;
 
@@ -109,7 +77,6 @@ NAMESPACE: 'namespace';
 DESCRIPTION: 'description';
 GENERICIMPL: 'generic';
 REQUIRES: 'requires';
-FAMILY: 'family';
 
 LBRACE: '{';
 RBRACE: '}';

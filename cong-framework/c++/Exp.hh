@@ -4,22 +4,28 @@
 #include "Boolean/BooleanStatic.hh"
 #include "Fun.hh"
 #include "Undefined.hh"
+#include "Decls.hh"
+#include "Bind.hh"
 
 #include <utility>
 
-namespace cong::lang {
-    namespace intern {
-        class Environment {};
+namespace cong::lang
+{
+    namespace intern
+    {
+        class Environment { };
 
         template <class Impl_>
         class Exp : public Impl_
         {
             using Base_ = Impl_;
+
         public:
             template <typename... InitS_>
             constexpr Exp(InitS_&&... initS)
-              : Base_{std::forward<InitS_>(initS)...}
-            {}
+                : Base_{std::forward<InitS_>(initS)...}
+            {
+            }
 
             template <typename... ExpS_>
             constexpr auto operator()(ExpS_&&... expS) const
@@ -33,21 +39,22 @@ namespace cong::lang {
         struct IsExp
         {
         private:
-            template <typename Plain_>
+            template <typename>
             struct Dispatch
             {
                 using Type = core::False;
             };
+
             template <class Impl_>
             struct Dispatch<Exp<Impl_>>
             {
                 using Type = core::True;
             };
+
         public:
             template <typename Exp_>
-            struct Call
+            struct Call : Dispatch<typename core::Plain::Call<Exp_>::Type>
             {
-                using Type = typename Dispatch<typename core::Plain::Call<Exp_>::Type>::Type;
             };
         };
 
@@ -89,8 +96,10 @@ namespace cong::lang {
             {
             private:
                 using Base_ = ReduceValue::Call<Exp_>;
+
             public:
                 using Type = typename Base_::Type;
+
                 static constexpr Type
                 call(Exp_ exp)
                 {
@@ -100,8 +109,9 @@ namespace cong::lang {
         };
 
         template <typename... ExpS_>
-        typename Eval::template Call<ExpS_...>::Type eval(ExpS_&&... expS) {
-            return Eval::template Call<ExpS_...>::call(std ::forward<ExpS_>(expS)...);
+        typename Eval::Call<ExpS_...>::Type eval(ExpS_&&... expS)
+        {
+            return Eval::Call<ExpS_...>::call(std::forward<ExpS_>(expS)...);
         }
 
         struct IsValid
@@ -112,11 +122,13 @@ namespace cong::lang {
             {
                 using Type = core::True;
             };
+
             template <typename Dummy_>
             struct Dispatch<core::Invalid, Dummy_>
             {
                 using Type = core::False;
             };
+
         public:
             template <typename Exp_>
             struct Call : Dispatch<typename core::Plain::Call<Exp_>::Type>
@@ -132,11 +144,13 @@ namespace cong::lang {
             {
                 using Type = core::True;
             };
+
             template <typename Dummy_>
             struct Dispatch<core::Undefined, Dummy_>
             {
                 using Type = core::False;
             };
+
         public:
             template <typename Exp_>
             struct Call : Dispatch<typename core::Plain::Call<Exp_>::Type>
@@ -144,51 +158,103 @@ namespace cong::lang {
             };
         };
 
-    namespace local
-    {
-        template <class ExpNew_>
-        struct ApplyReplace
+        struct TransformExp // is a Fun(Exp)Dynamic
         {
+        private:
+            template <typename PlainTupleOfExp_>
+            struct Dispatch;
+
+            template <typename... ItemS_>
+            struct Dispatch<core::Tuple<ItemS_...>>
+            {
+                template <typename Exp_,
+                          typename TupleOfExp_>
+                struct Call
+                {
+                    using Type = core::Tuple<typename ApplyValue::Call<Exp_, ItemS_>::Type...>;
+
+                    static constexpr Type
+                    call(Exp_ exp,
+                         TupleOfExp_ tupleOfExp)
+                    {
+                        return std::apply([&exp](ItemS_&... itemS)
+                                          {
+                                              return core::tuple(ApplyValue
+                                                  ::Call<Exp_, ItemS_>
+                                                  ::call(exp, itemS)...);
+                                          },
+                                          tupleOfExp);
+                    }
+                };
+            };
+
+        public:
             template <typename Exp_, typename TupleOfExp_>
             struct Call
             {
-            private:
-                using Bind_ = Exp<lang::local::Bind<Environment, ExpNew_, TupleOfExp_>>;
-                using Eval_ = Eval::Call<Bind_>;
-            public:
-                using Type = typename Eval_::Type;
-                static constexpr Type
+                using Tuple_ = typename core::Plain::Call<TupleOfExp_>::Type;
+                using Base_ = Dispatch<Tuple_>;
+
+                using Type = typename Base_::template Call<Exp_, TupleOfExp_>::Type;
+
+                static constexpr
+                Type
                 call(Exp_ exp, TupleOfExp_ tupleOfExp)
                 {
-                    return Eval_::call(Bind_{Environment{},
-                                             ExpNew_{},
-                                             tupleOfExp});
+                    return Base_::template Call<Exp_, TupleOfExp_>::call(exp, tupleOfExp);
                 }
             };
         };
 
-        template <class Fun_>
-        struct ApplyByFun
+        namespace local
         {
-            template <typename Exp_, typename TupleOfExp_>
-            struct Call;
-
-            template <typename Exp_, typename... ExpS_>
-            struct Call<Exp_, core::Tuple<ExpS_...>>
+            template <class ExpNew_>
+            struct ApplyReplace
             {
-            private:
-                using Call_ = typename Fun_::template Call<ExpS_...>;
-            public:
-                using Type = typename Call_::Type;
-                static constexpr Type
-                call(Exp_, core::Tuple<ExpS_...> tupleOfExp)
+                template <typename Exp_, typename TupleOfExp_>
+                struct Call
                 {
-                    return std::apply(Call_::call, tupleOfExp);
-                }
+                private:
+                    using Bind_ = Exp<lang::local::Bind<Environment, ExpNew_, TupleOfExp_>>;
+                    using Eval_ = Eval::Call<Bind_>;
+
+                public:
+                    using Type = typename Eval_::Type;
+
+                    static constexpr Type
+                    call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    {
+                        return Eval_::call(Bind_{
+                            Environment{},
+                            ExpNew_{},
+                            tupleOfExp
+                        });
+                    }
+                };
+            };
+
+            template <class Fun_>
+            struct ApplyByFun
+            {
+                template <typename Exp_, typename TupleOfExp_>
+                struct Call;
+
+                template <typename Exp_, typename... ExpS_>
+                struct Call<Exp_, core::Tuple<ExpS_...>>
+                {
+                private:
+                    using Call_ = typename Fun_::template Call<ExpS_...>;
+
+                public:
+                    using Type = typename Call_::Type;
+
+                    static constexpr Type
+                    call(Exp_, core::Tuple<ExpS_...> tupleOfExp)
+                    {
+                        return std::apply(Call_::call, tupleOfExp);
+                    }
+                };
             };
         };
-
-    };
-
     };
 };

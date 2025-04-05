@@ -5,7 +5,8 @@
 
 namespace cong::lang::core
 {
-    namespace intern {
+    namespace intern
+    {
         // type only, not to be instantiated
         template <typename Native_, Native_ native_>
         struct NaturalStatic
@@ -35,17 +36,21 @@ namespace cong::lang::core
                          intern::NaturalStatic<Native_, native2_>>
         {
             using Type = intern::NaturalStatic<Native_,
-                        (native1_ == natInf ? native2_ :
-                      (native2_ == natInf ? native1_ :
-                      (native1_ < native2_ ? native1_ : native2_)))>;
+                                               (native1_ == natInf
+                                                    ? native2_
+                                                    : (native2_ == natInf
+                                                           ? native1_
+                                                           : (native1_ < native2_ ? native1_ : native2_)))>;
         };
+
     public:
         template <typename Arg1_,
                   typename Arg2_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg1_>::Type,
-                      typename Plain::Call<Arg2_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg1_>::Type,
+                        typename Plain::Call<Arg2_>::Type>
+        {
+        };
     };
 
     struct Max
@@ -62,17 +67,21 @@ namespace cong::lang::core
                          intern::NaturalStatic<Native_, native2_>>
         {
             using Type = intern::NaturalStatic<Native_,
-                        (native1_ == natInf ? native2_ :
-                      (native2_ == natInf ? native1_ :
-                      (native1_ > native2_ ? native1_ : native2_)))>;
+                                               (native1_ == natInf
+                                                    ? native2_
+                                                    : (native2_ == natInf
+                                                           ? native1_
+                                                           : (native1_ > native2_ ? native1_ : native2_)))>;
         };
+
     public:
         template <typename Arg1_,
                   typename Arg2_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg1_>::Type,
-                      typename Plain::Call<Arg2_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg1_>::Type,
+                        typename Plain::Call<Arg2_>::Type>
+        {
+        };
     };
 
     struct Succ
@@ -88,11 +97,13 @@ namespace cong::lang::core
             static_assert(native_ != natInf, "Overflow");
             using Type = intern::NaturalStatic<Native_, native_ + 1>;
         };
+
     public:
         template <typename Arg_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg_>::Type>
+        {
+        };
     };
 
     struct Pred
@@ -108,11 +119,13 @@ namespace cong::lang::core
             static_assert(native_ != 0, "Underflow");
             using Type = intern::NaturalStatic<Native_, native_ - 1>;
         };
+
     public:
         template <typename Arg_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg_>::Type>
+        {
+        };
     };
 
     struct Add
@@ -128,11 +141,13 @@ namespace cong::lang::core
         {
             using Type = intern::NaturalStatic<Native_, native1_ + native2_>;
         };
+
     public:
         template <typename Arg1_, typename Arg2_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
+        {
+        };
     };
 
     struct Sub
@@ -149,11 +164,13 @@ namespace cong::lang::core
             static_assert(native2_ <= native1_, "Subtraction would result in negative value");
             using Type = intern::NaturalStatic<Native_, native1_ - native2_>;
         };
+
     public:
         template <typename Arg1_, typename Arg2_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
+        {
+        };
     };
 
     struct Mul
@@ -169,11 +186,13 @@ namespace cong::lang::core
         {
             using Type = intern::NaturalStatic<Native_, native1_ * native2_>;
         };
+
     public:
         template <typename Arg1_, typename Arg2_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
+        {
+        };
     };
 
     struct Div
@@ -190,10 +209,12 @@ namespace cong::lang::core
             static_assert(native2_ != 0, "Division by zero");
             using Type = intern::NaturalStatic<Native_, native1_ / native2_>;
         };
+
     public:
         template <typename Arg1_, typename Arg2_>
         struct Call
-          : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {};
+            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
+        {
+        };
     };
 };

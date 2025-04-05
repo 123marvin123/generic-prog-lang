@@ -52,6 +52,7 @@ void LangExport::setup_environment()
     env.AddFilesystemHandler(std::string(), std::make_unique<jinja2::RealFileSystem>("templates"));
     env.GetSettings().lstripBlocks = true;
     env.GetSettings().trimBlocks = true;
+    env.GetSettings().extensions.Do = true;
 
     env.AddGlobal("prefix", MakeCallable(
                       [](const std::string& str1, const std::string& str2)

@@ -1,7 +1,9 @@
+#pragma once
+
 #include <utility> // std::remove_*
 
-namespace cong::lang::core {
-
+namespace cong::lang::core
+{
     struct Plain
     {
         template <typename T>
@@ -18,11 +20,11 @@ namespace cong::lang::core {
         {
             using Type = T;
         };
+
         template <typename T>
         struct Call<T&&>
         {
             using Type = T;
         };
     };
-
 };

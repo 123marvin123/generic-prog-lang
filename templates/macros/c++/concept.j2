@@ -7,8 +7,8 @@ struct Concept{{def.name}} {
     {%- for base in def.bases -%}
 {{base.ns | join('::')}}::Concept{{base.name}}{{', ' if loop.nextitem is defined }}
     {%- endfor %}>;
-    static char const* name = "{{def.name}}";
-    static char const* description = "{{def.description}}";
+    static constexpr const char* name = "{{def.name}}";
+    static constexpr const char* description = "{{def.description}}";
 };
 {% endcall %}
 {% endmacro %}

@@ -1,2 +1,14 @@
 {% from "macros/c++/function.j2" import FunctionDefinition with context %}
+
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Exp.hh"
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Bind.hh"
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Function.hh"
+
+{% set ConceptObject = get_concept("Object") %}
+
+#include "{{ConceptObject.name}}.hh"
+{% for param in needed_files %}
+#include "{{ param.name}}.hh"
+{% endfor %}
+
 {{ FunctionDefinition(fun) }}

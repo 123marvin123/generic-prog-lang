@@ -216,7 +216,21 @@ template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionV
                 ValuesList l{};
                 l.reserve(params.size());
 
-                std::ranges::transform(params, std::back_inserter(l), [](const auto* p) { return Reflect(*p); });
+                std::ranges::transform(params, std::back_inserter(l), [](const auto* p) {
+                    if (const auto *concrete =
+                              utils::dyn_cast<ConcreteFunctionParameter>(p))
+                        return Reflect(*concrete);
+
+                      if (const auto *placeholder =
+                            utils::dyn_cast<PlaceholderFunctionParameter>(p))
+                      return Reflect(*placeholder);
+
+                    if (const auto *dependent =
+                              utils::dyn_cast<DependentFunctionParameter>(p))
+                        return Reflect(*dependent);
+
+                    return Reflect(*p);
+                });
 
                 return l;
             }},

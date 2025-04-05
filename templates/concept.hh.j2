@@ -6,10 +6,10 @@
 #ifndef {{ ns_include_guard }}
 #define {{ ns_include_guard }}
 
-#include <cong/Seq/lang/core/Tuple_forward.hh>
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Seq/Tuple.hh"
 
 {% for include in concept.bases %}
-#include <{{ include.name }}.hh>
+#include "{{ include.name }}.hh"
 {% endfor %}
 
 {{ ConceptDefinition(concept) }}
