@@ -75,24 +75,37 @@ CallExpression::CallExpression(Sema* sema, const Function* fun,
     }
 }
 
-std::variant<const Concept*, const PlaceholderFunctionParameter*> CallExpression::get_result() const
-{
-    const auto& result = get_function()->get_result();
-    if (std::holds_alternative<const Concept*>(result))
-        return std::get<const Concept*>(result);
+std::variant<const Concept *, const PlaceholderFunctionParameter *>
+CallExpression::get_result() const {
+  const auto &result = get_function()->get_result();
+  if (std::holds_alternative<const Concept *>(result))
+    return std::get<const Concept *>(result);
 
-    const auto& target_param = std::get<PlaceholderFunctionParameter*>(result);
+  const auto &target_param = std::get<PlaceholderFunctionParameter *>(result);
 
-    int idx = 0;
-    for (const auto& param : get_function()->get_parameters())
-    {
-        if (const auto& v = get_arguments()[idx]->get_result();
-            param == target_param && std::holds_alternative<const Concept*>(v))
-            return std::get<const Concept*>(v);
-        idx++;
-    }
+  int idx = 0;
+  for (const auto &param : get_function()->get_parameters()) {
+    if (const auto &v = get_arguments()[idx]->get_result();
+        param == target_param && std::holds_alternative<const Concept *>(v))
+      return std::get<const Concept *>(v);
+    idx++;
+  }
 
-    return target_param;
+  return target_param;
+}
+
+std::string CallExpression::to_cpp() const noexcept {
+    vec<std::string> str_args{};
+    str_args.reserve(args.size());
+    for (const auto& arg : args)
+        str_args.push_back(arg->to_cpp());
+
+    std::string joined_args = std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
+        [](std::string a, const std::string& b) {
+            return std::move(a) + ", " + b;
+        });
+
+    return std::format("{}({})", get_function()->get_full_name(), joined_args);
 }
 
 ArithmeticExpression::ArithmeticExpression(Sema* sema, s_ptr<Expression> left, s_ptr<Expression> right, const Operator op):

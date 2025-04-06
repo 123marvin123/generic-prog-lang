@@ -233,8 +233,7 @@ template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionV
                 });
 
                 return l;
-            }},
-            /* TODO: Export reqs and generic impls */
+            }}
         };
 
         return accessors;

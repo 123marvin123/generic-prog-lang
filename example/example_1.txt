@@ -9,6 +9,7 @@ namespace testing {
 }
 
 fun isModelOf(a: <T>, b: <K>) -> Boolean {
+    req { true }
     description { "checks if a is a model of b" }
 }
 

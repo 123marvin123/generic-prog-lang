@@ -28,6 +28,9 @@ using {{ Name_ }} = ::cong::lang::Bind<
 template <typename... Exp_>
 constexpr
 {{ Name_ }}<Exp_...> {{def.name}}(Exp_&&... args) {
+
+    {{function_requirements(def)}}
+
     return ::cong::lang::bind(::cong::lang::intern::Environment{},
                       ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<Dec{{ Name_ }}, Spec{{ Name_ }}>>{},
                       std::forward<Exp_>(args)...);

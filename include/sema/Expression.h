@@ -44,6 +44,12 @@ struct Expression : SemaElement, Introspection<Expression>
         return std::make_shared<Derived>(sema, std::forward<Args>(args)...);
     }
 
+    [[nodiscard]]
+    virtual std::string to_cpp() const noexcept = 0;
+
+    [[nodiscard]]
+    virtual std::string to_python() const noexcept = 0;
+
     struct DebugVisitor;
 
 private:
@@ -101,12 +107,17 @@ struct ConstantExpression : BaseConstantExpression
     }
 
     [[nodiscard]]
-    T& eval()
-    {
-        return value;
+    T &eval() {
+      return value;
     }
 
-private:
+    [[nodiscard]] std::string to_python() const noexcept override {
+        //TODO: are there differences in python and c++
+        // syntax for literals?
+        return to_cpp();
+    }
+
+  private:
     T value;
 };
 
@@ -117,6 +128,10 @@ struct StringExpression final : ConstantExpression<std::string>
     static s_ptr<StringExpression> create(Sema* sema, const std::string& value) {
         return Expression::create<StringExpression>(sema, value);
     }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override {
+        return eval();
+    }
 };
 
 struct RealExpression final : ConstantExpression<double>
@@ -125,6 +140,10 @@ struct RealExpression final : ConstantExpression<double>
 
     static s_ptr<RealExpression> create(Sema* sema, double value) {
         return Expression::create<RealExpression>(sema, value);
+    }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override {
+        return std::to_string(eval());
     }
 };
 
@@ -135,6 +154,10 @@ struct NumberExpression final : ConstantExpression<long>
     static s_ptr<NumberExpression> create(Sema* sema, long value) {
         return Expression::create<NumberExpression>(sema, value);
     }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override {
+        return std::to_string(eval());
+    }
 };
 
 struct BooleanExpression final : ConstantExpression<bool>
@@ -143,6 +166,10 @@ struct BooleanExpression final : ConstantExpression<bool>
 
     static s_ptr<BooleanExpression> create(Sema* sema, bool value) {
         return Expression::create<BooleanExpression>(sema, value);
+    }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override {
+        return eval() ? "true" : "false";
     }
 };
 
@@ -170,6 +197,15 @@ struct FunctionParameterExpression : Expression, Introspection<FunctionParameter
 
     static s_ptr<FunctionParameterExpression> create(Sema* sema, const FunctionParameter* value) {
         return Expression::create<FunctionParameterExpression>(sema, value);
+    }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override {
+        return std::string(param->get_identifier());
+    }
+
+    [[nodiscard]] std::string to_python() const noexcept override {
+        // TODO: are there differences in python and c++ syntax?
+        return to_cpp();
     }
 
     struct DebugVisitor;
@@ -239,6 +275,12 @@ struct CallExpression final : Expression, Introspection<CallExpression>
         return Expression::create<CallExpression>(sema, fun, std::move(args));
     }
 
+    [[nodiscard]] std::string to_cpp() const noexcept override;
+
+    [[nodiscard]] std::string to_python() const noexcept override {
+        return to_cpp(); //TODO: fix
+    }
+
     struct DebugVisitor;
 
 private:
@@ -266,7 +308,19 @@ struct ArithmeticExpression final : Expression, Introspection<ArithmeticExpressi
     s_ptr<Expression> get_left() const { return left; }
 
     [[nodiscard]]
-    s_ptr<Expression> get_right() const { return right; }
+    s_ptr<Expression> get_right() const {
+      return right;
+    }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override {
+        return std::format("{} {} {}", get_left()->to_cpp(),
+            utils::get_string_for_operator(op), get_right()->to_cpp());
+    }
+
+    [[nodiscard]] std::string to_python() const noexcept override {
+        return std::format("{} {} {}", get_left()->to_python(),
+            utils::get_string_for_operator(op), get_right()->to_python());
+    }
 
     struct DebugVisitor;
 
@@ -274,6 +328,8 @@ private:
     s_ptr<Expression> left, right;
     Operator op;
 };
+
+//@section DebugVisitor
 
 struct Expression::DebugVisitor final : BaseDebugVisitor
 {
