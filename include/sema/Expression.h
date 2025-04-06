@@ -111,6 +111,12 @@ struct ConstantExpression : BaseConstantExpression
       return value;
     }
 
+    [[nodiscard]] std::string to_cpp() const noexcept override {
+        std::ostringstream oss;
+        oss << eval();
+        return oss.str();
+    }
+
     [[nodiscard]] std::string to_python() const noexcept override {
         //TODO: are there differences in python and c++
         // syntax for literals?
@@ -128,10 +134,6 @@ struct StringExpression final : ConstantExpression<std::string>
     static s_ptr<StringExpression> create(Sema* sema, const std::string& value) {
         return Expression::create<StringExpression>(sema, value);
     }
-
-    [[nodiscard]] std::string to_cpp() const noexcept override {
-        return eval();
-    }
 };
 
 struct RealExpression final : ConstantExpression<double>
@@ -141,10 +143,6 @@ struct RealExpression final : ConstantExpression<double>
     static s_ptr<RealExpression> create(Sema* sema, double value) {
         return Expression::create<RealExpression>(sema, value);
     }
-
-    [[nodiscard]] std::string to_cpp() const noexcept override {
-        return std::to_string(eval());
-    }
 };
 
 struct NumberExpression final : ConstantExpression<long>
@@ -153,10 +151,6 @@ struct NumberExpression final : ConstantExpression<long>
 
     static s_ptr<NumberExpression> create(Sema* sema, long value) {
         return Expression::create<NumberExpression>(sema, value);
-    }
-
-    [[nodiscard]] std::string to_cpp() const noexcept override {
-        return std::to_string(eval());
     }
 };
 
