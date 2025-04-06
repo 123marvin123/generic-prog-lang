@@ -89,13 +89,15 @@ void JinjaCppExport::register_function_functions()
     LangExport::register_function_functions();
 
     get_template_env().AddGlobal("function_requirements", MakeCallable(
-        [this](std::string& fqi) {
+        [this](const std::string& fqi) {
             const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
             const opt<Function*> result = utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
             jinja2::ValuesList ret{};
 
-            if (!result.has_value())
+            if (!result.has_value()) {
+                std::cerr << "no result for " << fqi << "." << std::endl;
                 return ret;
+            }
 
             std::ranges::transform(result.value()->requirements(),
                                 std::back_inserter(ret),

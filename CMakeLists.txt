@@ -32,9 +32,9 @@ CPMAddPackage(
 
 CPMAddPackage(
         NAME jinja2cpp
-        URL https://codeload.github.com/123marvin123/Jinja2Cpp/zip/c9226345bcca8c5963996d85be1670d0b719e7ed
+        URL https://codeload.github.com/123marvin123/Jinja2Cpp/zip/1a65af0d479517bfff81c8e08b51c8d593f122e2
         OPTIONS "JINJA2CPP_BUILD_TESTS OFF"
-        CHECKSUM SHA256=f9d8dfba7f86c6e9236e21f820b934a862881ff4fb8e9123ca8a2ee3144f58de
+        CHECKSUM SHA256=990494782cf57ae8fc5d6ea79812b7cdda1e133ef1e74674bbbe8630608b0f97
 )
 
 CPMAddPackage(

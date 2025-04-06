@@ -9,7 +9,6 @@ namespace testing {
 }
 
 fun isModelOf(a: <T>, b: <K>) -> Boolean {
-    req { true }
     description { "checks if a is a model of b" }
 }
 
@@ -23,4 +22,10 @@ fun isEqual(a: <T>, b: <K>) -> Boolean {
 
 fun isNotEqual(a: <T>, b: <K>) -> Boolean {
     description { "checks if a is not equal to b" }
+}
+
+fun not(a: Boolean) -> Boolean {
+    requires { id(a) }
+    requires { false }
+    description { "negates a" }
 }

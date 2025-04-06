@@ -206,6 +206,29 @@ namespace cong::lang
             };
         };
 
+    template<typename BoolStatic_, typename Fun_>
+    struct CondEval;
+
+    template<typename Fun_>
+    struct CondEval<core::True, Fun_>
+    {
+    private:
+        using ExpType_ = decltype(Fun_());
+        static_assert(std::is_same_v<typename IsExp::Call<ExpType_>::Type, core::True>, "Not an expression");
+        static_assert(std::is_same_v<typename IsValid::Call<ExpType_>::Type, core::True>, "Expression not valid");
+        static_assert(std::is_same_v<typename IsDefined::Call<ExpType_>::Type, core::True>, "Expression not defined");
+    public:
+        using Type = typename Eval::Call<decltype(Fun_())>::Type;
+        static constexpr Type call(Fun_&& f) { return eval(std::forward<Fun_>(f())); }
+    };
+
+    template<typename Fun_>
+    struct CondEval<core::False, Fun_>
+    {
+        using Type = decltype(Fun_());
+        static constexpr Type call(Fun_&& f) { return std::forward<Fun_>(f)(); }
+    };
+
         namespace local
         {
             template <class ExpNew_>

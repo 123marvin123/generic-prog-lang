@@ -122,4 +122,28 @@ namespace cong::lang::core
         {
         };
     };
+
+    struct And_
+    {
+    private:
+        template <typename Arg1_, typename Arg2_>
+        struct Dispatch_;
+
+        template <typename Native_,
+                  Native_ native1_,
+                  Native_ native2_>
+        struct Dispatch_<intern::BooleanStatic<Native_, native1_>,
+                         intern::BooleanStatic<Native_, native2_>>
+        {
+            using Type = intern::BooleanStatic<Native_, (native1_ && native2_)>;
+        };
+
+    public:
+        template <typename Arg1_, typename Arg2_>
+        struct Call
+            : Dispatch_<typename Plain::Call<Arg1_>::Type,
+                        typename Plain::Call<Arg2_>::Type>
+        {
+        };
+    };
 }
