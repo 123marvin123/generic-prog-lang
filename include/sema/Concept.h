@@ -10,16 +10,6 @@
 #include "jinja2cpp/reflected_value.h"
 #include "Utils.h"
 
-template <class T>
-concept IsConcept = IsIdentifier<T> && requires(const T& t, std::string name, Namespace* ns)
-{
-    { T(name, ns) };
-    { t.is_base_of(nullptr) } -> std::same_as<bool>;
-    { t.matches_concept(nullptr) } -> std::same_as<bool>;
-    { t.get_bases() } -> std::same_as<const std::set<const T*>&>;
-    { t.get_full_name() } -> std::convertible_to<std::string_view>;
-};
-
 struct Concept final : SemaIdentifier, Introspection<Concept>
 {
     // Operation result type for a given operator and two concepts
@@ -73,8 +63,6 @@ protected:
     opt<std::string> description = std::nullopt;
     static OperationTable operation_table;
 };
-
-static_assert(IsConcept<Concept>, "Concept must satisfy the IsConcept concept");
 
 struct Concept::DebugVisitor final : BaseDebugVisitor
 {

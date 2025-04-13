@@ -85,7 +85,6 @@ template <class T> struct ConstantExpression : BaseConstantExpression {
 
   using value_type = T;
 
-  // Generate copy constructor
   ConstantExpression(const ConstantExpression &other)
       : BaseConstantExpression(other), value(other.value) {}
 
@@ -99,13 +98,15 @@ template <class T> struct ConstantExpression : BaseConstantExpression {
     return value;
   }
 
-  [[nodiscard]] std::string to_cpp() const noexcept override {
-    std::ostringstream oss; 
+  [[nodiscard]] 
+  std::string to_cpp() const noexcept override {
+    std::ostringstream oss;
     oss << eval();
     return oss.str();
   }
 
-  [[nodiscard]] std::string to_python() const noexcept override {
+  [[nodiscard]] 
+  std::string to_python() const noexcept override {
     // TODO: are there differences in python and c++
     //  syntax for literals?
     return to_cpp();

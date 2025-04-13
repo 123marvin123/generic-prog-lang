@@ -6,6 +6,7 @@
 #define JINJACPPEXPORT_H
 
 #include "../LangExport.h"
+#include "jinja2cpp/template.h"
 
 struct JinjaCppExport final : LangExport
 {
@@ -19,8 +20,11 @@ struct JinjaCppExport final : LangExport
 
         std::unordered_map<jinja2::Template*, std::filesystem::path> function_opts{
             {&function_tpl, "function.hh.j2"},
+            {&function_dec_tpl, "function_dec.hh.j2"},
             {&concept_tpl, "concept.hh.j2"}
         };
+
+        output_files.reserve(c.size() + (f.size() * 2));
 
         for (const auto& [tpl, p] : function_opts)
         {
@@ -40,7 +44,13 @@ private:
     void register_concept_functions() override;
     void register_function_functions() override;
 
+    void create_function_declaration_file(const Function* f, jinja2::ValuesList& needed_files);
+    void create_function_definition_file(const Function* f, jinja2::ValuesList& needed_files);
+
+    vec<std::filesystem::path> output_files;
+
     jinja2::Template function_tpl;
+    jinja2::Template function_dec_tpl;
     jinja2::Template concept_tpl;
 };
 

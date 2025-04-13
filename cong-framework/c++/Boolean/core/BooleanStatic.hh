@@ -97,9 +97,4 @@ namespace cong::lang::core
                       ArgS_...>
         {};
     };
-
-#define CLASS_ intern::BooleanStatic
-#include "../../core/Operator.hh"
-#include "operator.hh"
-#undef CLASS_
 };

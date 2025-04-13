@@ -1,4 +1,4 @@
-{%- from "macros/c++/function.j2" import FunctionDefinition with context -%}
+{%- from "macros/c++/function.j2" import FunctionDeclaration with context -%}
 #pragma once
 
 #include "Exp.hh"
@@ -6,7 +6,6 @@
 #include "Function.hh"
 #include "Traits.hh"
 #include "Seq/core/Tuple.hh"
-#include "Boolean/BooleanStatic.hh"
 
 {% set ConceptObject = get_concept("Object") %}
 
@@ -15,6 +14,6 @@
 #include "{{ param.name}}.hh"
 {% endfor %}
 
-#include "{{fun.name}}_dec.hh"
+#include "{{fun.name}}.hh"
 
-{{ FunctionDefinition(fun) }}
+{{ FunctionDeclaration(fun) }}

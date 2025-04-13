@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../Object/ObjectStatic.hh"
-
-#include "../Val.hh"
 #include "../ApplyMember.hh"
 #include "../Exp.hh"
 

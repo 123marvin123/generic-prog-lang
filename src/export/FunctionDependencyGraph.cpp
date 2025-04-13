@@ -57,7 +57,7 @@ void FunctionDependencyGraph::analyze_function_dependencies(const Function* func
     }
 
     for (const auto& req : function->requirements()) {
-        analyze_expression_dependencies(req.get(), callees);
+        analyze_expression_dependencies(req.get_expression().get(), callees);
     }
 
     dependencies[function].insert(callees.begin(), callees.end());

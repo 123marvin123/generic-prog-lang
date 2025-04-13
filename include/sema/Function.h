@@ -15,19 +15,11 @@
 #include "sema/SemaContext.h"
 #include "Decls.h"
 #include "FunctionParameter.h"
+#include "RequiresStatement.h"
 #include "Expression.h"
 #include "Utils.h"
 #include "Debug.h"
 #include "jinja2cpp/reflected_value.h"
-
-template<class T, class C>
-concept IsFunction = IsIdentifier<T> && IsConcept<C> && requires(T& t, std::string name, Namespace* ns)
-{
-    { t.get_parameters() } -> std::convertible_to<vec<FunctionParameter*>>;
-    { t.get_result() } -> std::convertible_to<std::variant<const C*, PlaceholderFunctionParameter*>>;
-    { t.is_dependent() } -> std::same_as<bool>;
-    { t.add_generic_implementation(nullptr) };
-};
 
 struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<Function>
 {
@@ -91,12 +83,12 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     }
 
     [[nodiscard]]
-    vec<s_ptr<Expression>> requirements() const
+    vec<RequiresStatement> requirements() const
     {
         return exp_requires;
     }
 
-    void add_requirement(s_ptr<Expression>);
+    void add_requirement(s_ptr<Expression>, opt<std::string> = std::nullopt);
 
     [[nodiscard]]
     virtual bool is_dependent() const { throw std::runtime_error("Not implemented."); };
@@ -110,10 +102,8 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
 private:
     opt<std::string> description;
     vec<s_ptr<Expression>> generic_implementations;
-    vec<s_ptr<Expression>> exp_requires;
+    vec<RequiresStatement> exp_requires;
 };
-
-static_assert(IsFunction<Function, Concept>, "ConcreteFunction should satisfy the Function concept");
 
 struct ConcreteFunction final : Function, Introspection<ConcreteFunction>
 {

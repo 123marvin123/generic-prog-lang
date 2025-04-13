@@ -18,26 +18,6 @@
 #include "sema/SemaIdentifier.h"
 #include "Decls.h"
 
-template <typename T, typename C, typename F>
-concept IsNamespace = IsIdentifier<T> && IsConcept<C> && IsFunction<F, C> && requires(T& t)
-{
-    { t.get_parent() } -> std::convertible_to<T*>;
-    { t.is_global() } -> std::same_as<bool>;
-    { t.get_full_name() } -> std::convertible_to<std::string_view>;
-
-    { t.find_concept(std::string_view{}) } -> std::same_as<opt<C*>>;
-    { t.find_function(std::string_view{}) } -> std::same_as<opt<F*>>;
-    { t.find_namespace(std::string_view{}) } -> std::same_as<opt<T*>>;
-
-    { t.register_namespace(std::make_unique<T>("", nullptr)) } -> std::same_as<bool>;
-    { t.register_concept(std::make_unique<C>("", nullptr)) } -> std::same_as<bool>;
-    { t.register_function(std::make_unique<F>("", nullptr)) } -> std::same_as<bool>;
-
-    { t.concepts() } -> std::convertible_to<vec<C*>>;
-    { t.namespaces() } -> std::convertible_to<vec<T*>>;
-    { t.functions() } -> std::convertible_to<vec<F*>>;
-};
-
 struct Namespace : SemaIdentifier, SemaContext<Namespace>, SemaContext<Concept>, SemaContext<Function>,
                    Introspection<Namespace>
 {
@@ -127,8 +107,6 @@ protected:
     Namespace* parent;
     Sema* sema;
 };
-
-static_assert(IsNamespace<Namespace, Concept, Function>, "Namespace must satisfy the IsNamespace concept");
 
 struct Namespace::DebugVisitor final : BaseDebugVisitor
 {

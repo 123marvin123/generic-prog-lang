@@ -33,8 +33,10 @@ functionBody
 functionBodyStmnt
     : DESCRIPTION LBRACE literal RBRACE # functionDescription
     | GENERICIMPL LBRACE expression RBRACE # functionGenericImpl
-    | REQUIRES LBRACE expression RBRACE # functionExpRequires
+    | REQUIRES ('(' 'name' ':' name=STRING ')')? LBRACE expression RBRACE # functionExpRequires
     ;
+
+
 
 parameterList
     : '(' (parameter (',' parameter)*)? ')'

@@ -1,5 +1,6 @@
 {% from "macros/c++/namespace.j2" import NamespaceChain with context %}
-{% macro FunctionDefinition(def) %}
+
+{% macro FunctionDeclaration(def) %}
 {% call NamespaceChain(def.ns) %}
 {% set Name_ = def.name | title %}
 
@@ -12,6 +13,33 @@ struct Dec{{ Name_ }} {
 {{ param.concept.ns | join('::') }}::Concept{{ param.concept.name }}
         {%- endif %}{{', ' if loop.nextitem is defined }}
     {%- endfor -%}>;
+};
+
+struct Spec{{ Name_ }};
+
+template <typename... Exp_>
+using {{ Name_ }} = ::cong::lang::Bind< 
+    ::cong::lang::intern::Environment,
+    ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<Dec{{ Name_ }}, Spec{{ Name_ }}>>,
+    Exp_...
+>;
+
+template <typename... Exp_>
+constexpr
+{{ Name_ }}<Exp_...> {{def.name}}(Exp_&&... args);
+
+{% endcall %}
+{% endmacro %}
+
+{% macro FunctionDefinition(def) %}
+{% call NamespaceChain(def.ns) %}
+{% set Name_ = def.name | title %}
+
+struct Spec{{ Name_ }} {
+    static constexpr auto name = "{{def.name}}";
+    static constexpr auto description = "{{def.description}}";
+
+    using ResultTupleOfExpReqEquiv = std::tuple<>;
     template<unsigned int Index_>
     struct Requirement
     {
@@ -24,20 +52,13 @@ struct Dec{{ Name_ }} {
     };
 };
 
-struct Spec{{ Name_ }} {
-    static constexpr auto name = "{{def.name}}";
-    static constexpr auto description = "{{def.description}}";
-
-    using ResultTupleOfExpReqEquiv = std::tuple<>;
-};
-
 {% for req in function_requirements(def.full_name) %}
 /*
- * Requirement #{{ loop.index }}:
- * {{ req }}
+ * Requirement #{{ loop.index }}{{(' named ' ~ req.name) if req.name | length > 0}}:
+ * {{ req.expression }}
 */
 template<>
-struct Dec{{ Name_ }}::Requirement<{{ loop.index0 }}> {
+struct Spec{{ Name_ }}::Requirement<{{ loop.index0 }}> {
     using Present = cong::lang::True;
     template<
     {%- for i in range(def.params | length) -%}
@@ -47,8 +68,8 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
     {
         static constexpr auto call({%- for p in def.params -%}Arg{{ loop.index }}_&& {{ p.name }}{{' , ' if not loop.last }}{% endfor -%})
         {
-            using ExpType_ = decltype({{ req }});
-            const auto& result = [&]{ return {{ req }}; };
+            using ExpType_ = decltype({{ req.expression }});
+            const auto& result = [&]{ return {{ req.expression }}; };
             return cong::lang::intern::CondEval<
                         typename ::cong::lang::intern::IsExp::Call<ExpType_>::Type,
                         decltype(result),
@@ -59,23 +80,16 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
 };{{' \n' if not loop.last }}{% endfor %} 
 
 template <typename... Exp_>
-using {{ Name_ }} = ::cong::lang::Bind< 
-    ::cong::lang::intern::Environment,
-    ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<Dec{{ Name_ }}, Spec{{ Name_ }}>>,
-    Exp_...
->;
-
-template <typename... Exp_>
 constexpr
 {{ Name_ }}<Exp_...> {{def.name}}(Exp_&&... args) 
 {
-    if constexpr (cong::lang::core::intern::is_constexpr_evaluable<cong::lang::intern::EvalRequirements, Dec{{ Name_ }}, Exp_...>::value) 
+    if constexpr (cong::lang::core::intern::is_constexpr_evaluable<cong::lang::intern::EvalRequirements, Spec{{ Name_ }}, Exp_...>::value) 
     {
         static_assert(
-            cong::lang::intern::EvalRequirements::Call<Dec{{ Name_ }}, Exp_...>
+            cong::lang::intern::EvalRequirements::Call<Spec{{ Name_ }}, Exp_...>
                 ::call(std::forward<Exp_>(args)...).native(),
             "Requirements not met at compile-time.");
-    } else if(!cong::lang::intern::EvalRequirements::Call<Dec{{ Name_ }}, Exp_...>::call(std::forward<Exp_>(args)...).native()) 
+    } else if(!cong::lang::intern::EvalRequirements::Call<Spec{{ Name_ }}, Exp_...>::call(std::forward<Exp_>(args)...).native()) 
     {
         throw std::runtime_error("Requirements not met at runtime.");
     }

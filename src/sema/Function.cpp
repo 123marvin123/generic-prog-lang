@@ -8,6 +8,8 @@
 #include <sema/Namespace.h>
 #include <sema/Sema.h>
 
+#include <utility>
+
 #include "sema/FunctionParameter.h"
 
 #include "Exception.h"
@@ -61,7 +63,7 @@ void Function::add_generic_implementation(s_ptr<Expression> exp)
     generic_implementations.push_back(std::move(exp));
 }
 
-void Function::add_requirement(s_ptr<Expression> exp)
+void Function::add_requirement(s_ptr<Expression> exp, opt<std::string> name)
 {
     static const auto boolean = *get_namespace()->get_sema()->find_concept("Boolean");
 
@@ -70,7 +72,7 @@ void Function::add_requirement(s_ptr<Expression> exp)
         conceptResult != boolean)
         throw std::runtime_error(std::format("Expression must return {}, not {}", boolean->get_identifier(), conceptResult->get_identifier()));
 
-    exp_requires.push_back(std::move(exp));
+    exp_requires.emplace_back(std::move(exp), std::move(name));
 }
 
 void Function::DebugVisitor::visitFunction(const Function& f)
@@ -123,13 +125,18 @@ void Function::DebugVisitor::visitFunction(const Function& f)
     }
 
     ss << termcolor::reset;
-    if (const vec<s_ptr<Expression>>& reqs = f.requirements();
+    if (const vec<RequiresStatement>& reqs = f.requirements();
         !reqs.empty())
     {
-        for (const s_ptr<Expression>& exp : reqs)
+        for (const RequiresStatement& exp : reqs)
         {
-            ss << spaces() << termcolor::bold << "requires" << termcolor::reset << " {\n";
-            ss << exp->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
+            ss << spaces() << termcolor::bold << "requires";
+
+            if (exp.is_named())
+                ss << termcolor::reset << "(name: \"" << termcolor::red << exp.get_name().value() << "\")" << termcolor::reset;
+
+            ss << " {\n";
+            ss << exp.get_expression()->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
         }
     }
     ss << termcolor::reset;
