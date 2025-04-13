@@ -10,15 +10,9 @@ include(cmake/CPM.cmake)
 
 CPMAddPackage(
         NAME nlohmann_json
-        URL https://github.com/nlohmann/json/archive/refs/heads/develop.zip
+        URL https://github.com/nlohmann/json/archive/refs/tags/v3.12.0.zip
+        URL_HASH SHA256=34660b5e9a407195d55e8da705ed26cc6d175ce5a6b1fb957e701fb4d5b04022
         OPTIONS "JSON_BuildTests OFF"
-)
-
-CPMAddPackage(
-        NAME cpputest
-        URL https://github.com/cpputest/cpputest/releases/download/v4.0/cpputest-4.0.zip
-        URL_HASH SHA256=b175881bf77bd09eae3ee3585757042c17db8443c10ea038c38bbc003b430391
-        OPTIONS "TESTS OFF"
 )
 
 CPMAddPackage(
@@ -42,6 +36,13 @@ CPMAddPackage(
         URL "https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.5.0.tar.gz"
         OPTIONS "CLI11_BUILD_EXAMPLES OFF" "CLI11_BUILD_TESTS OFF" "CLI11_BUILD_DOCS OFF"
         CHECKSUM SHA256=17e02b4cddc2fa348e5dbdbb582c59a3486fa2b2433e70a0c3bacb871334fd55
+)
+
+CPMAddPackage(
+        NAME Catch2
+        VERSION 3.8.1
+        URL https://codeload.github.com/catchorg/Catch2/tar.gz/refs/tags/v3.8.1
+        URL_HASH SHA256=18b3f70ac80fccc340d8c6ff0f339b2ae64944782f8d2fca2bd705cf47cadb79
 )
 
 # Find the ANTLR4 executable
@@ -96,11 +97,11 @@ target_include_directories(masterthesis_transpiler PRIVATE
 target_sources(masterthesis_transpiler PRIVATE ${CMAKE_SOURCE_DIR}/generated/CongLexer.cpp
         ${CMAKE_SOURCE_DIR}/generated/CongParser.cpp)
 
-file(GLOB_RECURSE TEST_FILES ${CMAKE_SOURCE_DIR}/test/**/*.cpp ${CMAKE_SOURCE_DIR}/test/*.cpp )
+file(GLOB_RECURSE TEST_FILES ${CMAKE_SOURCE_DIR}/test/**/*.cpp ${CMAKE_SOURCE_DIR}/test/*.cpp)
 foreach (TEST_FILE ${TEST_FILES})
     get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_FILE} ${SRC_FILES})
-    target_link_libraries(${TEST_NAME} antlr4_static nlohmann_json CppUTest jinja2cpp CLI11)
+    target_link_libraries(${TEST_NAME} antlr4_static nlohmann_json Catch2::Catch2WithMain jinja2cpp CLI11)
     target_include_directories(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/include
             ${CMAKE_SOURCE_DIR}/libs/termcolor
@@ -116,5 +117,5 @@ foreach (TEST_FILE ${TEST_FILES})
     )
 
     add_dependencies(${TEST_NAME} generate_grammar_files)
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} -v -c -ojunit)
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} --order rand --warn NoAssertions -d yes)
 endforeach ()

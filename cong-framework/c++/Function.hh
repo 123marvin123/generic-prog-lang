@@ -3,9 +3,9 @@
 #include "Exp.hh"
 #include "Base.hh"
 
-#include "Seq/Tuple.hh"
-#include "Number/NaturalIntervalStatic.hh"
-#include "Number/NaturalStatic.hh"
+#include "Seq/core/Tuple.hh"
+#include "Number/core/NaturalIntervalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
 #include "Boolean/BooleanStatic.hh"
 
 #include "Fun.hh"
@@ -19,6 +19,43 @@ namespace cong::lang
 {
     namespace intern
     {
+        struct EvalRequirements {
+        private:
+            template<unsigned int N, class IsAvail_, class Dec_, class... Args>
+            struct Dispatch;
+
+            template<unsigned int N, class Dec_, class... Args>
+            struct Dispatch<N, False, Dec_, Args...>
+            {
+                static constexpr auto call(Args&&...)
+                {
+                    return True{};
+                }
+            };
+
+            template<unsigned int N, class Dec_, class... Args>
+            struct Dispatch<N, True, Dec_, Args...>
+            {
+                static constexpr auto call(Args&&... args)
+                {
+                    using Call_ = typename Dec_::template Requirement<N>::template Call<Args...>;
+
+                    auto a = Call_::call(std::forward<Args>(args)...) ;
+                    auto b = Dispatch<N + 1, typename Dec_::template Requirement<N + 1>::Present, Dec_, Args...>::call
+                           (std::forward<Args>(args)...);
+
+                    return core::Truthy::Call<decltype(a)>::call(a) &&
+                        core::Truthy::Call<decltype(b)>::call(b);
+                }
+            };
+
+        public:
+            template<class Dec_, class... Args>
+            struct Call : Dispatch<0, typename Dec_::template Requirement<0>::Present, Dec_, Args...>
+            {
+            };
+        };
+
         template <class Dec_, class Spec_>
         class FunctionImpl
             : public Base
@@ -43,8 +80,8 @@ namespace cong::lang
 
             CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
 
-            template <typename Dummy_>
-            struct ApplyMember<Spec_, core::NaturalStatic<0>, Dummy_>
+            template <>
+            struct ApplyMember<Spec_, core::NaturalStatic<0>>
             {
             private:
                 // Dispatches are Fun

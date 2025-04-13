@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NaturalStatic.hh"
-#include "../Boolean/BooleanStatic.hh"
+#include "../../Boolean/core/BooleanStatic.hh"
 
 namespace cong::lang::core
 {

@@ -3,6 +3,7 @@
 #include <utility>
 #include "../Val.hh"
 #include "../Traits.hh"
+#include "../Number/core/NaturalStatic.hh"
 #include "../ApplyMember.hh"
 
 namespace cong::lang::local {
@@ -24,12 +25,14 @@ namespace cong::lang::local {
     {}
 
     constexpr
-    typename core::Traits<typename core::Traits<Native>::ToConst>::ToReference
+    //typename core::Traits<typename core::Traits<Native>::ToConst>::ToReference
+    const Native&
     native() const
     {
       return native_;
     }
-    typename core::Traits<Native>::ToReference
+
+    Native&
     native()
     {
       return native_;

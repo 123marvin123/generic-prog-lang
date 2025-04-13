@@ -2,5 +2,8 @@
 
 namespace cong::lang::core
 {
-    using Boolean = bool;
-}
+  struct Object
+  {
+
+  };
+};

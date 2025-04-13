@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Number/NaturalIntervalStatic.hh"
-#include "Boolean/BooleanStatic.hh"
+#include "Number/core/NaturalIntervalStatic.hh"
+#include "Boolean/core/BooleanStatic.hh"
 
 #include "Fun.hh"
 #include "Undefined.hh"

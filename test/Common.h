@@ -10,10 +10,6 @@
 #include "Exception.h"
 #include "sema/Sema.h"
 
-#include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTest/TestHarness.h"
-#include "CppUTest/TestOutput.h"
-
 #include "visitor/DeclarationVisitor.h"
 #include "visitor/DefinitionVisitor.h"
 
@@ -57,11 +53,4 @@ inline ANTLRData construct_parse_tree(const std::string& input)
     using namespace antlr4;
     return ANTLRData(std::make_unique<ANTLRInputStream>(input));
 }
-
-int main(const int ac, const char** av)
-{
-    MemoryLeakWarningPlugin::turnOffNewDeleteOverloads();
-    return CommandLineTestRunner::RunAllTests(ac, av);
-}
-
 #endif //COMMON_H

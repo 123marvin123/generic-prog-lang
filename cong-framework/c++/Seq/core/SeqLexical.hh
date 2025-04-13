@@ -2,9 +2,9 @@
 #ifndef CONG_SEQ_LANG_CORE_SEQLEXICAL_HH
 #define CONG_SEQ_LANG_CORE_SEQLEXICAL_HH
 
-#include "../Lexical.hh"
-#include "../Boolean/BooleanLexical.hh"
-#include "../Number/NaturalLexical.hh"
+#include "../../core/Lexical.hh"
+#include "../../Boolean/core/BooleanLexical.hh"
+#include "../../Number/core/NaturalLexical.hh"
 
 // @todo use alternative/additional implementations from boost preprocessor library?
 

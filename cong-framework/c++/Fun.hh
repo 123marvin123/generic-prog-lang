@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Seq/SeqLexical.hh"
+#include "Seq/core/SeqLexical.hh"
 
 #include "Type.hh"
-#include "Lexical.hh"
+#include "core/Lexical.hh"
 
 #include <utility> // std::forward
 

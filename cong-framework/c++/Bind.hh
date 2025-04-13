@@ -3,9 +3,9 @@
 #include "BindArg.hh"
 #include "Base.hh"
 
-#include "Seq/Tuple.hh"
-#include "Number/NaturalIntervalStatic.hh"
-#include "Boolean/BooleanStatic.hh"
+#include "Seq/core/Tuple.hh"
+#include "Number/core/NaturalIntervalStatic.hh"
+#include "Boolean/core/BooleanStatic.hh"
 
 #include "Traits.hh"
 #include "Type.hh"

@@ -1,8 +1,13 @@
-{% from "macros/c++/function.j2" import FunctionDefinition with context %}
+
+{%- from "macros/c++/function.j2" import FunctionDefinition with context -%}
+#pragma once
 
 #include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Exp.hh"
 #include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Bind.hh"
 #include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Function.hh"
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Traits.hh"
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Seq/core/Tuple.hh"
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Boolean/BooleanStatic.hh"
 
 {% set ConceptObject = get_concept("Object") %}
 

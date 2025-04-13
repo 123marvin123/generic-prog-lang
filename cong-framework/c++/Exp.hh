@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Seq/Tuple.hh"
-#include "Boolean/BooleanStatic.hh"
+#include "Seq/core/Tuple.hh"
+#include "Boolean/core/BooleanStatic.hh"
 #include "Fun.hh"
 #include "Undefined.hh"
 #include "Decls.hh"
@@ -117,14 +117,14 @@ namespace cong::lang
         struct IsValid
         {
         private:
-            template <typename Type_, typename Dummy_ = void>
+            template <typename Type_>
             struct Dispatch
             {
                 using Type = core::True;
             };
 
-            template <typename Dummy_>
-            struct Dispatch<core::Invalid, Dummy_>
+            template <>
+            struct Dispatch<core::Invalid>
             {
                 using Type = core::False;
             };
@@ -139,14 +139,14 @@ namespace cong::lang
         struct IsDefined
         {
         private:
-            template <typename Type_, typename Dummy_ = void>
+            template <typename Type_>
             struct Dispatch
             {
                 using Type = core::True;
             };
 
-            template <typename Dummy_>
-            struct Dispatch<core::Undefined, Dummy_>
+            template <>
+            struct Dispatch<core::Undefined>
             {
                 using Type = core::False;
             };
@@ -206,28 +206,27 @@ namespace cong::lang
             };
         };
 
-    template<typename BoolStatic_, typename Fun_>
+    template<typename BoolStatic_, typename Fun_, typename ExpType_>
     struct CondEval;
 
-    template<typename Fun_>
-    struct CondEval<core::True, Fun_>
+    template<typename Fun_, typename ExpType_>
+    struct CondEval<core::True, Fun_, ExpType_>
     {
     private:
-        using ExpType_ = decltype(Fun_());
         static_assert(std::is_same_v<typename IsExp::Call<ExpType_>::Type, core::True>, "Not an expression");
         static_assert(std::is_same_v<typename IsValid::Call<ExpType_>::Type, core::True>, "Expression not valid");
         static_assert(std::is_same_v<typename IsDefined::Call<ExpType_>::Type, core::True>, "Expression not defined");
     public:
-        using Type = typename Eval::Call<decltype(Fun_())>::Type;
-        static constexpr Type call(Fun_&& f) { return eval(std::forward<Fun_>(f())); }
+        using Type = typename Eval::Call<ExpType_>::Type;
+        static constexpr Type call(Fun_&& f) { return eval(std::forward<Fun_>(f)()); }
     };
 
-    template<typename Fun_>
-    struct CondEval<core::False, Fun_>
+    /*template<typename Fun_, typename... Args>
+    struct CondEval<core::False, Fun_, Args...>
     {
         using Type = decltype(Fun_());
-        static constexpr Type call(Fun_&& f) { return std::forward<Fun_>(f)(); }
-    };
+        static constexpr Type call(Fun_&& f, Args&&... args) { return std::forward<Fun_>(f)(std::forward<Args>(args)...); }
+    };*/
 
         namespace local
         {

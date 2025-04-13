@@ -1,17 +1,11 @@
 {% from "macros/c++/concept.j2" import ConceptDefinition with context %}
 {% from "macros/c++/namespace.j2" import NamespaceIncludeGuardName with context %}
 #pragma once
-{% set tmp = NamespaceIncludeGuardName(concept.ns) %}
-{% set ns_include_guard = "CONCEPT_" ~ tmp ~ ("_" if tmp else "") ~ (concept.name | upper) ~ "_H" %}
-#ifndef {{ ns_include_guard }}
-#define {{ ns_include_guard }}
 
-#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Seq/Tuple.hh"
+#include "/Users/haschker/Arbeitsbereich/generic-prog-lang/cong-framework/c++/Seq/core/Tuple.hh"
 
 {% for include in concept.bases %}
 #include "{{ include.name }}.hh"
 {% endfor %}
 
 {{ ConceptDefinition(concept) }}
-
-#endif // {{ ns_include_guard }}

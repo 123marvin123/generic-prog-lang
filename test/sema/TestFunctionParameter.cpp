@@ -1,87 +1,102 @@
 //
 // Created by Marvin Haschker on 15.03.25.
 //
+#include <catch2/catch_test_macros.hpp>
 #include "../Common.h"
 #include "sema/FunctionParameter.h"
 
-TEST_GROUP(FunctionParamGroup)
+struct FunctionParamFixture
 {
-    CUSTOM_SEMA(
-        (
-            sema = std::make_unique<Sema>();
-            sema_ptr = sema.get();
-            object = *sema->find_concept("Object");
-            id = *Sema::create_function<ConcreteFunction>(sema_ptr, "id", sema_ptr, object);
-            id2 = *Sema::create_function<ConcreteFunction>(sema_ptr, "id2", sema_ptr, object);
-        ),
-        (std::cout << "\n" << sema->to_string(4) << std::endl; sema.reset();)
-    )
-    Function* id, *id2;
+    std::unique_ptr<Sema> sema;
+    Sema* sema_ptr;
+    Function *id, *id2;
     Concept* object;
+
+    FunctionParamFixture()
+    {
+        sema = std::make_unique<Sema>();
+        sema_ptr = sema.get();
+        object = *sema->find_concept("Object");
+        id = *Sema::create_function<ConcreteFunction>(sema_ptr, "id", sema_ptr, object);
+        id2 = *Sema::create_function<ConcreteFunction>(sema_ptr, "id2", sema_ptr, object);
+    }
+
+    ~FunctionParamFixture() { sema.reset(); }
 };
 
-TEST(FunctionParamGroup, ConcreteConstructorThrowsForEmptyName)
+TEST_CASE_METHOD(FunctionParamFixture, "Concrete constructor throws for empty name", "[function_param]")
 {
-    CHECK_THROWS(std::runtime_error, ConcreteFunctionParameter("", object));
+    INFO(sema->to_string());
+    REQUIRE_THROWS_AS(ConcreteFunctionParameter("", object), std::runtime_error);
 }
 
-TEST(FunctionParamGroup, ConcreteConstructorThrowsForEmptyConcept)
+TEST_CASE_METHOD(FunctionParamFixture, "Concrete constructor throws for empty concept", "[function_param]")
 {
-    CHECK_THROWS(std::runtime_error, ConcreteFunctionParameter("", nullptr));
+    INFO(sema->to_string());
+    REQUIRE_THROWS_AS(ConcreteFunctionParameter("name", nullptr), std::runtime_error);
 }
 
-TEST(FunctionParamGroup, ConcreteParamConstructorInitializesCorrectly)
+TEST_CASE_METHOD(FunctionParamFixture, "Concrete param constructor initializes correctly", "[function_param]")
 {
     constexpr auto p_id = "param";
     ConcreteFunctionParameter param(p_id, object);
     param.set_function(id);
 
-    CHECK_EQUAL(p_id, std::string(param.get_identifier()));
-    CHECK_EQUAL(id, param.get_function());
-    CHECK_EQUAL(object, param.get_type());
+    INFO(sema->to_string());
+
+    REQUIRE(std::string(param.get_identifier()) == p_id);
+    REQUIRE(param.get_function() == id);
+    REQUIRE(param.get_type() == object);
 }
 
-TEST(FunctionParamGroup, ConcreteParamSetFunctionUpdatesFunctionPointer)
+TEST_CASE_METHOD(FunctionParamFixture, "Concrete param set function updates function pointer", "[function_param]")
 {
     constexpr auto p_id = "param";
     ConcreteFunctionParameter param(p_id, object);
     param.set_function(id2);
-    CHECK_EQUAL(id2, param.get_function());
+
+    INFO(sema->to_string());
+    REQUIRE(param.get_function() == id2);
 }
 
-TEST(FunctionParamGroup, PlaceholderConstructorThrowsForEmptyName)
+TEST_CASE_METHOD(FunctionParamFixture, "Placeholder constructor throws for empty name", "[function_param]")
 {
-    CHECK_THROWS(std::runtime_error, PlaceholderFunctionParameter("", "T"));
+    INFO(sema->to_string());
+    REQUIRE_THROWS_AS(PlaceholderFunctionParameter("", "T"), std::runtime_error);
 }
 
-TEST(FunctionParamGroup, PlaceholderConstructorThrowsForEmptyPlaceholderName)
+TEST_CASE_METHOD(FunctionParamFixture, "Placeholder constructor throws for empty placeholder name", "[function_param]")
 {
-    CHECK_THROWS(std::runtime_error, PlaceholderFunctionParameter("name", ""));
+    INFO(sema->to_string());
+    REQUIRE_THROWS_AS(PlaceholderFunctionParameter("name", ""), std::runtime_error);
 }
 
-TEST(FunctionParamGroup, PlaceholderConstructorInitializesCorrectly)
+TEST_CASE_METHOD(FunctionParamFixture, "Placeholder constructor initializes correctly", "[function_param]")
 {
     constexpr auto p_id = "param";
     constexpr auto type_placeholder_id = "T";
     PlaceholderFunctionParameter param(p_id, type_placeholder_id);
     param.set_function(id);
 
-    CHECK_EQUAL(p_id, std::string(param.get_identifier()));
-    CHECK_EQUAL(id, param.get_function());
-    CHECK_EQUAL(type_placeholder_id, param.get_type_placeholder_name());
+    INFO(sema->to_string());
+    REQUIRE(std::string(param.get_identifier()) == p_id);
+    REQUIRE(param.get_function() == id);
+    REQUIRE(param.get_type_placeholder_name() == type_placeholder_id);
 }
 
-TEST(FunctionParamGroup, DependentParamConstructorThrowsForEmptyName)
+TEST_CASE_METHOD(FunctionParamFixture, "Dependent param constructor throws for empty name", "[function_param]")
 {
-    CHECK_THROWS(std::runtime_error, DependentFunctionParameter("", nullptr));
+    INFO(sema->to_string());
+    REQUIRE_THROWS_AS(DependentFunctionParameter("", nullptr), std::runtime_error);
 }
 
-TEST(FunctionParamGroup, DependentParamConstructorThrowsForNullPlaceholder)
+TEST_CASE_METHOD(FunctionParamFixture, "Dependent param constructor throws for null placeholder", "[function_param]")
 {
-    CHECK_THROWS(std::runtime_error, DependentFunctionParameter("name", nullptr));
+    INFO(sema->to_string());
+    REQUIRE_THROWS_AS(DependentFunctionParameter("name", nullptr), std::runtime_error);
 }
 
-TEST(FunctionParamGroup, DependentParamConstructorInitializesCorrectly)
+TEST_CASE_METHOD(FunctionParamFixture, "Dependent param constructor initializes correctly", "[function_param]")
 {
     constexpr auto p_id = "param";
     constexpr auto type_placeholder_id = "T";
@@ -91,7 +106,8 @@ TEST(FunctionParamGroup, DependentParamConstructorInitializesCorrectly)
     DependentFunctionParameter dependent_param(p2_id, &param);
     dependent_param.set_function(id);
 
-    CHECK_EQUAL(p2_id, std::string(dependent_param.get_identifier()));
-    CHECK_EQUAL(id, dependent_param.get_function());
-    CHECK_EQUAL(&param, dependent_param.get_placeholder());
+    INFO(sema->to_string());
+    REQUIRE(std::string(dependent_param.get_identifier()) == p2_id);
+    REQUIRE(dependent_param.get_function() == id);
+    REQUIRE(dependent_param.get_placeholder() == &param);
 }

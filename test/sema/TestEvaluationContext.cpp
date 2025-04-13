@@ -1,54 +1,69 @@
 //
 // Created by Marvin Haschker on 16.03.25.
 //
+#include <catch2/catch_test_macros.hpp>
 #include "../Common.h"
 #include "sema/EvaluationContext.h"
 
-TEST_GROUP(EvaluationContextGroup)
+struct EvaluationContextFixture
 {
-    DEFAULT_SEMA()
+    std::unique_ptr<Sema> sema;
+    Sema* sema_ptr;
+
+    EvaluationContextFixture()
+    {
+        sema = std::make_unique<Sema>();
+        sema_ptr = sema.get();
+    }
+
+    ~EvaluationContextFixture() { sema.reset(); }
 };
 
-TEST(EvaluationContextGroup, TestEvaluatingConstantExpression)
+TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating constant expression", "[evaluation_context]")
 {
+    INFO(sema->to_string());
     const auto exp = std::make_shared<StringExpression>(sema.get(), "hello");
 
-    CHECK_EQUAL(exp.get(), EvaluationContext::bind_expression(exp, {}).get());
+    REQUIRE(exp.get() == EvaluationContext::bind_expression(exp, {}).get());
 }
 
-TEST(EvaluationContextGroup, TestEvaluatingConcreteFunctionCall)
+TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating concrete function call", "[evaluation_context]")
 {
     auto c_bool = *sema->find_concept("Boolean");
     const auto sema_ptr = sema.get();
     auto f = Sema::create_function<ConcreteFunction>(sema.get(), "f", sema_ptr, c_bool);
+    INFO(sema->to_string());
 
     const auto callExp = std::make_shared<CallExpression>(sema.get(), *f, vec<s_ptr<Expression>>{});
 
-    CHECK_EQUAL_TEXT(callExp.get(), EvaluationContext::bind_expression(callExp, {}).get(),
-                    "Expression instance returned should be the same.");
+    INFO("Binding expression for concrete function call");
+    REQUIRE(callExp.get() == EvaluationContext::bind_expression(callExp, {}).get());
 }
 
-TEST(EvaluationContextGroup, TestEvaluatingEmptyDependentFunctionCall)
+TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating empty dependent function call", "[evaluation_context]")
 {
     auto f = *Sema::create_function<DependentFunction>(sema.get(), "f", sema_ptr);
     const auto p = f->register_function_parameter<PlaceholderFunctionParameter>("param", "T");
     f->set_dependency(p);
+    INFO(sema->to_string());
 
     const auto some_dependency = std::make_shared<FunctionParameterExpression>(sema.get(), f->get_parameters()[0]);
 
     const auto callExp = std::make_shared<CallExpression>(sema.get(), f, vec<s_ptr<Expression>>{some_dependency});
 
-    CHECK_EQUAL_TEXT(p, std::get<const PlaceholderFunctionParameter*>(callExp->get_result()),
-                     "Resulting concept cannot be determined at this point");
-    CHECK_EQUAL_TEXT(callExp.get(), EvaluationContext::bind_expression(callExp, {}).get(),
-                     "Expression instance returned should be the same.");
+    INFO("Checking function call result is placeholder");
+    REQUIRE(p == std::get<const PlaceholderFunctionParameter*>(callExp->get_result()));
+
+    INFO("Binding expression for empty dependent function call");
+    REQUIRE(callExp.get() == EvaluationContext::bind_expression(callExp, {}).get());
 }
 
-TEST(EvaluationContextGroup, TestEvaluatingDependentFunctionCall)
+TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating dependent function call", "[evaluation_context]")
 {
     auto f = *Sema::create_function<DependentFunction>(sema_ptr, "f", sema_ptr);
     auto p = f->register_function_parameter<PlaceholderFunctionParameter>("param", "T");
     f->set_dependency(p);
+    INFO(sema->to_string());
 
     const auto some_dependency = std::make_shared<FunctionParameterExpression>(sema_ptr, p);
 
@@ -56,18 +71,17 @@ TEST(EvaluationContextGroup, TestEvaluatingDependentFunctionCall)
     const auto callExp = std::make_shared<CallExpression>(sema_ptr, f, vec<s_ptr<Expression>>{some_dependency});
     const auto c_number = *sema->find_concept("Number");
 
-    const auto newCallExp = utils::dyn_ptr_cast<CallExpression>(EvaluationContext::bind_expression(callExp, { {p, c_number} }));
-    CHECK_TRUE_TEXT(newCallExp.get() != callExp.get(),
-                    "Expression instance returned should be different.");
-    CHECK_EQUAL_TEXT(c_number, std::get<const Concept*>(newCallExp->get_result()),
-                    "Call Expression should return the bound concept.");
-    CHECK_EQUAL_TEXT(callExp->get_arguments().size(), newCallExp->get_arguments().size(),
-                    "Argument size should be the same");
-    CHECK_TRUE_TEXT(utils::is<BoundFunctionParameterExpression>(newCallExp->get_arguments()[0]),
-                    "First argument should be the bound parameter expression.");
+    INFO("Binding dependent function call with Number concept");
+    const auto newCallExp =
+        utils::dyn_ptr_cast<CallExpression>(EvaluationContext::bind_expression(callExp, {{p, c_number}}));
+
+    REQUIRE(newCallExp.get() != callExp.get());
+    REQUIRE(c_number == std::get<const Concept*>(newCallExp->get_result()));
+    REQUIRE(callExp->get_arguments().size() == newCallExp->get_arguments().size());
+    REQUIRE(utils::is<BoundFunctionParameterExpression>(newCallExp->get_arguments()[0]));
 }
 
-TEST(EvaluationContextGroup, TestEvaluatingNestedDependentFunctionCall)
+TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating nested dependent function call", "[evaluation_context]")
 {
     const auto f = *Sema::create_function<DependentFunction>(sema_ptr, "f", sema_ptr);
     auto p = f->set_dependency(f->register_function_parameter<PlaceholderFunctionParameter>("param", "T"));
@@ -75,115 +89,123 @@ TEST(EvaluationContextGroup, TestEvaluatingNestedDependentFunctionCall)
     auto boolean = *sema->find_concept("Boolean");
     auto f2 = *Sema::create_function<ConcreteFunction>(sema_ptr, "f2", sema_ptr, boolean);
     auto p2 = f2->register_function_parameter<PlaceholderFunctionParameter>("param", "T");
+    INFO(sema->to_string());
 
-    const auto callExp = CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{
-        CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{
-            FunctionParameterExpression::create(sema_ptr, p2)
-        })
-    });
+    const auto callExp = CallExpression::create(
+        sema_ptr, f,
+        vec<s_ptr<Expression>>{CallExpression::create(
+            sema_ptr, f, vec<s_ptr<Expression>>{FunctionParameterExpression::create(sema_ptr, p2)})});
+    INFO("Created nested dependent function call");
 
-    CHECK_TRUE_TEXT(std::holds_alternative<const PlaceholderFunctionParameter*>(callExp->get_result()), "Result should be a placeholder");
-    CHECK_EQUAL_TEXT(p, std::get<const PlaceholderFunctionParameter*>(callExp->get_result()), "Dependent type should be equal to p");
+    REQUIRE(std::holds_alternative<const PlaceholderFunctionParameter*>(callExp->get_result()));
+    REQUIRE(p == std::get<const PlaceholderFunctionParameter*>(callExp->get_result()));
 
-    const auto newCallExp = EvaluationContext::bind_expression(callExp, { {p2, boolean} });;
-    CHECK_TRUE_TEXT(newCallExp.get() != callExp.get(), "Expression instance returned should be different.");
-    CHECK_TRUE_TEXT(std::holds_alternative<const Concept*>(newCallExp->get_result()), "Result should contain a concept");
-    CHECK_EQUAL_TEXT(boolean, std::get<const Concept*>(newCallExp->get_result()), "Result should be the boolean");
+    INFO("Binding nested dependent function call with Boolean concept");
+    const auto newCallExp = EvaluationContext::bind_expression(callExp, {{p2, boolean}});
+    REQUIRE(newCallExp.get() != callExp.get());
+    REQUIRE(std::holds_alternative<const Concept*>(newCallExp->get_result()));
+    REQUIRE(boolean == std::get<const Concept*>(newCallExp->get_result()));
 }
 
-TEST(EvaluationContextGroup, TestBindingMultiplePlaceholders)
+TEST_CASE_METHOD(EvaluationContextFixture, "Binding multiple placeholders", "[evaluation_context]")
 {
     const auto f = *Sema::create_function<DependentFunction>(sema_ptr, "f", sema_ptr);
     auto p1 = f->register_function_parameter<PlaceholderFunctionParameter>("param1", "T");
     auto p2 = f->register_function_parameter<PlaceholderFunctionParameter>("param2", "U");
     f->set_dependency(p1);
+    INFO(sema->to_string());
 
-    const auto callExp = CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{
-        FunctionParameterExpression::create(sema_ptr, p1),
-        FunctionParameterExpression::create(sema_ptr, p2)
-    });
+    const auto callExp =
+        CallExpression::create(sema_ptr, f,
+                               vec<s_ptr<Expression>>{FunctionParameterExpression::create(sema_ptr, p1),
+                                                      FunctionParameterExpression::create(sema_ptr, p2)});
+    INFO("Created function call with two placeholder parameters");
 
     auto boolean = *sema->find_concept("Boolean");
     auto number = *sema->find_concept("Number");
 
-    const auto newCallExp = EvaluationContext::bind_expression(callExp, {
-        {p1, boolean},
-        {p2, number}
-    });
+    INFO("Binding both placeholders with Boolean and Number concepts");
+    const auto newCallExp = EvaluationContext::bind_expression(callExp, {{p1, boolean}, {p2, number}});
 
-    CHECK_TRUE_TEXT(newCallExp.get() != callExp.get(), "Expression instance returned should be different");
-    CHECK_TRUE_TEXT(std::holds_alternative<const Concept*>(newCallExp->get_result()), "Result should contain a concept");
-    CHECK_EQUAL_TEXT(boolean, std::get<const Concept*>(newCallExp->get_result()), "Result should be the boolean");
+    REQUIRE(newCallExp.get() != callExp.get());
+    REQUIRE(std::holds_alternative<const Concept*>(newCallExp->get_result()));
+    REQUIRE(boolean == std::get<const Concept*>(newCallExp->get_result()));
 
     auto args = utils::dyn_ptr_cast<CallExpression>(newCallExp)->get_arguments();
-    CHECK_TRUE_TEXT(utils::is<BoundFunctionParameterExpression>(args[0]), "First argument should be bound");
-    CHECK_TRUE_TEXT(utils::is<BoundFunctionParameterExpression>(args[1]), "Second argument should be bound");
+    REQUIRE(utils::is<BoundFunctionParameterExpression>(args[0]));
+    REQUIRE(utils::is<BoundFunctionParameterExpression>(args[1]));
 }
 
-TEST(EvaluationContextGroup, TestPartialBinding)
+TEST_CASE_METHOD(EvaluationContextFixture, "Partial binding", "[evaluation_context]")
 {
     const auto f = *Sema::create_function<DependentFunction>(sema_ptr, "f", sema_ptr);
     auto p1 = f->register_function_parameter<PlaceholderFunctionParameter>("param1", "T");
     auto p2 = f->register_function_parameter<PlaceholderFunctionParameter>("param2", "U");
     f->set_dependency(p2);
+    INFO(sema->to_string());
 
-    const auto callExp = CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{
-        FunctionParameterExpression::create(sema_ptr, p1),
-        FunctionParameterExpression::create(sema_ptr, p2)
-    });
+    const auto callExp =
+        CallExpression::create(sema_ptr, f,
+                               vec<s_ptr<Expression>>{FunctionParameterExpression::create(sema_ptr, p1),
+                                                      FunctionParameterExpression::create(sema_ptr, p2)});
+    INFO("Created function call with two placeholder parameters");
 
     auto number = *sema->find_concept("Number");
 
-    // Only bind the first parameter
+    INFO("Binding only first parameter with Number concept");
     const auto newCallExp = EvaluationContext::bind_expression(callExp, {{p1, number}});
 
-    CHECK_TRUE_TEXT(newCallExp.get() != callExp.get(), "Expression instance returned should be different");
-    CHECK_TRUE_TEXT(std::holds_alternative<const PlaceholderFunctionParameter*>(newCallExp->get_result()),
-                    "Result should still be a placeholder");
-    CHECK_EQUAL_TEXT(p2, std::get<const PlaceholderFunctionParameter*>(newCallExp->get_result()),
-                    "Result should be the second placeholder");
+    REQUIRE(newCallExp.get() != callExp.get());
+    REQUIRE(std::holds_alternative<const PlaceholderFunctionParameter*>(newCallExp->get_result()));
+    REQUIRE(p2 == std::get<const PlaceholderFunctionParameter*>(newCallExp->get_result()));
 }
 
-TEST(EvaluationContextGroup, TestCyclicDependency)
+TEST_CASE_METHOD(EvaluationContextFixture, "Cyclic dependency", "[evaluation_context]")
 {
     const auto f = *Sema::create_function<DependentFunction>(sema_ptr, "f", sema_ptr);
     auto p = f->register_function_parameter<PlaceholderFunctionParameter>("param", "T");
     f->set_dependency(p);
+    INFO(sema->to_string());
 
-    const auto callExp = CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{
-        CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{
-            FunctionParameterExpression::create(sema_ptr, p)
-        })
-    });
+    const auto callExp = CallExpression::create(
+        sema_ptr, f,
+        vec<s_ptr<Expression>>{CallExpression::create(
+            sema_ptr, f, vec<s_ptr<Expression>>{FunctionParameterExpression::create(sema_ptr, p)})});
+    INFO("Created function call with cyclic dependency");
 
     auto boolean = *sema->find_concept("Boolean");
 
-    const auto newCallExp = utils::dyn_ptr_cast<CallExpression>(EvaluationContext::bind_expression(callExp, {{p, boolean}}));
-    CHECK_TRUE_TEXT(newCallExp.get() != callExp.get(), "Expression instance returned should be different");
-    CHECK_TRUE_TEXT(std::holds_alternative<const Concept*>(newCallExp->get_result()), "Result should be a concept");
-    CHECK_EQUAL_TEXT(boolean, std::get<const Concept*>(newCallExp->get_result()), "Result should be boolean");
+    INFO("Binding cyclic dependency with Boolean concept");
+    const auto newCallExp =
+        utils::dyn_ptr_cast<CallExpression>(EvaluationContext::bind_expression(callExp, {{p, boolean}}));
+
+    REQUIRE(newCallExp.get() != callExp.get());
+    REQUIRE(std::holds_alternative<const Concept*>(newCallExp->get_result()));
+    REQUIRE(boolean == std::get<const Concept*>(newCallExp->get_result()));
 
     auto innerCall = utils::dyn_ptr_cast<CallExpression>(newCallExp->get_arguments()[0]);
-    CHECK_TRUE_TEXT(innerCall != nullptr, "First argument should be a call expression");
-    CHECK_TRUE_TEXT(std::holds_alternative<const Concept*>(innerCall->get_result()),
-                   "Inner call result should be a concept");
+    REQUIRE(innerCall != nullptr);
+    REQUIRE(std::holds_alternative<const Concept*>(innerCall->get_result()));
 }
 
-TEST(EvaluationContextGroup, TestBindingToConcreteExpression)
+TEST_CASE_METHOD(EvaluationContextFixture, "Binding to concrete expression", "[evaluation_context]")
 {
     const auto f = *Sema::create_function<DependentFunction>(sema_ptr, "f", sema_ptr);
     auto p = f->register_function_parameter<PlaceholderFunctionParameter>("param", "T");
     f->set_dependency(p);
+    INFO(sema->to_string());
 
     auto stringExp = StringExpression::create(sema_ptr, "hello");
     const auto callExp = CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{stringExp});
+    INFO("Created function call with string expression argument");
 
     auto string = *sema->find_concept("String");
-    const auto newCallExp = utils::dyn_ptr_cast<CallExpression>(EvaluationContext::bind_expression(callExp, {{p, string}}));
+    INFO("Binding with String concept");
+    const auto newCallExp =
+        utils::dyn_ptr_cast<CallExpression>(EvaluationContext::bind_expression(callExp, {{p, string}}));
 
-    CHECK_TRUE_TEXT(newCallExp.get() == callExp.get(), "Expression instance returned should not be different");
-    CHECK_TRUE_TEXT(std::holds_alternative<const Concept*>(newCallExp->get_result()), "Result should be a concept");
-    CHECK_EQUAL_TEXT(string, std::get<const Concept*>(newCallExp->get_result()), "Result should be string concept");
-    CHECK_EQUAL_TEXT(stringExp.get(), newCallExp->get_arguments()[0].get(),
-                    "Concrete expressions should remain unchanged");
+    REQUIRE(newCallExp.get() == callExp.get());
+    REQUIRE(std::holds_alternative<const Concept*>(newCallExp->get_result()));
+    REQUIRE(string == std::get<const Concept*>(newCallExp->get_result()));
+    REQUIRE(stringExp.get() == newCallExp->get_arguments()[0].get());
 }

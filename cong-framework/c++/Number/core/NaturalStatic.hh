@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Natural.hh"
-#include "../Type.hh"
+#include "../../Type.hh"
 
 namespace cong::lang::core
 {
@@ -11,8 +11,10 @@ namespace cong::lang::core
         template <typename Native_, Native_ native_>
         struct NaturalStatic
         {
-            using Native = Native_;
-            static constexpr Native native() { return native_; }
+            static constexpr Native_ native()
+            {
+                return native_;
+            }
         };
     };
 

@@ -2,188 +2,193 @@
 // Created by Marvin Haschker on 15.03.25.
 //
 
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include "Common.h"
 #include "Utils.h"
 
-TEST_GROUP(UtilsGroup)
-{
-    DEFAULT_SEMA()
+struct UtilsFixture {
+    u_ptr<Sema> sema;
+    Sema* sema_ptr;
+
+    UtilsFixture() : sema(std::make_unique<Sema>()), sema_ptr(sema.get()) {}
 };
 
-TEST(UtilsGroup, TestSplitFQILocal)
+TEST_CASE_METHOD(UtilsFixture, "Split fully qualified identifier - local", "[utils]")
 {
     constexpr auto id = "A::B::C";
     const auto [namespaces, identifier, topLevel] =
         utils::split_fully_qualified_identifier(id);
 
-    CHECK(!topLevel);
-    CHECK(identifier == "C");
-    CHECK(namespaces.size() == 2);
-    CHECK(namespaces[0] == "A");
-    CHECK(namespaces[1] == "B");
+    REQUIRE_FALSE(topLevel);
+    REQUIRE(identifier == "C");
+    REQUIRE(namespaces.size() == 2);
+    REQUIRE(namespaces[0] == "A");
+    REQUIRE(namespaces[1] == "B");
 }
 
-TEST(UtilsGroup, TestSplitFQITopLevel)
+TEST_CASE_METHOD(UtilsFixture, "Split fully qualified identifier - top level", "[utils]")
 {
     constexpr auto id = "::A::B::C";
     const auto [namespaces, identifier, topLevel] =
         utils::split_fully_qualified_identifier(id);
 
-    CHECK(topLevel);
-    CHECK(identifier == "C");
-    CHECK(namespaces.size() == 2);
-    CHECK(namespaces[0] == "A");
-    CHECK(namespaces[1] == "B");
+    REQUIRE(topLevel);
+    REQUIRE(identifier == "C");
+    REQUIRE(namespaces.size() == 2);
+    REQUIRE(namespaces[0] == "A");
+    REQUIRE(namespaces[1] == "B");
 }
 
-TEST(UtilsGroup, TestSplitFQISimpleIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "Split fully qualified identifier - simple identifier", "[utils]")
 {
     constexpr auto id = "C";
     const auto [namespaces, identifier, topLevel] =
         utils::split_fully_qualified_identifier(id);
 
-    CHECK(!topLevel);
-    CHECK(identifier == "C");
-    CHECK(namespaces.empty());
+    REQUIRE_FALSE(topLevel);
+    REQUIRE(identifier == "C");
+    REQUIRE(namespaces.empty());
 }
 
-TEST(UtilsGroup, TestSplitFQISimpleIdentifierTopLevel)
+TEST_CASE_METHOD(UtilsFixture, "Split fully qualified identifier - simple identifier top level", "[utils]")
 {
     constexpr auto id = "::C";
     const auto [namespaces, identifier, topLevel] =
         utils::split_fully_qualified_identifier(id);
 
-    CHECK(topLevel);
-    CHECK(identifier == "C");
-    CHECK(namespaces.empty());
+    REQUIRE(topLevel);
+    REQUIRE(identifier == "C");
+    REQUIRE(namespaces.empty());
 }
 
-TEST(UtilsGroup, TestCleanupStringLiteral)
+TEST_CASE_METHOD(UtilsFixture, "Cleanup string literal", "[utils]")
 {
     constexpr auto id = "\"Hello World!\"";
     constexpr auto id2 = "Anything else";
 
-    CHECK(utils::cleanup_string_literal("").empty());
-    STRCMP_EQUAL("a", utils::cleanup_string_literal("a").c_str());
-    STRCMP_EQUAL("Hello World!", utils::cleanup_string_literal(id).c_str());
-    STRCMP_EQUAL(id2, utils::cleanup_string_literal(id2).c_str());
+    REQUIRE(utils::cleanup_string_literal("").empty());
+    REQUIRE(utils::cleanup_string_literal("a") == "a");
+    REQUIRE(utils::cleanup_string_literal(id) == "Hello World!");
+    REQUIRE(utils::cleanup_string_literal(id2) == id2);
 }
 
-TEST(UtilsGroup, TestReturnsTrueForValidDynamicCast)
+TEST_CASE_METHOD(UtilsFixture, "is() returns true for valid dynamic cast", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const Base* base = new Derived();
-    CHECK(utils::is<Derived>(base));
+    REQUIRE(utils::is<Derived>(base));
     delete base;
 }
 
-TEST(UtilsGroup, TestReturnsFalseForInvalidDynamicCast)
+TEST_CASE_METHOD(UtilsFixture, "is() returns false for invalid dynamic cast", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const Base* base = new Base();
-    CHECK(!utils::is<Derived>(base));
+    REQUIRE_FALSE(utils::is<Derived>(base));
     delete base;
 }
 
-TEST(UtilsGroup, TestReturnsTrueForValidSharedPtrDynamicCast)
+TEST_CASE_METHOD(UtilsFixture, "is() returns true for valid shared_ptr dynamic cast", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const s_ptr<Base> base = std::make_shared<Derived>();
-    CHECK(utils::is<Derived>(base));
+    REQUIRE(utils::is<Derived>(base));
 }
 
-TEST(UtilsGroup, TestReturnsFalseForInvalidSharedPtrDynamicCast)
+TEST_CASE_METHOD(UtilsFixture, "is() returns false for invalid shared_ptr dynamic cast", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const auto base = std::make_shared<Base>();
-    CHECK(!utils::is<Derived>(base));
+    REQUIRE_FALSE(utils::is<Derived>(base));
 }
 
-TEST(UtilsGroup, TestDynCastReturnsValidPointerForCorrectType)
+TEST_CASE_METHOD(UtilsFixture, "dyn_cast returns valid pointer for correct type", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     Base* base = new Derived();
-    CHECK(utils::dyn_cast<Derived>(base) != nullptr);
+    REQUIRE(utils::dyn_cast<Derived>(base) != nullptr);
     delete base;
 }
 
-TEST(UtilsGroup, TestDynCastReturnsNullptrForIncorrectType)
+TEST_CASE_METHOD(UtilsFixture, "dyn_cast returns nullptr for incorrect type", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const auto base = new Base();
-    CHECK(utils::dyn_cast<Derived>(base) == nullptr);
+    REQUIRE(utils::dyn_cast<Derived>(base) == nullptr);
     delete base;
 }
 
-TEST(UtilsGroup, TestDynCastConstReturnsValidPointerForCorrectType)
+TEST_CASE_METHOD(UtilsFixture, "dyn_cast const returns valid pointer for correct type", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const Base* base = new Derived();
-    CHECK(utils::dyn_cast<Derived>(base) != nullptr);
+    REQUIRE(utils::dyn_cast<Derived>(base) != nullptr);
     delete base;
 }
 
-TEST(UtilsGroup, TestDynCastConstReturnsNullptrForIncorrectType)
+TEST_CASE_METHOD(UtilsFixture, "dyn_cast const returns nullptr for incorrect type", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const Base* base = new Base();
-    CHECK(utils::dyn_cast<Derived>(base) == nullptr);
+    REQUIRE(utils::dyn_cast<Derived>(base) == nullptr);
     delete base;
 }
 
-TEST(UtilsGroup, TestDynPtrCastReturnsValidSharedPtrForCorrectType)
+TEST_CASE_METHOD(UtilsFixture, "dyn_ptr_cast returns valid shared_ptr for correct type", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const s_ptr<Base> base = std::make_shared<Derived>();
-    CHECK(utils::dyn_ptr_cast<Derived>(base) != nullptr);
+    REQUIRE(utils::dyn_ptr_cast<Derived>(base) != nullptr);
 }
 
-TEST(UtilsGroup, TestDynPtrCastReturnsNullptrForIncorrectType)
+TEST_CASE_METHOD(UtilsFixture, "dyn_ptr_cast returns nullptr for incorrect type", "[utils]")
 {
     struct Base { virtual ~Base() = default; };
     struct Derived : Base {};
 
     const auto base = std::make_shared<Base>();
-    CHECK(utils::dyn_ptr_cast<Derived>(base) == nullptr);
+    REQUIRE(utils::dyn_ptr_cast<Derived>(base) == nullptr);
 }
 
-TEST(UtilsGroup, TestResolveFQIWithValidConceptIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with valid concept identifier", "[utils]")
 {
     constexpr auto c_id = "Object";
     const utils::FQIInfo fqiInfo{{}, c_id, true};
 
     const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqiInfo, sema.get());
-    CHECK(result.has_value());
-    CHECK_EQUAL(std::string((*sema->find_concept(c_id))->get_identifier()), std::string((*result)->get_identifier()));
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*sema->find_concept(c_id))->get_identifier()) ==
+            std::string((*result)->get_identifier()));
 }
 
-TEST(UtilsGroup, TestResolveFQIWithInvalidConceptIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with invalid concept identifier", "[utils]")
 {
     const utils::FQIInfo fqiInfo{{}, "invalid_identifier", true};
 
     auto result = utils::resolve_fully_qualified_identifier<Concept>(fqiInfo, sema.get());
-    CHECK(!result.has_value());
+    REQUIRE_FALSE(result.has_value());
 }
 
-TEST(UtilsGroup, TestResolveFQIWithValidConceptIdentifierInNamespace)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with valid concept identifier in namespace", "[utils]")
 {
     constexpr auto ns_id = "A";
     constexpr auto c_id = "C";
@@ -193,26 +198,26 @@ TEST(UtilsGroup, TestResolveFQIWithValidConceptIdentifierInNamespace)
     Sema::create_concept(ns, c_id).value();
 
     const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqiInfo, sema.get());
-    CHECK(result.has_value());
-    CHECK_EQUAL(c_id, std::string((*result)->get_identifier()));
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == c_id);
 }
 
-TEST(UtilsGroup, TestResolveFQIWithEmptyConceptIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with empty concept identifier", "[utils]")
 {
     const utils::FQIInfo fqiInfo{{}, "", true};
 
     const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqiInfo, sema.get());
-    CHECK(!result.has_value());
+    REQUIRE_FALSE(result.has_value());
 }
 
-TEST(UtilsGroup, TestResolveFQIWithNullNamespace)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with null namespace", "[utils]")
 {
     const utils::FQIInfo fqiInfo{{"namespace1", "namespace2"}, "identifier", true};
     const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqiInfo, nullptr);
-    CHECK(!result.has_value());
+    REQUIRE_FALSE(result.has_value());
 }
 
-TEST(UtilsGroup, TestResolveFQIWithValidFunctionIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with valid function identifier", "[utils]")
 {
     constexpr auto f_id = "id";
     const auto object = *sema->find_concept("Object");
@@ -221,19 +226,19 @@ TEST(UtilsGroup, TestResolveFQIWithValidFunctionIdentifier)
     const utils::FQIInfo fqiInfo{{}, f_id, true};
 
     const auto result = utils::resolve_fully_qualified_identifier<Function>(fqiInfo, sema.get());
-    CHECK(result.has_value());
-    CHECK_EQUAL(f_id, std::string((*result)->get_identifier()));
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == f_id);
 }
 
-TEST(UtilsGroup, TestResolveFQIWithInvalidFunctionIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with invalid function identifier", "[utils]")
 {
     const utils::FQIInfo fqiInfo{{}, "non_existent_function", true};
 
     const auto result = utils::resolve_fully_qualified_identifier<Function>(fqiInfo, sema.get());
-    CHECK(!result.has_value());
+    REQUIRE_FALSE(result.has_value());
 }
 
-TEST(UtilsGroup, TestResolveFQIWithValidFunctionIdentifierInNamespace)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with valid function identifier in namespace", "[utils]")
 {
     constexpr auto ns_id = "Math";
     constexpr auto f_id = "add";
@@ -244,34 +249,34 @@ TEST(UtilsGroup, TestResolveFQIWithValidFunctionIdentifierInNamespace)
     *Sema::create_function<ConcreteFunction>(ns, f_id, ns, number);
 
     const auto result = utils::resolve_fully_qualified_identifier<Function>(fqiInfo, sema.get());
-    CHECK(result.has_value());
-    CHECK_EQUAL(f_id, std::string((*result)->get_identifier()));
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == f_id);
 }
 
-TEST(UtilsGroup, TestResolveFQIWithEmptyFunctionIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with empty function identifier", "[utils]")
 {
     const utils::FQIInfo fqiInfo{{}, "", true};
 
     const auto result = utils::resolve_fully_qualified_identifier<Function>(fqiInfo, sema.get());
-    CHECK(!result.has_value());
+    REQUIRE_FALSE(result.has_value());
 }
 
-TEST(UtilsGroup, TestResolveFQIWithNullNamespaceForFunction)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with null namespace for function", "[utils]")
 {
     const utils::FQIInfo fqiInfo{{"namespace1", "namespace2"}, "function_id", true};
     const auto result = utils::resolve_fully_qualified_identifier<Function>(fqiInfo, nullptr);
-    CHECK(!result.has_value());
+    REQUIRE_FALSE(result.has_value());
 }
 
-TEST(UtilsGroup, TestResolveFQIWithInvalidNamespaceIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with invalid namespace identifier", "[utils]")
 {
     const utils::FQIInfo fqiInfo{{}, "invalid_namespace", true};
 
     const auto result = utils::resolve_fully_qualified_identifier<Namespace>(fqiInfo, sema.get());
-    CHECK(!result.has_value());
+    REQUIRE_FALSE(result.has_value());
 }
 
-TEST(UtilsGroup, TestResolveFQIWithValidNamespaceIdentifier)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with valid namespace identifier", "[utils]")
 {
     constexpr auto ns_id = "Math";
     const utils::FQIInfo fqiInfo{{}, ns_id, true};
@@ -279,11 +284,11 @@ TEST(UtilsGroup, TestResolveFQIWithValidNamespaceIdentifier)
     *Sema::create_namespace(ns_id, sema.get(), sema.get());
 
     const auto result = utils::resolve_fully_qualified_identifier<Namespace>(fqiInfo, sema.get());
-    CHECK(result.has_value());
-    CHECK_EQUAL(ns_id, std::string((*result)->get_identifier()));
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == ns_id);
 }
 
-TEST(UtilsGroup, TestResolveFQIWithNestedNamespaces)
+TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with nested namespaces", "[utils]")
 {
     constexpr auto ns_id1 = "Math";
     constexpr auto ns_id2 = "Test";
@@ -293,11 +298,11 @@ TEST(UtilsGroup, TestResolveFQIWithNestedNamespaces)
 
     const utils::FQIInfo fqiInfo{{ns_id1}, ns_id2, true};
     const auto result = utils::resolve_fully_qualified_identifier<Namespace>(fqiInfo, sema.get());
-    CHECK(result.has_value());
-    CHECK_EQUAL(std::string(b->get_identifier()), std::string((*result)->get_identifier()));
+    REQUIRE(result.has_value());
+    REQUIRE(std::string(b->get_identifier()) == std::string((*result)->get_identifier()));
 }
 
-TEST(UtilsGroup, TestCrossNamespaceConceptDependencyWithSimpleName)
+TEST_CASE_METHOD(UtilsFixture, "Cross namespace concept dependency with simple name", "[utils]")
 {
     constexpr auto ns_id1 = "NSA";
     constexpr auto ns_id2 = "NSB";
@@ -319,12 +324,14 @@ TEST(UtilsGroup, TestCrossNamespaceConceptDependencyWithSimpleName)
     v.visit(data.parse_tree());
     DefinitionVisitor v2{sema.get()};
     v2.visit(data.parse_tree());
+
+    REQUIRE(true);
 }
 
-TEST(UtilsGroup, TestToplevelNS)
+TEST_CASE_METHOD(UtilsFixture, "Top level namespace", "[utils]")
 {
-    const auto [namespaces, identifier, topLevel]= utils::split_fully_qualified_identifier("::");
-    CHECK_TRUE(namespaces.empty());
-    CHECK_TRUE(identifier.empty());
-    CHECK_TRUE(topLevel);
+    const auto [namespaces, identifier, topLevel] = utils::split_fully_qualified_identifier("::");
+    REQUIRE(namespaces.empty());
+    REQUIRE(identifier.empty());
+    REQUIRE(topLevel);
 }

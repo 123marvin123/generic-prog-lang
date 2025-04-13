@@ -1,149 +1,48 @@
 #pragma once
 
-#include "Boolean.hh"
-#include "../Type.hh"
-#include <type_traits>
+#include "../Object/ObjectStatic.hh"
 
-namespace cong::lang::core
-{
-    namespace intern
+#include "../Val.hh"
+#include "../ApplyMember.hh"
+#include "../Exp.hh"
+
+#include "core/Boolean.hh"
+
+namespace cong::lang {
+	namespace local {
+		template <typename Native_, Native_ native_>
+  		class BooleanStatic
+    		: public cong::lang::ObjectStatic<Native_, native_>
+  		{
+    		using Base_ = cong::lang::ObjectStatic<Native_, native_>;
+  		public:
+    		CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
+  		};
+	};
+
+	template <core::Boolean value_>
+	using BooleanStatic = intern::Exp<local::BooleanStatic<core::Boolean, value_>>;
+
+	using True = BooleanStatic<true>;
+	using False = BooleanStatic<false>;
+
+    template<core::Boolean native_>
+    struct core::Truthy::Call<BooleanStatic<native_>>
     {
-        // type only, not to be instantiated
-        template <typename Native_, Native_ native_>
-        struct BooleanStatic
+        using Type = bool;
+        static constexpr Type call(...)
         {
-            using Native = Native_;
-            static constexpr Native native() { return native_; }
-        };
+            return native_;
+        }
     };
 
-    template <Boolean native_>
-    using BooleanStatic = intern::BooleanStatic<Boolean, native_>;
-
-    using True = BooleanStatic<true>;
-    using False = BooleanStatic<false>;
-
-    struct Cond
+    template<core::Boolean native_>
+    struct core::Falsy::Call<BooleanStatic<native_>>
     {
-    private:
-        template <typename BooleanStatic_,
-                  typename TypeTrue_,
-                  typename TypeFalse_>
-        struct Dispatch_;
-
-        template <typename Native_,
-                  typename TypeTrue_,
-                  typename TypeFalse_>
-        struct Dispatch_<intern::BooleanStatic<Native_, true>,
-                         TypeTrue_,
-                         TypeFalse_>
+        using Type = bool;
+        static constexpr Type call(...)
         {
-            using Type = TypeTrue_;
-        };
-
-        template <typename Native_,
-                  typename TypeTrue_,
-                  typename TypeFalse_>
-        struct Dispatch_<intern::BooleanStatic<Native_, false>,
-                         TypeTrue_,
-                         TypeFalse_>
-        {
-            using Type = TypeFalse_;
-        };
-
-    public:
-        template <typename BooleanStatic_,
-                  typename TypeTrue_,
-                  typename TypeFalse_>
-        struct Call
-            : Dispatch_<typename Plain::Call<BooleanStatic_>::Type,
-                        TypeTrue_,
-                        TypeFalse_>
-        {
-        };
+            return native_ == false;
+        }
     };
-
-    template <class Fun_,
-              class Cond_,
-              typename Default_>
-    struct FunByCond
-    {
-    private:
-        template <typename BooleanStatic_, typename... ArgS_>
-        struct Dispatch_;
-
-        template <typename... ArgS_>
-        struct Dispatch_<False, ArgS_...>
-        {
-            using Type = Default_;
-        };
-
-        template <typename... ArgS_>
-        struct Dispatch_<True, ArgS_...>
-            : Fun_::template Call<ArgS_...>
-        {
-        private:
-            using Base_ = typename Fun_::template Call<ArgS_...>;
-
-        public:
-            using Type = typename Base_::Type;
-        };
-
-    public:
-        template <typename Arg1_, typename... ArgS_>
-        struct Call
-            : Dispatch_<typename Cond_::template Call<Arg1_>::Type,
-                        Arg1_,
-                        ArgS_...>
-        {
-        };
-    };
-
-    struct Or_
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-
-        template <typename Native_,
-                  Native_ native1_,
-                  Native_ native2_>
-        struct Dispatch_<intern::BooleanStatic<Native_, native1_>,
-                         intern::BooleanStatic<Native_, native2_>>
-        {
-            using Type = intern::BooleanStatic<Native_, (native1_ || native2_)>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call
-            : Dispatch_<typename Plain::Call<Arg1_>::Type,
-                        typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-
-    struct And_
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-
-        template <typename Native_,
-                  Native_ native1_,
-                  Native_ native2_>
-        struct Dispatch_<intern::BooleanStatic<Native_, native1_>,
-                         intern::BooleanStatic<Native_, native2_>>
-        {
-            using Type = intern::BooleanStatic<Native_, (native1_ && native2_)>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call
-            : Dispatch_<typename Plain::Call<Arg1_>::Type,
-                        typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-}
+};

@@ -94,6 +94,23 @@ CallExpression::get_result() const {
   return target_param;
 }
 
+std::set<const Function *> CallExpression::get_depending_functions() const {
+    std::set<const Function*> depending_functions{};
+
+    depending_functions.emplace(this->get_function());
+
+    for (const s_ptr<Expression>& exp : this->get_arguments()) {
+        if (auto call_exp = utils::dyn_ptr_cast<CallExpression>(exp)) {
+            // Recursively call get_depending_functions and insert the result
+            // into the depending_functions set
+            auto nested_functions = call_exp->get_depending_functions();
+            depending_functions.insert(nested_functions.begin(), nested_functions.end());
+        }
+    }
+
+    return depending_functions;
+}
+
 std::string CallExpression::to_cpp() const noexcept {
     vec<std::string> str_args{};
     str_args.reserve(args.size());

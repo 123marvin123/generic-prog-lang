@@ -4,7 +4,7 @@
 #include "Base.hh"
 
 #include "Decls.hh"
-#include "Boolean/BooleanStatic.hh"
+#include "Boolean/core/BooleanStatic.hh"
 
 #include "Traits.hh"
 

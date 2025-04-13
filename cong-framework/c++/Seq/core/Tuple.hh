@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../Boolean/BooleanStatic.hh"
-#include "../Number/NaturalStatic.hh"
-#include "../Decls.hh"
-#include "../Type.hh"
+#include "../../Boolean/core/BooleanStatic.hh"
+#include "../../Number/core/NaturalStatic.hh"
+#include "../../Decls.hh"
+#include "../../Type.hh"
 
 #include <utility>
 #include <functional>

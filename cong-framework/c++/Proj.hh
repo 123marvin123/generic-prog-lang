@@ -3,9 +3,9 @@
 #include "Exp.hh"
 #include "Base.hh"
 
-#include "Seq/Tuple.hh"
-#include "Number/NaturalIntervalStatic.hh"
-#include "Boolean/Boolean.hh"
+#include "Seq/core/Tuple.hh"
+#include "Number/core/NaturalIntervalStatic.hh"
+#include "Boolean/core/Boolean.hh"
 
 namespace cong::lang
 {
