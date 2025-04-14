@@ -87,14 +87,14 @@ namespace cong::lang
             private:
                 // Dispatches are Fun
 
-                template <typename Exp__, typename TupleOfExp__, typename TupleOfImpl_, typename Offset_>
+                template <typename Exp__, typename TupleOfExp__, typename Offset_>
                 struct DispatchOffset;
 
                 // generic implementation is defined for given arguments;
                 // propagate the call to that implementation
                 CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchDefined,
-                 (Exp__, TupleOfExp__, TupleOfImpl_, Offset_, Apply_, Type_), (),
+                 (Exp__, TupleOfExp__, Apply_, Offset_, Type_), (),
                  (
                      (Base__, (Apply_))
                  ),
@@ -105,10 +105,10 @@ namespace cong::lang
                 // re-try with predecessor in tuple of generic implementations
                 CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchDefined,
-                 (Exp__, TupleOfExp__, TupleOfImpl_, Offset_, Apply_), (core::Undefined),
+                 (Exp__, TupleOfExp__, Apply_, Offset_), (core::Undefined),
                  (
-                     (Pred_, (typename core::Pred::Call<Offset_>::Type)),
-                     (Base__, (DispatchOffset<Exp__, TupleOfExp__, TupleOfImpl_, Pred_>))
+                    (Make_, (core::FunStaticMake<core::Undefined>)),
+                    (Base__, (local::ApplyByFun<Make_>))
                  ),
                  Base__
                 );
@@ -116,10 +116,10 @@ namespace cong::lang
                 // call generic implementation (converted to Fun) on given arguments, examine definedness
                 CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchImpl,
-                 (Exp__, TupleOfExp__, TupleOfImpl_, Offset_, Apply_), (),
+                 (Exp__, TupleOfExp__, Apply_, Offset_), (),
                  (
                      (Type_, (typename Apply_::template Call<Exp__, TupleOfExp__>::Type)),
-                     (Base__, (DispatchDefined<Exp__, TupleOfExp__, TupleOfImpl_, Offset_, Apply_, Type_>))
+                     (Base__, (DispatchDefined<Exp__, TupleOfExp__, Apply_, Offset_, Type_>))
                  ),
                  Base__
                 );
@@ -127,18 +127,16 @@ namespace cong::lang
                 // standard case: try generic implementation at position before the previous
                 CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchOffset,
-                 (Exp__, TupleOfExp__, TupleOfImpl_, Offset_), (),
+                 (Exp__, TupleOfExp__, Offset_), (),
                  (
-                     (Pred_, (typename core::Pred::Call<Offset_>::Type)),
-                     (Impl_, (typename core::ItemAt::Call<TupleOfImpl_, Pred_>::Type)),
-                     (ImplPlain_, (typename core::Plain::Call<Impl_>::Type)),
-                     (Base__, (DispatchImpl<Exp__, TupleOfExp__, TupleOfImpl_, Offset_, ImplPlain_>))
+                     (Impl_, (typename Spec_::template GenericImpl<Offset_>)),
+                     (Base__, (DispatchImpl<Exp__, TupleOfExp__, Impl_, Offset_>))
                  ),
                  Base__
                 );
 
                 // final case: no further generic implementation (previous offset was zero)
-                CONG_LANG_CORE_FUN_PROPAGATE
+                /*CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchOffset,
                  (Exp__, TupleOfExp__, TupleOfImpl_), (core::NaturalStatic<0>),
                  (
@@ -146,7 +144,8 @@ namespace cong::lang
                      (Base__, (local::ApplyByFun<Make_>))
                  ),
                  Base__
-                );
+                );*/
+
 
             public:
                 // pick last (backwards order) generic impl. whose application is not Undefined
@@ -155,12 +154,9 @@ namespace cong::lang
                 CONG_LANG_CORE_FUN_CALL_PROPAGATE
                 (
                     (
-                        (TupleOfExpReqEquiv_, (typename Spec_::ResultTupleOfExpReqEquiv)),
-                        (Length_, (typename core::Length::Call<TupleOfExpReqEquiv_>::Type)),
                         (Base__, (DispatchOffset<Exp_,
-                            TupleOfExp_,
-                            TupleOfExpReqEquiv_,
-                            Length_>))
+                                                TupleOfExp_,
+                                                core::Zero>))
                     ),
                     Base__
                 );

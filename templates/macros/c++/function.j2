@@ -90,6 +90,8 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
     };
 };{{' \n' if not loop.last }}{% endfor %} 
 
+{# TODO: add GenericImpl<...> structs for providing generic implementations #}
+
 template <typename... Exp_>
 constexpr
 {{ Name_ }}<Exp_...> {{def.name}}(Exp_&&... args) 
