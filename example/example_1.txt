@@ -24,7 +24,7 @@ fun isNotEqual(a: <T>, b: <K>) -> Boolean {
     description { "checks if a is not equal to b" }
 }
 
-fun not(a: Boolean) -> Boolean {
+fun not_(a: Boolean) -> Boolean {
     requires(name: "test1") { id(a) }
     requires { false }
     description { "negates a" }

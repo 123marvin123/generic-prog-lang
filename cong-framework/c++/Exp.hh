@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Seq/core/Tuple.hh"
-#include "Boolean/core/BooleanStatic.hh"
-#include "Fun.hh"
-#include "Undefined.hh"
-#include "Decls.hh"
 #include "Bind.hh"
+#include "Boolean/core/BooleanStatic.hh"
+#include "Decls.hh"
+#include "Fun.hh"
+#include "Seq/core/Tuple.hh"
+#include "Undefined.hh"
 
 #include <utility>
 
@@ -13,7 +13,9 @@ namespace cong::lang
 {
     namespace intern
     {
-        class Environment { };
+        class Environment
+        {
+        };
 
         template <class Impl_>
         class Exp : public Impl_
@@ -22,17 +24,14 @@ namespace cong::lang
 
         public:
             template <typename... InitS_>
-            constexpr Exp(InitS_&&... initS)
-                : Base_{std::forward<InitS_>(initS)...}
+            constexpr Exp(InitS_&&... initS) : Base_{std::forward<InitS_>(initS)...}
             {
             }
 
             template <typename... ExpS_>
             constexpr auto operator()(ExpS_&&... expS) const
             {
-                return bind(Environment{},
-                            *this,
-                            std::forward<ExpS_>(expS)...);
+                return bind(Environment{}, *this, std::forward<ExpS_>(expS)...);
             }
         };
 
@@ -58,11 +57,11 @@ namespace cong::lang
             };
         };
 
-#define CONG_LANG_LOCAL_FUNSTATICBYMEMBERFUN(Fun_, Default_) \
-    namespace local \
-    { \
-        CONG_LANG_CORE_FUNSTATICBYMEMBERFUN(Fun_); \
-    } \
+#define CONG_LANG_LOCAL_FUNSTATICBYMEMBERFUN(Fun_, Default_)                                                           \
+    namespace local                                                                                                    \
+    {                                                                                                                  \
+        CONG_LANG_CORE_FUNSTATICBYMEMBERFUN(Fun_);                                                                     \
+    }                                                                                                                  \
     using Fun_ = core::FunByCond<core::FunByFunStatic<local::Fun_>, IsExp, Default_>;
 
         CONG_LANG_LOCAL_FUNSTATICBYMEMBERFUN(IsStateful, core::True);
@@ -72,11 +71,11 @@ namespace cong::lang
 
 #undef CONG_LANG_LOCAL_FUNSTATICBYMEMBERFUN
 
-#define CONG_LANG_LOCAL_FUNBYMEMBERFUN(Fun_) \
-    namespace local \
-    { \
-        CONG_LANG_CORE_FUNBYMEMBERFUN(Fun_); \
-    } \
+#define CONG_LANG_LOCAL_FUNBYMEMBERFUN(Fun_)                                                                           \
+    namespace local                                                                                                    \
+    {                                                                                                                  \
+        CONG_LANG_CORE_FUNBYMEMBERFUN(Fun_);                                                                           \
+    }                                                                                                                  \
     using Fun_ = core::FunByCond<local::Fun_, IsExp, core::Invalid>;
 
         CONG_LANG_LOCAL_FUNBYMEMBERFUN(ReduceSpace);
@@ -100,11 +99,7 @@ namespace cong::lang
             public:
                 using Type = typename Base_::Type;
 
-                static constexpr Type
-                call(Exp_ exp)
-                {
-                    return Base_::call(exp);
-                }
+                static constexpr Type call(Exp_ exp) { return Base_::call(exp); }
             };
         };
 
@@ -167,22 +162,15 @@ namespace cong::lang
             template <typename... ItemS_>
             struct Dispatch<core::Tuple<ItemS_...>>
             {
-                template <typename Exp_,
-                          typename TupleOfExp_>
+                template <typename Exp_, typename TupleOfExp_>
                 struct Call
                 {
                     using Type = core::Tuple<typename ApplyValue::Call<Exp_, ItemS_>::Type...>;
 
-                    static constexpr Type
-                    call(Exp_ exp,
-                         TupleOfExp_ tupleOfExp)
+                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
                     {
                         return std::apply([&exp](ItemS_&... itemS)
-                                          {
-                                              return core::tuple(ApplyValue
-                                                  ::Call<Exp_, ItemS_>
-                                                  ::call(exp, itemS)...);
-                                          },
+                                          { return core::tuple(ApplyValue ::Call<Exp_, ItemS_>::call(exp, itemS)...); },
                                           tupleOfExp);
                     }
                 };
@@ -197,36 +185,29 @@ namespace cong::lang
 
                 using Type = typename Base_::template Call<Exp_, TupleOfExp_>::Type;
 
-                static constexpr
-                Type
-                call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
                 {
                     return Base_::template Call<Exp_, TupleOfExp_>::call(exp, tupleOfExp);
                 }
             };
         };
 
-    template<typename BoolStatic_, typename Fun_, typename ExpType_>
-    struct CondEval;
+        template <typename BoolStatic_, typename Fun_, typename ExpType_>
+        struct CondEval;
 
-    template<typename Fun_, typename ExpType_>
-    struct CondEval<core::True, Fun_, ExpType_>
-    {
-    private:
-        static_assert(std::is_same_v<typename IsExp::Call<ExpType_>::Type, core::True>, "Not an expression");
-        static_assert(std::is_same_v<typename IsValid::Call<ExpType_>::Type, core::True>, "Expression not valid");
-        static_assert(std::is_same_v<typename IsDefined::Call<ExpType_>::Type, core::True>, "Expression not defined");
-    public:
-        using Type = typename Eval::Call<ExpType_>::Type;
-        static constexpr Type call(Fun_&& f) { return eval(std::forward<Fun_>(f)()); }
-    };
+        template <typename Fun_, typename ExpType_>
+        struct CondEval<core::True, Fun_, ExpType_>
+        {
+        private:
+            static_assert(std::is_same_v<typename IsExp::Call<ExpType_>::Type, core::True>, "Not an expression");
+            static_assert(std::is_same_v<typename IsValid::Call<ExpType_>::Type, core::True>, "Expression not valid");
+            static_assert(std::is_same_v<typename IsDefined::Call<ExpType_>::Type, core::True>,
+                          "Expression not defined");
 
-    /*template<typename Fun_, typename... Args>
-    struct CondEval<core::False, Fun_, Args...>
-    {
-        using Type = decltype(Fun_());
-        static constexpr Type call(Fun_&& f, Args&&... args) { return std::forward<Fun_>(f)(std::forward<Args>(args)...); }
-    };*/
+        public:
+            using Type = typename Eval::Call<ExpType_>::Type;
+            static constexpr Type call(Fun_&& f) { return eval(std::forward<Fun_>(f)()); }
+        };
 
         namespace local
         {
@@ -243,14 +224,9 @@ namespace cong::lang
                 public:
                     using Type = typename Eval_::Type;
 
-                    static constexpr Type
-                    call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
                     {
-                        return Eval_::call(Bind_{
-                            Environment{},
-                            ExpNew_{},
-                            tupleOfExp
-                        });
+                        return Eval_::call(Bind_{Environment{}, ExpNew_{}, tupleOfExp});
                     }
                 };
             };
@@ -270,13 +246,12 @@ namespace cong::lang
                 public:
                     using Type = typename Call_::Type;
 
-                    static constexpr Type
-                    call(Exp_, core::Tuple<ExpS_...> tupleOfExp)
+                    static constexpr Type call(Exp_, core::Tuple<ExpS_...> tupleOfExp)
                     {
                         return std::apply(Call_::call, tupleOfExp);
                     }
                 };
             };
-        };
-    };
-};
+        }; // namespace local
+    }; // namespace intern
+}; // namespace cong::lang

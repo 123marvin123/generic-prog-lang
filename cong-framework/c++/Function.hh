@@ -21,10 +21,10 @@ namespace cong::lang
     {
         struct EvalRequirements {
         private:
-            template<unsigned int N, class IsAvail_, class Dec_, class... Args>
+            template<class N, class IsAvail_, class Dec_, class... Args>
             struct Dispatch;
 
-            template<unsigned int N, class Dec_, class... Args>
+            template<class N, class Dec_, class... Args>
             struct Dispatch<N, False, Dec_, Args...>
             {
                 static constexpr auto call(Args&&...)
@@ -33,15 +33,16 @@ namespace cong::lang
                 }
             };
 
-            template<unsigned int N, class Dec_, class... Args>
+            template<class N, class Dec_, class... Args>
             struct Dispatch<N, True, Dec_, Args...>
             {
                 static constexpr auto call(Args&&... args)
                 {
                     using Call_ = typename Dec_::template Requirement<N>::template Call<Args...>;
+                    using Succ_ = core::Succ::Call<N>::Type;
 
                     auto a = Call_::call(std::forward<Args>(args)...) ;
-                    auto b = Dispatch<N + 1, typename Dec_::template Requirement<N + 1>::Present, Dec_, Args...>::call
+                    auto b = Dispatch<Succ_, typename Dec_::template Requirement<Succ_>::Present, Dec_, Args...>::call
                            (std::forward<Args>(args)...);
 
                     return core::Truthy::Call<decltype(a)>::call(a) &&
@@ -51,7 +52,7 @@ namespace cong::lang
 
         public:
             template<class Dec_, class... Args>
-            struct Call : Dispatch<0, typename Dec_::template Requirement<0>::Present, Dec_, Args...>
+            struct Call : Dispatch<core::Zero, typename Dec_::template Requirement<core::Zero>::Present, Dec_, Args...>
             {
             };
         };
@@ -63,8 +64,8 @@ namespace cong::lang
             using Base_ = Base;
 
         public:
-            using ReduceSpace = core::FunStaticMake<core::NaturalStatic<0>>;
-            using ReduceTime = core::FunStaticMake<core::NaturalStatic<1>>; // @todo appropriate?
+            using ReduceSpace = core::FunStaticMake<core::Zero>;
+            using ReduceTime = core::FunStaticMake<core::One>; // @todo appropriate?
             using ReduceValue = core::FunId;
 
         private:
@@ -81,7 +82,7 @@ namespace cong::lang
             CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
 
             template <>
-            struct ApplyMember<Spec_, core::NaturalStatic<0>>
+            struct ApplyMember<Spec_, core::Zero>
             {
             private:
                 // Dispatches are Fun
@@ -131,8 +132,7 @@ namespace cong::lang
                      (Pred_, (typename core::Pred::Call<Offset_>::Type)),
                      (Impl_, (typename core::ItemAt::Call<TupleOfImpl_, Pred_>::Type)),
                      (ImplPlain_, (typename core::Plain::Call<Impl_>::Type)),
-                     (Apply_, (local::ApplyReplace<ImplPlain_>)), // @todo requires ImplPlain_ to be static - add check?
-                     (Base__, (DispatchImpl<Exp__, TupleOfExp__, TupleOfImpl_, Offset_, Apply_>))
+                     (Base__, (DispatchImpl<Exp__, TupleOfExp__, TupleOfImpl_, Offset_, ImplPlain_>))
                  ),
                  Base__
                 );
