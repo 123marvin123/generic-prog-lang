@@ -14,10 +14,10 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
-    T__14 = 15, T__15 = 16, CONCEPT = 17, FUNCTION = 18, NAMESPACE = 19, 
-    DESCRIPTION = 20, GENERICIMPL = 21, REQUIRES = 22, LBRACE = 23, RBRACE = 24, 
-    VARARGS = 25, REAL = 26, BOOL = 27, NUMBER = 28, STRING = 29, IDENTIFIER = 30, 
-    WHITESPACE = 31, COMMENT = 32, LINE_COMMENT = 33, OTHER = 34
+    T__14 = 15, CONCEPT = 16, FUNCTION = 17, NAMESPACE = 18, DESCRIPTION = 19, 
+    GENERICIMPL = 20, REQUIRES = 21, LBRACE = 22, RBRACE = 23, VARARGS = 24, 
+    REAL = 25, BOOL = 26, NUMBER = 27, STRING = 28, IDENTIFIER = 29, WHITESPACE = 30, 
+    COMMENT = 31, LINE_COMMENT = 32, OTHER = 33
   };
 
   enum {
@@ -212,7 +212,7 @@ public:
     antlr4::tree::TerminalNode *LBRACE();
     ExpressionContext *expression();
     antlr4::tree::TerminalNode *RBRACE();
-    antlr4::tree::TerminalNode *STRING();
+    antlr4::tree::TerminalNode *IDENTIFIER();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };

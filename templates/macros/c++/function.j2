@@ -2,7 +2,8 @@
 
 {% macro FunctionDeclaration(def) %}
 {% call NamespaceChain(def.ns) %}
-{% set Name_ = def.name | title %}
+{% set Name_ = sanitize(def.name) | title %}
+{% set name_ = sanitize(def.name) %}
 
 struct Dec{{ Name_ }} {
     using ParamTupleOfConcept = ::cong::lang::core::Tuple<
@@ -26,34 +27,36 @@ using {{ Name_ }} = ::cong::lang::Bind<
 
 template <typename... Exp_>
 constexpr
-{{ Name_ }}<Exp_...> {{def.name}}(Exp_&&... args);
+{{ Name_ }}<Exp_...> {{ name_ }}(Exp_&&... args);
 
 {% endcall %}
 {% endmacro %}
 
 {% macro FunctionDefinition(def) %}
 {% call NamespaceChain(def.ns) %}
-{% set Name_ = def.name | title %}
+{% set Name_ = sanitize(def.name) | title %}
+{% set name_ = sanitize(def.name) %}
 
 struct Spec{{ Name_ }} {
-    static constexpr auto name = "{{def.name}}";
+    static constexpr auto name = "{{ name_ }}";
     static constexpr auto description = "{{def.description}}";
 
     template<class Index_>
     struct Requirement
     {
-        using Present = cong::lang::False;
+        using Present = cong::lang::core::False;
         template<class...>
         struct Call
         {
             //TODO: add using Type = core::Undefined instead of 'Present'
-            static constexpr cong::lang::True call(...);
+            static constexpr cong::lang::core::True call(...);
         };
     };
 
     template<class Index_>
     struct GenericImpl
     {
+        using Present = cong::lang::core::False;
         template<typename...>
         struct Call 
         {
@@ -70,7 +73,7 @@ struct Spec{{ Name_ }} {
 */
 template<>
 struct Spec{{ Name_ }}::Requirement<cong::lang::core::NaturalStatic<{{ loop.index0 }}>> {
-    using Present = cong::lang::True;
+    using Present = cong::lang::core::True;
     template<
     {%- for i in range(def.params | length) -%}
 class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
@@ -90,14 +93,43 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
     };
 };{{' \n' if not loop.last }}{% endfor %} 
 
+{% for impl in function_generic_impls(def.full_name) %}
+/*
+ * Generic Implementation #{{ loop.index }}:
+ * {{ impl }}
+*/
+template<>
+struct Spec{{ Name_ }}::GenericImpl<cong::lang::core::NaturalStatic<{{ loop.index0 }}>>
+{
+    using Present = cong::lang::core::True;
+    template<typename Exp_, typename TupleOfExp_>
+    struct Call;
+
+    template<typename Exp_, typename... Args>
+    struct Call<Exp_, cong::lang::core::Tuple<Args...>>
+    {
+    private:
+        using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
+        static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
+        {
+            return {{ impl }};
+        }
+    public:
+        using Type = std::invoke_result_t<decltype(call_), Args...>;
+        static constexpr Type call(Exp_ exp, TupleOfExp_ args) {
+            return std::apply(call_, args);
+        }
+    };
+};{{' \n' if not loop.last }}{% endfor %} 
+
 {# TODO: add GenericImpl<...> structs for providing generic implementations #}
 
 template <typename... Exp_>
 constexpr
-{{ Name_ }}<Exp_...> {{def.name}}(Exp_&&... args) 
+{{ Name_ }}<Exp_...> {{ name_ }}(Exp_&&... args) 
 {
     // TODO: lazy eval of requirements
-    if constexpr (cong::lang::core::intern::is_constexpr_evaluable<cong::lang::intern::EvalRequirements, Spec{{ Name_ }}, Exp_...>::value) 
+    /*if constexpr (cong::lang::core::intern::is_constexpr_evaluable<cong::lang::intern::EvalRequirements, Spec{{ Name_ }}, Exp_...>::value) 
     {
         constexpr auto res = cong::lang::intern::EvalRequirements::Call<Spec{{ Name_ }}, Exp_...>
                 ::call(std::forward<Exp_>(args)...);
@@ -109,7 +141,7 @@ constexpr
         if (const auto res = cong::lang::intern::EvalRequirements::Call<Spec{{ Name_ }}, Exp_...>::call(std::forward<Exp_>(args)...);
             cong::lang::core::Falsy::Call<decltype(res)>::call(res))
             throw std::runtime_error("Requirements not met at runtime.");
-    }
+    }*/
 
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},

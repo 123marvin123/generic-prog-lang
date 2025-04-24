@@ -4,6 +4,11 @@
 #include "export/JinjaEngine.h"
 #include "Processor.h"
 
+const std::map<std::string, LanguageMode> langmode_map = {
+    {"cpp", LanguageMode::Cpp},
+    {"python", LanguageMode::Python}
+};
+
 int main(const int argc, char** argv)
 {
     CLI::App app{"Generic Programming Language Transpiler"};
@@ -13,6 +18,7 @@ int main(const int argc, char** argv)
         output_folder = std::filesystem::current_path() / "output",
         template_folder = std::filesystem::current_path() / "templates";
     bool purge_output = false;
+    LanguageMode language_mode{LanguageMode::Cpp};
 
     app.add_option("--input", input_file, "Input file")
        ->required()
@@ -28,6 +34,10 @@ int main(const int argc, char** argv)
     app.add_flag("--purge", purge_output,
                  "Removes all files in the output directory before writing new files");
 
+    app.add_option("--lang-mode", language_mode, "Language modes to generate")
+        ->required()
+        ->transform(CLI::CheckedTransformer(langmode_map, CLI::ignore_case));
+
     CLI11_PARSE(app, argc, argv);
 
     DirValidator validator(purge_output);
@@ -37,9 +47,9 @@ int main(const int argc, char** argv)
     const Processor p{input_file};
     const u_ptr<Sema> sema = p.run_sema();
 
-    for (const JinjaEngine engine{sema.get(), output_folder, template_folder, purge_output};
-        const auto& a : engine.process(LanguageMode::Cpp))
-        std::cout << a << std::endl;
+    const JinjaEngine engine{sema.get(), output_folder, template_folder, purge_output};
+    for (const auto& f : engine.process(language_mode))
+        std::cout << f << std::endl;
 
     return 0;
 }

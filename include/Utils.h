@@ -6,11 +6,8 @@
 #define UTILS_H
 
 #include <memory>
-#include <optional>
-
 #include <CLI/CLI.hpp>
 #include "Decls.h"
-#include "CongParser.h"
 
 namespace utils
 {
@@ -75,6 +72,131 @@ namespace utils
 
     std::string_view get_string_for_operator(Operator op);
 
+    const std::map<std::string_view, std::string_view> cpp_keyword_map = {
+        {"alignas", "alignas_"},
+        {"alignof", "alignof_"},
+        {"and", "and_"},
+        {"and_eq", "and_eq_"},
+        {"asm", "asm_"},
+        {"atomic_cancel", "atomic_cancel_"}, // C++20 Transactional Memory TS
+        {"atomic_commit", "atomic_commit_"}, // C++20 Transactional Memory TS
+        {"atomic_noexcept", "atomic_noexcept_"}, // C++20 Transactional Memory TS
+        {"auto", "auto_"},
+        {"bitand", "bitand_"},
+        {"bitor", "bitor_"},
+        {"bool", "bool_"},
+        {"break", "break_"},
+        {"case", "case_"},
+        {"catch", "catch_"},
+        {"char", "char_"},
+        {"char8_t", "char8_t_"}, // C++20
+        {"char16_t", "char16_t_"},
+        {"char32_t", "char32_t_"},
+        {"class", "class_"},
+        {"compl", "compl_"},
+        {"concept", "concept_"}, // C++20
+        {"const", "const_"},
+        {"consteval", "consteval_"}, // C++20
+        {"constexpr", "constexpr_"},
+        {"constinit", "constinit_"}, // C++20
+        {"const_cast", "const_cast_"},
+        {"continue", "continue_"},
+        {"co_await", "co_await_"}, // C++20
+        {"co_return", "co_return_"}, // C++20
+        {"co_yield", "co_yield_"}, // C++20
+        {"decltype", "decltype_"},
+        {"default", "default_"},
+        {"delete", "delete_"},
+        {"do", "do_"},
+        {"double", "double_"},
+        {"dynamic_cast", "dynamic_cast_"},
+        {"else", "else_"},
+        {"enum", "enum_"},
+        {"explicit", "explicit_"},
+        {"export", "export_"}, // Wieder eingeführt in C++20 (Modules)
+        {"extern", "extern_"},
+        {"false", "false_"},
+        {"float", "float_"},
+        {"for", "for_"},
+        {"friend", "friend_"},
+        {"goto", "goto_"},
+        {"if", "if_"},
+        {"inline", "inline_"},
+        {"int", "int_"},
+        {"long", "long_"},
+        {"mutable", "mutable_"},
+        {"namespace", "namespace_"},
+        {"new", "new_"},
+        {"noexcept", "noexcept_"},
+        {"not", "not_"},
+        {"not_eq", "not_eq_"},
+        {"nullptr", "nullptr_"},
+        {"operator", "operator_"},
+        {"or", "or_"},
+        {"or_eq", "or_eq_"},
+        {"private", "private_"},
+        {"protected", "protected_"},
+        {"public", "public_"},
+        {"reflexpr", "reflexpr_"}, // C++ TS for Reflection
+        {"register", "register_"}, // Veraltet, aber reserviert
+        {"reinterpret_cast", "reinterpret_cast_"},
+        {"requires", "requires_"}, // C++20
+        {"return", "return_"},
+        {"short", "short_"},
+        {"signed", "signed_"},
+        {"sizeof", "sizeof_"},
+        {"static", "static_"},
+        {"static_assert", "static_assert_"},
+        {"static_cast", "static_cast_"},
+        {"struct", "struct_"},
+        {"switch", "switch_"},
+        {"synchronized", "synchronized_"}, // C++20 Transactional Memory TS
+        {"template", "template_"},
+        {"this", "this_"},
+        {"thread_local", "thread_local_"},
+        {"throw", "throw_"},
+        {"true", "true_"},
+        {"try", "try_"},
+        {"typedef", "typedef_"},
+        {"typeid", "typeid_"},
+        {"typename", "typename_"},
+        {"union", "union_"},
+        {"unsigned", "unsigned_"},
+        {"using", "using_"},
+        {"virtual", "virtual_"},
+        {"void", "void_"},
+        {"volatile", "volatile_"},
+        {"wchar_t", "wchar_t_"},
+        {"while", "while_"},
+        {"xor", "xor_"},
+        {"xor_eq", "xor_eq_"}
+        /* ... */
+    };
+
+    const std::map<std::string_view, std::string_view> python_keyword_map = {
+        {"and", "and_"}, {"as", "as_"}, {"assert", "assert_"}, {"async", "async_"},
+        {"await", "await_"}, {"break", "break_"}, {"class", "class_"}, {"continue", "continue_"},
+        {"def", "def_"}, {"del", "del_"}, {"elif", "elif_"}, {"else", "else_"},
+        {"except", "except_"}, {"False", "False_"}, {"finally", "finally_"}, {"for", "for_"},
+        {"from", "from_"}, {"global", "global_"}, {"if", "if_"}, {"import", "import_"},
+        {"in", "in_"}, {"is", "is_"}, {"lambda", "lambda_"}, {"None", "None_"},
+        {"nonlocal", "nonlocal_"}, {"not", "not_"}, {"or", "or_"}, {"pass", "pass_"},
+        {"raise", "raise_"}, {"return", "return_"}, {"True", "True_"}, {"try", "try_"},
+        {"while", "while_"}, {"with", "with_"}, {"yield", "yield_"}
+    };
+
+    /**
+    * @brief Sanitizes a C++ identifier to ensure it's not a reserved keyword.
+    * 
+    * This function checks if the provided identifier is a C++ reserved keyword.
+    * If it is, returns an alternative sanitized version of the identifier.
+    * Otherwise, returns the original identifier unchanged.
+    * 
+    * @param identifier The string view containing the identifier to sanitize
+    * @return std::string A sanitized version of the identifier that is not a C++ keyword
+    */
+    std::string sanitize_cpp_identifier(std::string_view identifier);
+    std::string sanitize_python_identifier(std::string_view identifier);
 }
 
 

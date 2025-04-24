@@ -247,7 +247,9 @@ public:                                                                         
                                                                                                                        \
     public:                                                                                                            \
         using Type = typename Call_::Type;                                                                             \
-        static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp) { return Call_::call(exp, tupleOfExp); }          \
+        static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp) {                                             \
+            return Call_::call(exp, tupleOfExp);                        \
+        }                                                                                                              \
     }
 
 #elif defined CONG_LANG_CORE_FUN_PROPAGATE_INHERIT

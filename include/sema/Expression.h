@@ -189,7 +189,7 @@ struct FunctionParameterExpression
   }
 
   [[nodiscard]] std::string to_cpp() const noexcept override {
-    return std::string(param->get_identifier());
+    return utils::sanitize_cpp_identifier(param->get_identifier());
   }
 
   [[nodiscard]] std::string to_python() const noexcept override {

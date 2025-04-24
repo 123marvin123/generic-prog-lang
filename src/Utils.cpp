@@ -174,3 +174,25 @@ DirValidator::DirValidator(const bool& allow_overwrite) : Validator("DIR")
         return ""; // Empty string means validation passed
     };
 }
+
+std::string utils::sanitize_cpp_identifier(std::string_view identifier)
+{
+    auto it = cpp_keyword_map.find(identifier);
+    if (it != cpp_keyword_map.end())
+    {
+        return std::string(it->second);
+    }
+
+   return std::string(identifier);
+}
+
+std::string utils::sanitize_python_identifier(std::string_view identifier)
+{
+    auto it = python_keyword_map.find(identifier);
+    if (it != python_keyword_map.end())
+    {
+        return std::string(it->second);
+    }
+
+    return std::string(identifier);
+}

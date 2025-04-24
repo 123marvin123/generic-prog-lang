@@ -90,6 +90,9 @@ namespace cong::lang
                 template <typename Exp__, typename TupleOfExp__, typename Offset_>
                 struct DispatchOffset;
 
+                template<typename Exp__, typename TupleOfExp__, typename Offset_, typename Available__>
+                struct DispatchAvailable;
+
                 // generic implementation is defined for given arguments;
                 // propagate the call to that implementation
                 CONG_LANG_CORE_FUN_PROPAGATE
@@ -107,8 +110,9 @@ namespace cong::lang
                 (DispatchDefined,
                  (Exp__, TupleOfExp__, Apply_, Offset_), (core::Undefined),
                  (
-                    (Make_, (core::FunStaticMake<core::Undefined>)),
-                    (Base__, (local::ApplyByFun<Make_>))
+                     (Base__, (DispatchOffset<Exp__,
+                                             TupleOfExp__,
+                                             typename core::Succ::Call<Offset_>::Type>))
                  ),
                  Base__
                 );
@@ -124,17 +128,6 @@ namespace cong::lang
                  Base__
                 );
 
-                // standard case: try generic implementation at position before the previous
-                CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchOffset,
-                 (Exp__, TupleOfExp__, Offset_), (),
-                 (
-                     (Impl_, (typename Spec_::template GenericImpl<Offset_>)),
-                     (Base__, (DispatchImpl<Exp__, TupleOfExp__, Impl_, Offset_>))
-                 ),
-                 Base__
-                );
-
                 // final case: no further generic implementation (previous offset was zero)
                 /*CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchOffset,
@@ -145,6 +138,37 @@ namespace cong::lang
                  ),
                  Base__
                 );*/
+
+                // standard case: try generic implementation at position before the previous
+                CONG_LANG_CORE_FUN_PROPAGATE
+                (DispatchOffset,
+                 (Exp__, TupleOfExp__, Offset_), (),
+                 (
+                     (Impl_, (typename Spec_::template GenericImpl<Offset_>)),
+                     (Base__, (DispatchAvailable<Exp__, TupleOfExp__, Offset_, typename Impl_::Present>))
+                 ),
+                 Base__
+                );
+
+                CONG_LANG_CORE_FUN_PROPAGATE
+                (DispatchAvailable,
+                    (Exp__, TupleOfExp__, Offset_), (cong::lang::core::True),
+                    (
+                        (Impl_, (typename Spec_::template GenericImpl<Offset_>)),
+                        (Base__, (DispatchImpl<Exp__, TupleOfExp__, Impl_, Offset_>))
+                    ),
+                    Base__
+                );
+
+                CONG_LANG_CORE_FUN_PROPAGATE
+                (DispatchAvailable,
+                 (Exp__, TupleOfExp__, Offset_), (cong::lang::core::False),
+                 (
+                    (Make_, (core::FunStaticMake<core::Undefined>)),
+                    (Base__, (local::ApplyByFun<Make_>))
+                 ),
+                 Base__
+                );
 
 
             public:

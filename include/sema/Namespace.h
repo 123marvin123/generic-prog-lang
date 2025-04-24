@@ -99,6 +99,22 @@ struct Namespace : SemaIdentifier, SemaContext<Namespace>, SemaContext<Concept>,
     }
 
     [[nodiscard]]
+    vec<const Namespace*> namespace_chain() const
+    {
+        vec<const Namespace*> result;
+        const Namespace* current = this;
+
+        while (current)
+        {
+            result.push_back(current);
+            current = current->get_parent();
+        }
+
+        std::reverse(result.begin(), result.end());
+        return result;
+    }
+
+    [[nodiscard]]
     Sema* get_sema() const { return sema; }
 
     struct DebugVisitor;

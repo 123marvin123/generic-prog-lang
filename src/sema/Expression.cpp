@@ -122,7 +122,11 @@ std::string CallExpression::to_cpp() const noexcept {
             return std::move(a) + ", " + b;
         });
 
-    return std::format("{}({})", get_function()->get_full_name(), joined_args);
+    const Namespace* ns = get_function()->get_namespace();
+    std::string prefix = ns->get_full_name() + (ns->is_global() ? "" : "::");
+    std::string id = utils::sanitize_cpp_identifier(get_function()->get_identifier());
+    
+    return std::format("{}{}({})", prefix, id, joined_args);
 }
 
 ArithmeticExpression::ArithmeticExpression(Sema* sema, s_ptr<Expression> left, s_ptr<Expression> right, const Operator op):

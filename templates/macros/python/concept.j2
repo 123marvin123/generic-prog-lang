@@ -1,0 +1,31 @@
+{# filepath: /Users/haschker/Arbeitsbereich/generic-prog-lang/templates/macros/python/concept.j2 #}
+{% macro ConceptDefinition(def) %}
+{# --- Imports --- #}
+
+{# TODO: Import base concepts based on def.bases #}
+{% for base in def.bases %}
+from {{ python_import_path(base) }} import Concept{{ sanitize(base.name) }}
+{% endfor %}
+
+{# --- Concept Class --- #}
+class Concept{{ sanitize(def.name) }}:
+    NAME = "{{ sanitize(def.name) }}"
+    NAMESPACE = "{{ def.ns | join('.') if def.ns else '' }}"
+    DESCRIPTION = """{{ def.description | replace('"', '\\"') }}""" # Escape quotes
+
+    # Store base concepts (optional)
+    BASES = [
+        {% for base in def.bases -%}
+        Concept{{ sanitize(base.name) }}{{ ',' if not loop.last }}
+        {% endfor %}
+    ]
+
+    def __init__(self):
+        # Concepts are typically not instantiated directly in Python
+        # This serves mainly as a marker or for meta-information
+        pass
+
+# Optional: Alias for easier use
+{{ sanitize(def.name) }} = Concept{{ sanitize(def.name) }}
+
+{% endmacro %}

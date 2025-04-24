@@ -1,13 +1,14 @@
 {% from "macros/c++/namespace.j2" import NamespaceChain with context %}
 
 {% macro ConceptDefinition(def) %}
+{% set Name_ = sanitize(def.name) %}
 {% call NamespaceChain(def.ns) %}
-struct Concept{{def.name}} {
+struct Concept{{ Name_ }} {
     using Bases = ::cong::lang::core::Tuple<
     {%- for base in def.bases -%}
-{{base.ns | join('::')}}::Concept{{base.name}}{{', ' if loop.nextitem is defined }}
+{{base.ns | join('::')}}::Concept{{ sanitize(base.name) }}{{', ' if loop.nextitem is defined }}
     {%- endfor %}>;
-    static constexpr auto name = "{{def.name}}";
+    static constexpr auto name = "{{ Name_ }}";
     static constexpr auto description = "{{def.description}}";
 };
 {% endcall %}
