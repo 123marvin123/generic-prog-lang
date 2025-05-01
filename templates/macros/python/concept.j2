@@ -7,25 +7,24 @@
 from {{ python_import_path(base) }} import Concept{{ sanitize(base.name) }}
 {% endfor %}
 
-{# --- Concept Class --- #}
-class Concept{{ sanitize(def.name) }}:
-    NAME = "{{ sanitize(def.name) }}"
-    NAMESPACE = "{{ def.ns | join('.') if def.ns else '' }}"
-    DESCRIPTION = """{{ def.description | replace('"', '\\"') }}""" # Escape quotes
+from .concept import Concept
 
-    # Store base concepts (optional)
+class Concept{{ sanitize(def.name) }}(Concept):
+
+    _instance = None
     BASES = [
-        {% for base in def.bases -%}
-        Concept{{ sanitize(base.name) }}{{ ',' if not loop.last }}
-        {% endfor %}
+{% for base in def.bases %}
+        Concept{{ sanitize(base.name) }}{% if not loop.last %},{% endif %}
+{% endfor %}
     ]
-
+    
     def __init__(self):
-        # Concepts are typically not instantiated directly in Python
-        # This serves mainly as a marker or for meta-information
-        pass
-
-# Optional: Alias for easier use
-{{ sanitize(def.name) }} = Concept{{ sanitize(def.name) }}
+        super().__init__("{{ sanitize(def.name) }}", """{{ def.description | replace('"', '\\"') }}""")
+    
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
 
 {% endmacro %}

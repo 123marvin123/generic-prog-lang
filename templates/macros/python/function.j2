@@ -1,51 +1,21 @@
-{# filepath: /Users/haschker/Arbeitsbereich/generic-prog-lang/templates/macros/python/function.j2 #}
 {% macro FunctionDefinition(def) %}
-{# --- Imports --- #}
-import typing
-from typing import TypeVar, Generic, Any # Add necessary types
 
-{# TODO: Import types used in parameters and return type #}
-{# TODO: Import functions called within the generic implementation #}
-{% set reqs = function_requirements_python(def.fqn) %}
-{% set impls = function_generic_impls_python(def.fqn) %}
+{% set reqs = function_requirements(def.full_name) %}
+{% set impls = function_generic_impls(def.full_name) %}
+{% set Name_ = sanitize(def.name) | capitalize %}
 
-{# --- Type Variables (if any placeholders used) --- #}
-{% for p in def.params if p.type.is_placeholder %}
-{{ sanitize(p.type.name) }} = TypeVar('{{ sanitize(p.type.name) }}')
-{% endfor %}
-{# TODO: Handle return type placeholder #}
+class Spec{{ Name_ }}:
 
+    GENERIC_IMPLS = [
+        {% for impl in impls %}
+        lambda {% for p in def.params -%}{{ sanitize(p.name) }}{{ ', ' if not loop.last }}{%- endfor -%}: {{ impl }}{{ ', ' if not loop.last }}
+        {% endfor %}
+    ]
 
-{# --- Function Definition --- #}
-def {{ sanitize(def.name) }}(
-    {%- for p in def.params -%}
-    {{ sanitize(p.name) }}{{ ', ' if not loop.last }}
-    {%- endfor -%}
-):
-    """
-    Function: {{ def.name }}
-    Namespace: {{ def.ns | join('.') if def.ns else '(root)' }}
-    Description: {{ def.description if def.description else 'N/A' }}
+    NAME = "{{ sanitize(def.name) }}"
+    pass
 
-    Requires:
-    {% for r in reqs -%}
-    - {{ to_python_code(r.expression_obj) }}
-    {% else -%}
-    N/A
-    {% endfor %}
-    """
-    # --- Requirements Check (optional runtime check) ---
-    {% for r in reqs -%}
-    # assert {{ to_python_code(r.expression_obj) }}, "Requirement not met: {{ to_python_code(r.expression_obj) }}"
-    {% endfor %}
-
-    # --- Generic Implementation ---
-    # Note: Assumes the first generic implementation is the one to use.
-    # More complex logic might be needed for multiple/conditional implementations.
-    {% if impls %}
-    return {{ to_python_code(impls[0]) }}
-    {% else %}
-    raise NotImplementedError("Generic implementation missing for function {{ def.name }}")
-    {% endif %}
+def {{ sanitize(def.name) }}({%- for p in def.params -%}{{ sanitize(p.name) }}{{ ', ' if not loop.last }}{%- endfor -%}):
+    return Exp()
 
 {% endmacro %}
