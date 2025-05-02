@@ -9,9 +9,6 @@ class Val(Base):
     def reduce_time(self):
         from .primitive import Number
         return Exp(Number(1))
-        
-    def reduce_value(self):
-        return self
 
     def apply_space(self):
         from .primitive import Number

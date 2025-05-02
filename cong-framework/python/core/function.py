@@ -35,21 +35,21 @@ class _Function(Base):
             if not is_exp(arg):
                 raise TypeError(f"Argument {i} must be an expression, got {type(arg).__name__}")
 
-        exp = args[0].reduce_value()
-        argument_list = args[1:] if len(args) > 1 else []
-
         # Evaluate the argument_list to a new list evaluated_args by calling reduce_value on each of them
-        evaluated_args = [arg.reduce_value() for arg in argument_list]
+        evaluated_args = [arg.reduce_value() for arg in args]
 
-        # TODO check if arguments satisfy the needed concepts for this fun 
+        # TODO check if arguments satisfy the needed concepts for this fun
 
-        method = getattr(exp, self.specification.name, None)
-        if method is not None:
-            return method(*evaluated_args)
 
-        generic_impls = getattr(self.specification, "GENERIC_IMPLS", [])
+        # We iterate through all our arguments to see if any of the arguments implement our target function
+        for exp in evaluated_args:
+            method = getattr(exp, self.specification.name, None)
+            if method is not None:
+                return method(*evaluated_args)
+
+        generic_impls = getattr(self.specification, "generic_impls", [])
         for generic_impl in generic_impls:
-            result = generic_impl(exp, *evaluated_args)
+            result = generic_impl(*evaluated_args)
             if not isinstance(result, Undefined):
                 return result
         

@@ -8,8 +8,7 @@ class Exp(Base):
         return getattr(self._impl, name)
 
     def __call__(self, *args):
-        from .bind import Bind
-        return Exp(Bind(self, args))
+        return self._impl(*args)
     
     def reduce_space(self):
         return self._impl.reduce_space()

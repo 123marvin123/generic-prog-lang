@@ -1,4 +1,3 @@
-{# filepath: /Users/haschker/Arbeitsbereich/generic-prog-lang/templates/macros/python/concept.j2 #}
 {% macro ConceptDefinition(def) %}
 {# --- Imports --- #}
 
@@ -7,19 +6,20 @@
 from {{ python_import_path(base) }} import Concept{{ sanitize(base.name) }}
 {% endfor %}
 
-from .concept import Concept
+from .cong.core.concept import Concept
 
 class Concept{{ sanitize(def.name) }}(Concept):
 
     _instance = None
-    BASES = [
-{% for base in def.bases %}
-        Concept{{ sanitize(base.name) }}{% if not loop.last %},{% endif %}
-{% endfor %}
-    ]
-    
+
     def __init__(self):
-        super().__init__("{{ sanitize(def.name) }}", """{{ def.description | replace('"', '\\"') }}""")
+        super().__init__(
+            "{{ sanitize(def.name) }}", 
+            """{{ def.description | replace('"', '\\"') }}""",
+            [{%- for base in def.bases %}
+Concept{{ sanitize(base.name) }}.instance(){% if not loop.last %},{% endif %}
+            {% endfor -%}]
+        )
     
     @classmethod
     def instance(cls):

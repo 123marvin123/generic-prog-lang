@@ -3,13 +3,19 @@
 //
 #include "export/python/JinjaPythonExport.h"
 #include "Utils.h"
-#include "sema/Expression.h" // Für Expression::to_python() (muss noch implementiert werden)
-#include "sema/RequiresStatement.h" // Für Requirements
-#include "jinja2cpp/template_env.h" // Für get_template_env()
-#include "jinja2cpp/user_callable.h" // Für MakeCallable
+#include "sema/Expression.h"
+#include "sema/RequiresStatement.h"
+#include "jinja2cpp/template_env.h"
+#include "jinja2cpp/user_callable.h"
+
+#include <filesystem>
+#include <format>
+#include <unordered_map>
+#include <variant>
+
 #include <fstream>
 #include <iostream>
-#include <ranges> // Für Views und Ranges
+#include <ranges>
 
 // Konstruktor: Templates laden und Funktionen registrieren
 JinjaPythonExport::JinjaPythonExport(Sema* sema, const std::filesystem::path& template_folder, std::filesystem::path out,
@@ -40,12 +46,12 @@ JinjaPythonExport::JinjaPythonExport(Sema* sema, const std::filesystem::path& te
 // Hilfsfunktion zum Erstellen von __init__.py
 void JinjaPythonExport::ensure_python_module(const std::filesystem::path& dir_path)
 {
-    if (!std::filesystem::exists(dir_path))
+    if (!exists(dir_path))
     {
-        std::filesystem::create_directories(dir_path);
+        create_directories(dir_path);
     }
     const auto init_py = dir_path / "__init__.py";
-    if (!std::filesystem::exists(init_py))
+    if (!exists(init_py))
     {
         std::ofstream init_file(init_py); // Leere Datei erstellen
         if (!init_file)
@@ -80,7 +86,6 @@ vec<std::filesystem::path> JinjaPythonExport::process()
 
         jinja2::ValuesMap context{};
         context["concept"] = jinja2::Reflect(c);
-        // TODO: Fügen Sie hier ggf. Abhängigkeiten (Basis-Konzepte) für Imports hinzu
 
         if (const auto res = concept_tpl.RenderAsString(context); res.has_value())
         {
@@ -115,7 +120,6 @@ vec<std::filesystem::path> JinjaPythonExport::process()
 
         jinja2::ValuesMap context{};
         context["function"] = jinja2::Reflect(FunctionView{f});
-        // TODO: Fügen Sie hier ggf. Abhängigkeiten (Typen, aufgerufene Funktionen) für Imports hinzu
 
         if (const auto res = function_tpl.RenderAsString(context); res.has_value())
         {

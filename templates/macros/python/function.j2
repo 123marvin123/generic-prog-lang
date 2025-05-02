@@ -4,18 +4,26 @@
 {% set impls = function_generic_impls(def.full_name) %}
 {% set Name_ = sanitize(def.name) | capitalize %}
 
-class Spec{{ Name_ }}:
+class Spec{{ Name_ }}(FunctionSpecification):
 
-    GENERIC_IMPLS = [
-        {% for impl in impls %}
-        lambda {% for p in def.params -%}{{ sanitize(p.name) }}{{ ', ' if not loop.last }}{%- endfor -%}: {{ impl }}{{ ', ' if not loop.last }}
-        {% endfor %}
-    ]
+    def __init__(self):
+        super().__init__(
+            "{{ sanitize(def.name) }}",
+            """{{ def.description | replace('"', '\\"') }}""",
+            [{%- for param in def.params -%}
+                {%- if param.type == "placeholder_function_parameter" or param.type == "dependent_function_parameter" %}
+ConceptObject.instance()
+                {%- else %}
+Concept{{ param.concept.name }}.instance()
+                {%- endif %}{{', ' if loop.nextitem is defined }}
+            {%- endfor -%}],
+            Concept{{ sanitize(def.result.name) }}.instance(),
+            [{%- for impl in impls -%}
+lambda {% for p in def.params -%}{{ sanitize(p.name) }}{{ ', ' if not loop.last }}{%- endfor -%}: {{ impl }}{{ ', ' if not loop.last }}
+            {%- endfor -%}]
+        )
 
-    NAME = "{{ sanitize(def.name) }}"
-    pass
-
-def {{ sanitize(def.name) }}({%- for p in def.params -%}{{ sanitize(p.name) }}{{ ', ' if not loop.last }}{%- endfor -%}):
-    return Exp()
+def {{ sanitize(def.name) }}(*args):
+    return Bind(Function(Spec{{ Name_ }}()), *args)
 
 {% endmacro %}

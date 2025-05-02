@@ -37,7 +37,8 @@ class Base:
         return Undefined("Operation time cost not defined")
         
     def reduce_value(self):
-        return self
+        from .exp import Exp
+        return Exp(self)
         
     # Apply-Eigenschaften
     def apply_space(self):

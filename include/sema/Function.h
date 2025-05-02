@@ -11,15 +11,16 @@
 #include <variant>
 #include <ranges>
 
-#include "sema/SemaIdentifier.h"
-#include "sema/SemaContext.h"
-#include "Decls.h"
-#include "FunctionParameter.h"
-#include "RequiresStatement.h"
-#include "Expression.h"
-#include "Utils.h"
 #include "Debug.h"
+#include "Decls.h"
+#include "Expression.h"
+#include "FunctionParameter.h"
+#include "Namespace.h"
+#include "RequiresStatement.h"
+#include "Utils.h"
 #include "jinja2cpp/reflected_value.h"
+#include "sema/SemaContext.h"
+#include "sema/SemaIdentifier.h"
 
 struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<Function>
 {
@@ -186,6 +187,42 @@ public:
     friend struct jinja2::TypeReflection<FunctionView>;
 };
 
+/*
+template<> struct jinja2::TypeReflection<ConcreteFunction> : TypeReflected<ConcreteFunction>
+{
+    static auto& GetAccessors()
+    {
+        static auto parent = TypeReflection<FunctionView>::GetAccessors();
+        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
+
+        accessors.insert({
+            {"type", [](const ConcreteFunction&) { return "concrete_function"; }},
+            {"result_concept", [](const ConcreteFunction& f) { return Reflect(*std::get<const Concept*>(f.get_result())); }}
+        });
+
+        return accessors;
+    }
+};
+
+template<> struct jinja2::TypeReflection<DependentFunction> : TypeReflected<DependentFunction>
+{
+    static auto& GetAccessors()
+    {
+        static auto parent = TypeReflection<FunctionView>::GetAccessors();
+        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
+
+        accessors.insert({
+            {"type", [](const Function&) { return "dependent_function"; }},
+            {"result_dependency", [](const DependentFunction& f) { return Reflect(*std::get<PlaceholderFunctionParameter*>(f.get_result())); }}
+        });
+
+        return accessors;
+    }
+};
+*/
+
+const Concept* get_object(const Function* f);
+
 template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionView>
 {
     static auto& GetAccessors()
@@ -194,6 +231,15 @@ template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionV
             {"name", [](const FunctionView& f) { return f.func->get_identifier(); }},
             {"full_name", [](const FunctionView& f) { return f.func->get_full_name(); }},
             {"description", [](const FunctionView& f) { return f.func->get_description().value_or(""); }},
+            {"result", [](const FunctionView& f)
+            {
+                if (std::holds_alternative<const Concept*>(f.func->get_result()))
+                {
+                    return Reflect(*std::get<const Concept*>(f.func->get_result()));
+                }
+
+                return Reflect(*get_object(f.func));
+            }},
             {"ns", [](const FunctionView& f)
             {
                 const utils::FQIInfo info = utils::split_fully_qualified_identifier(f.func->get_full_name());
@@ -229,39 +275,5 @@ template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionV
         return accessors;
     }
 };
-
-/*
-template<> struct jinja2::TypeReflection<ConcreteFunction> : TypeReflected<ConcreteFunction>
-{
-    static auto& GetAccessors()
-    {
-        static auto parent = TypeReflection<FunctionView>::GetAccessors();
-        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
-
-        accessors.insert({
-            {"type", [](const ConcreteFunction&) { return "concrete_function"; }},
-            {"result_concept", [](const ConcreteFunction& f) { return Reflect(*std::get<const Concept*>(f.get_result())); }}
-        });
-
-        return accessors;
-    }
-};
-
-template<> struct jinja2::TypeReflection<DependentFunction> : TypeReflected<DependentFunction>
-{
-    static auto& GetAccessors()
-    {
-        static auto parent = TypeReflection<FunctionView>::GetAccessors();
-        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
-
-        accessors.insert({
-            {"type", [](const Function&) { return "dependent_function"; }},
-            {"result_dependency", [](const DependentFunction& f) { return Reflect(*std::get<PlaceholderFunctionParameter*>(f.get_result())); }}
-        });
-
-        return accessors;
-    }
-};
-*/
 
 #endif //FUNCTION_H

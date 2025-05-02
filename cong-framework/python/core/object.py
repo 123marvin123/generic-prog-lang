@@ -10,15 +10,6 @@ class _Object(Val):
     def native(self):
         return self._native
 
-    def reduce_value(self):
-        return self
-    
-    def apply_value(self, *args):
-        return self
-
-    def id(self):
-        return self
-
     def __str__(self):
         return f"ObjectDynamic({self._native})"
         

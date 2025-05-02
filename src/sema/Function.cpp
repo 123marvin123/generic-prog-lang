@@ -98,8 +98,7 @@ void Function::DebugVisitor::visitFunction(const Function& f)
 
     ss << "]) -> " << termcolor::yellow;
 
-    if (const auto& result = f.get_result();
-        std::holds_alternative<const Concept*>(result))
+    if (const auto& result = f.get_result(); std::holds_alternative<const Concept*>(result))
         ss << std::get<const Concept*>(result)->get_identifier();
     else if (std::holds_alternative<PlaceholderFunctionParameter*>(result))
         ss << std::get<PlaceholderFunctionParameter*>(result)->get_type_placeholder_name();
@@ -114,8 +113,7 @@ void Function::DebugVisitor::visitFunction(const Function& f)
         ss << termcolor::red << "\"" << f.get_description().value() << "\"";
 
     ss << termcolor::reset << "\n";
-    if (const vec<s_ptr<Expression>>& generic_impls = f.get_implementations();
-        !generic_impls.empty())
+    if (const vec<s_ptr<Expression>>& generic_impls = f.get_implementations(); !generic_impls.empty())
     {
         for (const s_ptr<Expression>& exp : generic_impls)
         {
@@ -125,20 +123,23 @@ void Function::DebugVisitor::visitFunction(const Function& f)
     }
 
     ss << termcolor::reset;
-    if (const vec<RequiresStatement>& reqs = f.requirements();
-        !reqs.empty())
+    if (const vec<RequiresStatement>& reqs = f.requirements(); !reqs.empty())
     {
         for (const RequiresStatement& exp : reqs)
         {
             ss << spaces() << termcolor::bold << "requires";
 
             if (exp.is_named())
-                ss << termcolor::reset << "(name: \"" << termcolor::red << exp.get_name().value() << "\")" << termcolor::reset;
+                ss << termcolor::reset << "(name: \"" << termcolor::red << exp.get_name().value() << "\")"
+                   << termcolor::reset;
 
             ss << " {\n";
             ss << exp.get_expression()->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
         }
     }
     ss << termcolor::reset;
-
+}
+const Concept* get_object(const Function* f)
+{
+    return f->get_namespace()->get_sema()->find_concept("Object").value();
 }

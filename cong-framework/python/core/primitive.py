@@ -11,9 +11,6 @@ class PrimitiveVal(_Object):
     def value(self):
         return self._native
         
-    def reduce_value(self):
-        return self
-        
     def __str__(self):
         return f"{type(self).__name__}({self.value})"
         
