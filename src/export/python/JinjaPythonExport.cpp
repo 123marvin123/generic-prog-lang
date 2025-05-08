@@ -3,10 +3,10 @@
 //
 #include "export/python/JinjaPythonExport.h"
 #include "Utils.h"
-#include "sema/Expression.h"
-#include "sema/RequiresStatement.h"
 #include "jinja2cpp/template_env.h"
 #include "jinja2cpp/user_callable.h"
+#include "sema/Expression.h"
+#include "sema/RequiresStatement.h"
 
 #include <filesystem>
 #include <format>
@@ -18,22 +18,21 @@
 #include <ranges>
 
 // Konstruktor: Templates laden und Funktionen registrieren
-JinjaPythonExport::JinjaPythonExport(Sema* sema, const std::filesystem::path& template_folder, std::filesystem::path out,
-                                     const vec<const Concept*>& c, const vec<const Function*>& f) :
-    LangExport(sema, std::move(out), c, f)
+JinjaPythonExport::JinjaPythonExport(Sema* sema, const std::filesystem::path& template_folder,
+                                     std::filesystem::path out, const vec<const Concept*>& c,
+                                     const vec<const Function*>& f) : LangExport(sema, std::move(out), c, f)
 {
     // Templates laden
-    std::unordered_map<jinja2::Template*, std::filesystem::path> template_paths{
-        {&function_tpl, "function.py.j2"},
-        {&concept_tpl, "concept.py.j2"}
-    };
+    std::unordered_map<jinja2::Template*, std::filesystem::path> template_paths{{&function_tpl, "function.py.j2"},
+                                                                                {&concept_tpl, "concept.py.j2"}};
 
     for (const auto& [tpl, p] : template_paths)
     {
         const auto res = get_template_env().LoadTemplate(p);
         if (!res.has_value())
         {
-            std::cerr << "Failed to load Python template '" << p.string() << "': " << res.error().ToString() << std::endl;
+            std::cerr << "Failed to load Python template '" << p.string() << "': " << res.error().ToString()
+                      << std::endl;
             throw std::runtime_error(std::format("Failed to load Python template {}", p.string()));
         }
         *tpl = res.value();
@@ -56,8 +55,8 @@ void JinjaPythonExport::ensure_python_module(const std::filesystem::path& dir_pa
         std::ofstream init_file(init_py); // Leere Datei erstellen
         if (!init_file)
         {
-             std::cerr << "Failed to create __init__.py in " << dir_path << std::endl;
-             // Fehlerbehandlung nach Bedarf
+            std::cerr << "Failed to create __init__.py in " << dir_path << std::endl;
+            // Fehlerbehandlung nach Bedarf
         }
     }
 }
@@ -82,12 +81,13 @@ vec<std::filesystem::path> JinjaPythonExport::process()
             ensure_python_module(current_path);
         }
 
-        std::filesystem::path out_path = current_path / std::format("{}.py", utils::sanitize_python_identifier(c->get_identifier()));
+        std::filesystem::path out_path =
+            current_path / std::format("{}.py", utils::sanitize_python_identifier(c->get_identifier()));
 
         jinja2::ValuesMap context{};
         context["concept"] = jinja2::Reflect(c);
 
-        if (const auto res = concept_tpl.RenderAsString(context); res.has_value())
+        if (const auto& res = concept_tpl.RenderAsString(context))
         {
             std::ofstream out_file(out_path);
             if (!out_file)
@@ -100,8 +100,7 @@ vec<std::filesystem::path> JinjaPythonExport::process()
         }
         else
         {
-            std::cerr << "Failed to render template for concept " << c->get_full_name() << ": " << res.error().ToString() << std::endl;
-            // Fehlerbehandlung
+            utils::print_jinja2_error(res.error(), std::format("Failed to render template for concept {}", c->get_full_name()));
         }
     }
 
@@ -116,7 +115,8 @@ vec<std::filesystem::path> JinjaPythonExport::process()
             ensure_python_module(current_path);
         }
 
-        std::filesystem::path out_path = current_path / std::format("{}.py", utils::sanitize_python_identifier(f->get_identifier()));
+        std::filesystem::path out_path =
+            current_path / std::format("{}.py", utils::sanitize_python_identifier(f->get_identifier()));
 
         jinja2::ValuesMap context{};
         context["function"] = jinja2::Reflect(FunctionView{f});
@@ -134,8 +134,7 @@ vec<std::filesystem::path> JinjaPythonExport::process()
         }
         else
         {
-            std::cerr << "Failed to render template for function " << f->get_full_name() << ": " << res.error().ToString() << std::endl;
-            // Fehlerbehandlung
+            utils::print_jinja2_error(res.error(), std::format("Failed to render template for function {}", f->get_full_name()));
         }
     }
 
@@ -148,48 +147,34 @@ void JinjaPythonExport::register_concept_functions()
     LangExport::register_concept_functions(); // Basis-Funktionen (z.B. Namespace)
 
     // Python-spezifische Sanitize-Funktion
-    const auto& sanitize = jinja2::MakeCallable([](const std::string& id)
-    {
-        return utils::sanitize_python_identifier(id);
-    }, jinja2::ArgInfo{"id", true});
+    const auto& sanitize = jinja2::MakeCallable(
+        [](const std::string& id) { return utils::sanitize_python_identifier(id); }, jinja2::ArgInfo{"id", true});
 
     get_template_env().AddGlobal("sanitize", sanitize);
 
-    // Funktion zum Erzeugen von Python-Import-Pfaden (Beispiel)
     const auto& python_import_path = jinja2::MakeCallable(
-        [](const std::string& sema_object) {
-            // Annahme: sema_object ist ein reflected Concept* oder Function*
-            // Implementierung, um den Python-Modulpfad zu generieren
-            // z.B. aus Namespace und Identifier
-            // Beispiel: ns1::ns2::MyConcept -> "ns1.ns2.MyConcept"
-            //if (!sema_object) return ""; // Oder Fehler
-            // Hier Logik zum Extrahieren von Namespace/Identifier und Formatieren
-            // Dies erfordert Zugriff auf die reflektierten Daten oder eine Hilfsstruktur
-                return jinja2::Value("some_module.some_item");
-        }, jinja2::ArgInfo{"sema_object", true});
+        [](const std::string& sema_object)
+        {
+            return jinja2::Value("some_module.some_item");
+        },
+        jinja2::ArgInfo{"sema_object", true});
 
-     get_template_env().AddGlobal("python_import_path", python_import_path);
+    get_template_env().AddGlobal("python_import_path", python_import_path);
 }
 
-// Jinja-Funktionen für Funktionen registrieren
 void JinjaPythonExport::register_function_functions()
 {
-    LangExport::register_function_functions(); // Basis-Funktionen
+    LangExport::register_function_functions();
 
-    // Python-spezifische Sanitize-Funktion (falls nicht schon in concept)
-    const auto& sanitize = jinja2::MakeCallable([](const std::string& id)
-    {
-        return utils::sanitize_python_identifier(id);
-    }, jinja2::ArgInfo{"id", true});
+    const auto& sanitize = jinja2::MakeCallable(
+        [](const std::string& id) { return utils::sanitize_python_identifier(id); }, jinja2::ArgInfo{"id", true});
     get_template_env().AddGlobal("sanitize", sanitize);
 
-    // Funktion zum Extrahieren von Requirements (ähnlich C++)
-     const auto& func_reqs_python = MakeCallable(
+    const auto& func_reqs_python = MakeCallable(
         [this](const std::string& fqi)
         {
             const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
-            const opt<Function*> result =
-                utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
+            const opt<Function*> result = utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
             jinja2::ValuesList ret{};
 
             if (!result.has_value())
@@ -202,7 +187,6 @@ void JinjaPythonExport::register_function_functions()
                                    [](const RequiresStatement& exp)
                                    {
                                        jinja2::ValuesMap m{};
-                                       // Name ist optional, Python braucht ihn nicht unbedingt für requires
                                        m["name"] = utils::sanitize_python_identifier(exp.get_name().value_or(""));
                                        m["expression"] = exp.get_expression()->to_python();
                                        return m;
@@ -214,27 +198,37 @@ void JinjaPythonExport::register_function_functions()
 
     get_template_env().AddGlobal("function_requirements", func_reqs_python);
 
-     // Funktion zum Extrahieren der Generic Implementation (ähnlich C++)
-    const auto& func_generic_python = MakeCallable([this](const std::string& fqi){
-        const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
-        const opt<Function*> result =
-            utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
-        jinja2::ValuesList ret{}; // Gibt eine Liste von reflektierten Expressions zurück
-
-        if (!result.has_value())
+    const auto& func_generic_python = MakeCallable(
+        [this](const std::string& fqi)
         {
-            std::cerr << "no result for " << fqi << "." << std::endl;
+            const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
+            const opt<Function*> result = utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
+            jinja2::ValuesList ret{}; // Gibt eine Liste von reflektierten Expressions zurück
+
+            if (!result.has_value())
+            {
+                std::cerr << "no result for " << fqi << "." << std::endl;
+                return ret;
+            }
+
+            std::ranges::transform(result.value()->get_implementations(), std::back_inserter(ret),
+                                   [](const GenericImplementation& impl)
+                                   {
+                                       jinja2::ValuesMap m;
+                                       m["exp"] = impl.get_expression()->to_python();
+                                       m["timecomplexity"] = impl.get_time_complexity()
+                                           ? impl.get_time_complexity()->to_python()
+                                           : jinja2::EmptyValue{};
+                                       m["spacecomplexity"] = impl.get_space_complexity()
+                                           ? impl.get_space_complexity()->to_python()
+                                           : jinja2::EmptyValue{};
+
+                                       return m;
+                                   });
+
             return ret;
-        }
+        },
+        jinja2::ArgInfo{"fqi", true});
 
-        std::ranges::transform(result.value()->get_implementations(), std::back_inserter(ret),
-        [](const s_ptr<Expression>& exp)
-        {
-            return exp->to_python();
-        });
-
-        return ret;
-    }, jinja2::ArgInfo{"fqi", true});
-
-     get_template_env().AddGlobal("function_generic_impls", func_generic_python);
+    get_template_env().AddGlobal("function_generic_impls", func_generic_python);
 }

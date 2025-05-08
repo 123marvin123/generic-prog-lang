@@ -5,15 +5,18 @@
 #include "export/c++/JinjaCppExport.h"
 
 #include "Utils.h"
+#include "jinja2cpp/reflected_value.h"
 #include "jinja2cpp/template.h"
 #include "jinja2cpp/template_env.h"
 #include "jinja2cpp/user_callable.h"
 #include "jinja2cpp/value.h"
 #include "sema/Expression.h"
+#include "sema/GenericImplementation.h"
 
 void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2::ValuesList& needed_files)
 {
-    std::filesystem::path out = get_output_folder() / std::format("{}_dec.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
+    std::filesystem::path out =
+        get_output_folder() / std::format("{}_dec.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
 
     if (const auto res = function_dec_tpl.RenderAsString(
             {{"fun", jinja2::Reflect(FunctionView{f})}, {"needed_files", needed_files}});
@@ -33,15 +36,15 @@ void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2:
     }
     else
     {
-        std::cerr << res.error().ToString() << std::endl;
-        throw std::runtime_error(
-            std::format("Failed to render template for function declaration {}", f->get_full_name()));
+        utils::print_jinja2_error(
+            res.error(), std::format("Failed to render template for function declaration {}", f->get_full_name()));
     }
 }
 
 void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::ValuesList& needed_files)
 {
-    std::filesystem::path out = get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
+    std::filesystem::path out =
+        get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
 
     if (const auto res =
             function_tpl.RenderAsString({{"fun", jinja2::Reflect(FunctionView{f})}, {"needed_files", needed_files}});
@@ -61,8 +64,8 @@ void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::
     }
     else
     {
-        std::cerr << res.error().ToString() << std::endl;
-        throw std::runtime_error(std::format("Failed to render template for function {}", f->get_full_name()));
+        utils::print_jinja2_error(
+            res.error(), std::format("Failed to render template for function definition {}", f->get_full_name()));
     }
 }
 
@@ -70,7 +73,8 @@ vec<std::filesystem::path> JinjaCppExport::process()
 {
     for (const Concept* c : get_concepts())
     {
-        std::filesystem::path out = get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(c->get_identifier()));
+        std::filesystem::path out =
+            get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(c->get_identifier()));
         if (const auto res = concept_tpl.RenderAsString({{"concept", jinja2::Reflect(c)}}); res.has_value())
         {
             const std::string& contents = res.value();
@@ -87,14 +91,14 @@ vec<std::filesystem::path> JinjaCppExport::process()
         }
         else
         {
-            std::cerr << res.error().ToString() << std::endl;
-            throw std::runtime_error(std::format("Failed to render template for concept {}", c->get_full_name()));
+            utils::print_jinja2_error(res.error(), std::format("Failed to render template for concept {}", c->get_full_name()));
         }
     }
 
     for (const Function* f : get_functions())
     {
-        std::filesystem::path out = get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
+        std::filesystem::path out =
+            get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
 
         std::unordered_set<std::variant<const Concept*, const Function*>> needed_files_set = {};
 
@@ -146,8 +150,7 @@ void JinjaCppExport::register_function_functions()
         [this](const std::string& fqi)
         {
             const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
-            const opt<Function*> result =
-                utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
+            const opt<Function*> result = utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
             jinja2::ValuesList ret{};
 
             if (!result.has_value())
@@ -169,37 +172,43 @@ void JinjaCppExport::register_function_functions()
         },
         jinja2::ArgInfo{"fqi", true});
 
-    const auto& func_generic = MakeCallable([this](const std::string& fqi){
-        const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
-        const opt<Function*> result =
-            utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
-        jinja2::ValuesList ret{};
-
-        if (!result.has_value())
+    const auto& func_generic = MakeCallable(
+        [this](const std::string& fqi)
         {
-            std::cerr << "no result for " << fqi << "." << std::endl;
+            const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
+            const opt<Function*> result = utils::resolve_fully_qualified_identifier<Function>(info, get_sema());
+            jinja2::ValuesList ret{};
+
+            if (!result.has_value())
+            {
+                std::cerr << "no result for " << fqi << "." << std::endl;
+                return ret;
+            }
+
+            std::ranges::transform(result.value()->get_implementations(), std::back_inserter(ret),
+                                   [](const GenericImplementation& impl)
+                                   {
+                                       jinja2::ValuesMap m;
+                                       m["expression"] = impl.get_expression()->to_cpp();
+                                       m["time_complexity"] = impl.get_time_complexity()
+                                           ? impl.get_time_complexity()->to_cpp()
+                                           : jinja2::EmptyValue{};
+                                       m["space_complexity"] = impl.get_space_complexity()
+                                           ? impl.get_space_complexity()->to_cpp()
+                                           : jinja2::EmptyValue{};
+                                       return m;
+                                   });
+
             return ret;
-        }
+        },
+        jinja2::ArgInfo{"fqi", true});
 
-        std::ranges::transform(result.value()->get_implementations(), std::back_inserter(ret),
-        [](const s_ptr<Expression>& exp)
-        {
-            return exp->to_cpp();
-        });
+    const auto& sanitize = jinja2::MakeCallable(
+        [this](const std::string& id) { return utils::sanitize_cpp_identifier(id); }, jinja2::ArgInfo{"id", true});
 
-        return ret;
-    }, jinja2::ArgInfo{"fqi", true});
+    get_template_env().AddGlobal("function_requirements", func_reqs);
 
-    const auto& sanitize = jinja2::MakeCallable([this](const std::string& id)
-    {
-        return utils::sanitize_cpp_identifier(id);
-    }, jinja2::ArgInfo{"id", true});
-
-    get_template_env().AddGlobal("function_requirements",
-                                 func_reqs);
-
-    get_template_env().AddGlobal("function_generic_impls", 
-                                func_generic);    
+    get_template_env().AddGlobal("function_generic_impls", func_generic);
 
     get_template_env().AddGlobal("sanitize", sanitize);
 }

@@ -41,7 +41,40 @@ opt<Operator> utils::get_operator_for_string(std::string_view s)
     return std::nullopt;
 }
 
-std::string_view utils::get_string_for_operator(Operator op)
+std::string_view utils::get_function_for_operator(const Sema* sema, const Operator op)
+{
+    switch (op)
+    {
+    case Operator::ADD:
+        return sema->builtin_function<Operator::ADD>()->get_identifier();
+    case Operator::SUB:
+        return sema->builtin_function<Operator::SUB>()->get_identifier();
+    case Operator::MUL:
+        return sema->builtin_function<Operator::MUL>()->get_identifier();
+    case Operator::DIV:
+        return sema->builtin_function<Operator::DIV>()->get_identifier();
+    case Operator::MOD:
+        return sema->builtin_function<Operator::MOD>()->get_identifier();
+    default:
+        throw std::runtime_error("Invalid operator");
+    }
+}
+
+void utils::print_jinja2_error(const jinja2::ErrorInfo& info, const std::string& msg)
+{
+    if (!msg.empty())
+        std::cerr << msg << std::endl;
+
+    std::cerr << "  Code: " << static_cast<int>(info.GetCode()) << "\n";
+    std::cerr << "  File: " << info.GetErrorLocation().fileName << "\n";
+    std::cerr << "  Line: " << info.GetErrorLocation().line << "\n";
+    std::cerr << "  Column: " << info.GetErrorLocation().col << "\n";
+    std::cerr << "  Description:\n" << info.GetLocationDescr() << "\n";
+    std::cerr << "  Full Message:\n" << info << std::endl;
+}
+
+
+std::string_view utils::get_string_for_operator(const Operator op)
 {
     switch (op)
     {

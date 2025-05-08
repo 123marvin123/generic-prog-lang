@@ -4,19 +4,19 @@ from .base import Base
 class Val(Base):
     def reduce_space(self):
         from .primitive import Number
-        return Exp(Number(0))
+        return Number(0)
 
     def reduce_time(self):
         from .primitive import Number
-        return Exp(Number(1))
+        return Number(1)
 
-    def apply_space(self):
+    def apply_space(self, *args):
         from .primitive import Number
-        return Exp(Number(0))
+        return Number(0)
 
-    def apply_time(self):
+    def apply_time(self, *args):
         from .primitive import Number
-        return Exp(Number(1))
+        return Number(1)
         
     def apply_value(self, *args):
         return args[0] if args else self

@@ -41,6 +41,10 @@ public:
 
     virtual std::any visitParameterList(CongParser::ParameterListContext *context) = 0;
 
+    virtual std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext *context) = 0;
+
+    virtual std::any visitGenericImplDetail(CongParser::GenericImplDetailContext *context) = 0;
+
     virtual std::any visitParameter(CongParser::ParameterContext *context) = 0;
 
     virtual std::any visitCallExpression(CongParser::CallExpressionContext *context) = 0;

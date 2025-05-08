@@ -54,78 +54,89 @@ void congParserInitialize() {
     std::vector<std::string>{
       "translationUnit", "stmnt", "conceptDefinitionStmnt", "conceptDefinitionBases", 
       "namespaceStmnt", "functionStmnt", "functionBody", "functionBodyStmnt", 
-      "parameterList", "parameter", "expression", "placeholderOrQualifiedId", 
-      "placeholder", "qualifiedIdentifier", "literal"
+      "parameterList", "genericImplDetails", "genericImplDetail", "parameter", 
+      "expression", "placeholderOrQualifiedId", "placeholder", "qualifiedIdentifier", 
+      "literal"
     },
     std::vector<std::string>{
       "", "'('", "':'", "')'", "';'", "'&'", "'->'", "','", "'+'", "'-'", 
       "'*'", "'/'", "'%'", "'<'", "'>'", "'::'", "'concept'", "'fun'", "'namespace'", 
-      "'description'", "'generic'", "'requires'", "'{'", "'}'", "'...'"
+      "'description'", "'generic'", "'requires'", "'time'", "'space'", "'{'", 
+      "'}'", "'...'"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "CONCEPT", 
       "FUNCTION", "NAMESPACE", "DESCRIPTION", "GENERICIMPL", "REQUIRES", 
-      "LBRACE", "RBRACE", "VARARGS", "REAL", "BOOL", "NUMBER", "STRING", 
-      "IDENTIFIER", "WHITESPACE", "COMMENT", "LINE_COMMENT", "OTHER"
+      "TIME", "SPACE", "LBRACE", "RBRACE", "VARARGS", "REAL", "BOOL", "NUMBER", 
+      "STRING", "IDENTIFIER", "WHITESPACE", "COMMENT", "LINE_COMMENT", "OTHER"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,33,179,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,35,207,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,
-  	14,1,0,5,0,32,8,0,10,0,12,0,35,9,0,1,0,1,0,1,1,1,1,1,1,3,1,42,8,1,1,2,
-  	1,2,1,2,1,2,1,2,1,2,1,2,3,2,51,8,2,1,2,3,2,54,8,2,1,2,1,2,1,3,1,3,1,3,
-  	1,3,5,3,62,8,3,10,3,12,3,65,9,3,1,4,1,4,1,4,1,4,5,4,71,8,4,10,4,12,4,
-  	74,9,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,6,1,6,5,6,87,8,6,10,6,12,
-  	6,90,9,6,1,6,1,6,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,3,7,
-  	106,8,7,1,7,1,7,1,7,1,7,3,7,112,8,7,1,8,1,8,1,8,1,8,5,8,118,8,8,10,8,
-  	12,8,121,9,8,3,8,123,8,8,1,8,1,8,1,9,1,9,1,9,1,9,1,10,1,10,1,10,1,10,
-  	1,10,1,10,1,10,5,10,138,8,10,10,10,12,10,141,9,10,3,10,143,8,10,1,10,
-  	1,10,1,10,3,10,148,8,10,1,10,1,10,1,10,5,10,153,8,10,10,10,12,10,156,
-  	9,10,1,11,1,11,3,11,160,8,11,1,12,1,12,1,12,1,12,1,13,3,13,167,8,13,1,
-  	13,1,13,1,13,5,13,172,8,13,10,13,12,13,175,9,13,1,14,1,14,1,14,0,1,20,
-  	15,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,0,2,1,0,8,12,1,0,25,28,184,
-  	0,33,1,0,0,0,2,41,1,0,0,0,4,43,1,0,0,0,6,57,1,0,0,0,8,66,1,0,0,0,10,77,
-  	1,0,0,0,12,84,1,0,0,0,14,111,1,0,0,0,16,113,1,0,0,0,18,126,1,0,0,0,20,
-  	147,1,0,0,0,22,159,1,0,0,0,24,161,1,0,0,0,26,166,1,0,0,0,28,176,1,0,0,
-  	0,30,32,3,2,1,0,31,30,1,0,0,0,32,35,1,0,0,0,33,31,1,0,0,0,33,34,1,0,0,
-  	0,34,36,1,0,0,0,35,33,1,0,0,0,36,37,5,0,0,1,37,1,1,0,0,0,38,42,3,4,2,
-  	0,39,42,3,8,4,0,40,42,3,10,5,0,41,38,1,0,0,0,41,39,1,0,0,0,41,40,1,0,
-  	0,0,42,3,1,0,0,0,43,44,5,16,0,0,44,50,5,29,0,0,45,46,5,1,0,0,46,47,5,
-  	19,0,0,47,48,5,2,0,0,48,49,5,28,0,0,49,51,5,3,0,0,50,45,1,0,0,0,50,51,
-  	1,0,0,0,51,53,1,0,0,0,52,54,3,6,3,0,53,52,1,0,0,0,53,54,1,0,0,0,54,55,
-  	1,0,0,0,55,56,5,4,0,0,56,5,1,0,0,0,57,58,5,2,0,0,58,63,3,26,13,0,59,60,
-  	5,5,0,0,60,62,3,26,13,0,61,59,1,0,0,0,62,65,1,0,0,0,63,61,1,0,0,0,63,
-  	64,1,0,0,0,64,7,1,0,0,0,65,63,1,0,0,0,66,67,5,18,0,0,67,68,5,29,0,0,68,
-  	72,5,22,0,0,69,71,3,2,1,0,70,69,1,0,0,0,71,74,1,0,0,0,72,70,1,0,0,0,72,
-  	73,1,0,0,0,73,75,1,0,0,0,74,72,1,0,0,0,75,76,5,23,0,0,76,9,1,0,0,0,77,
-  	78,5,17,0,0,78,79,5,29,0,0,79,80,3,16,8,0,80,81,5,6,0,0,81,82,3,26,13,
-  	0,82,83,3,12,6,0,83,11,1,0,0,0,84,88,5,22,0,0,85,87,3,14,7,0,86,85,1,
-  	0,0,0,87,90,1,0,0,0,88,86,1,0,0,0,88,89,1,0,0,0,89,91,1,0,0,0,90,88,1,
-  	0,0,0,91,92,5,23,0,0,92,13,1,0,0,0,93,94,5,19,0,0,94,95,5,22,0,0,95,96,
-  	3,28,14,0,96,97,5,23,0,0,97,112,1,0,0,0,98,99,5,20,0,0,99,100,5,22,0,
-  	0,100,101,3,20,10,0,101,102,5,23,0,0,102,112,1,0,0,0,103,105,5,21,0,0,
-  	104,106,5,29,0,0,105,104,1,0,0,0,105,106,1,0,0,0,106,107,1,0,0,0,107,
-  	108,5,22,0,0,108,109,3,20,10,0,109,110,5,23,0,0,110,112,1,0,0,0,111,93,
-  	1,0,0,0,111,98,1,0,0,0,111,103,1,0,0,0,112,15,1,0,0,0,113,122,5,1,0,0,
-  	114,119,3,18,9,0,115,116,5,7,0,0,116,118,3,18,9,0,117,115,1,0,0,0,118,
-  	121,1,0,0,0,119,117,1,0,0,0,119,120,1,0,0,0,120,123,1,0,0,0,121,119,1,
-  	0,0,0,122,114,1,0,0,0,122,123,1,0,0,0,123,124,1,0,0,0,124,125,5,3,0,0,
-  	125,17,1,0,0,0,126,127,5,29,0,0,127,128,5,2,0,0,128,129,3,22,11,0,129,
-  	19,1,0,0,0,130,131,6,10,-1,0,131,148,3,28,14,0,132,133,3,26,13,0,133,
-  	142,5,1,0,0,134,139,3,20,10,0,135,136,5,7,0,0,136,138,3,20,10,0,137,135,
-  	1,0,0,0,138,141,1,0,0,0,139,137,1,0,0,0,139,140,1,0,0,0,140,143,1,0,0,
-  	0,141,139,1,0,0,0,142,134,1,0,0,0,142,143,1,0,0,0,143,144,1,0,0,0,144,
-  	145,5,3,0,0,145,148,1,0,0,0,146,148,5,29,0,0,147,130,1,0,0,0,147,132,
-  	1,0,0,0,147,146,1,0,0,0,148,154,1,0,0,0,149,150,10,4,0,0,150,151,7,0,
-  	0,0,151,153,3,20,10,5,152,149,1,0,0,0,153,156,1,0,0,0,154,152,1,0,0,0,
-  	154,155,1,0,0,0,155,21,1,0,0,0,156,154,1,0,0,0,157,160,3,26,13,0,158,
-  	160,3,24,12,0,159,157,1,0,0,0,159,158,1,0,0,0,160,23,1,0,0,0,161,162,
-  	5,13,0,0,162,163,5,29,0,0,163,164,5,14,0,0,164,25,1,0,0,0,165,167,5,15,
-  	0,0,166,165,1,0,0,0,166,167,1,0,0,0,167,168,1,0,0,0,168,173,5,29,0,0,
-  	169,170,5,15,0,0,170,172,5,29,0,0,171,169,1,0,0,0,172,175,1,0,0,0,173,
-  	171,1,0,0,0,173,174,1,0,0,0,174,27,1,0,0,0,175,173,1,0,0,0,176,177,7,
-  	1,0,0,177,29,1,0,0,0,18,33,41,50,53,63,72,88,105,111,119,122,139,142,
-  	147,154,159,166,173
+  	14,2,15,7,15,2,16,7,16,1,0,5,0,36,8,0,10,0,12,0,39,9,0,1,0,1,0,1,1,1,
+  	1,1,1,3,1,46,8,1,1,2,1,2,1,2,1,2,1,2,1,2,1,2,3,2,55,8,2,1,2,3,2,58,8,
+  	2,1,2,1,2,1,3,1,3,1,3,1,3,5,3,66,8,3,10,3,12,3,69,9,3,1,4,1,4,1,4,1,4,
+  	5,4,75,8,4,10,4,12,4,78,9,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,6,1,
+  	6,5,6,91,8,6,10,6,12,6,94,9,6,1,6,1,6,1,7,1,7,1,7,1,7,1,7,1,7,1,7,3,7,
+  	105,8,7,1,7,1,7,1,7,1,7,1,7,1,7,3,7,113,8,7,1,7,1,7,1,7,1,7,3,7,119,8,
+  	7,1,8,1,8,1,8,1,8,5,8,125,8,8,10,8,12,8,128,9,8,3,8,130,8,8,1,8,1,8,1,
+  	9,1,9,1,9,1,9,5,9,138,8,9,10,9,12,9,141,9,9,3,9,143,8,9,1,9,1,9,1,10,
+  	1,10,1,10,1,10,1,10,1,10,3,10,153,8,10,1,11,1,11,1,11,1,11,1,12,1,12,
+  	1,12,1,12,1,12,1,12,1,12,5,12,166,8,12,10,12,12,12,169,9,12,3,12,171,
+  	8,12,1,12,1,12,1,12,3,12,176,8,12,1,12,1,12,1,12,5,12,181,8,12,10,12,
+  	12,12,184,9,12,1,13,1,13,3,13,188,8,13,1,14,1,14,1,14,1,14,1,15,3,15,
+  	195,8,15,1,15,1,15,1,15,5,15,200,8,15,10,15,12,15,203,9,15,1,16,1,16,
+  	1,16,0,1,24,17,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,0,2,1,0,
+  	8,12,1,0,27,30,214,0,37,1,0,0,0,2,45,1,0,0,0,4,47,1,0,0,0,6,61,1,0,0,
+  	0,8,70,1,0,0,0,10,81,1,0,0,0,12,88,1,0,0,0,14,118,1,0,0,0,16,120,1,0,
+  	0,0,18,133,1,0,0,0,20,152,1,0,0,0,22,154,1,0,0,0,24,175,1,0,0,0,26,187,
+  	1,0,0,0,28,189,1,0,0,0,30,194,1,0,0,0,32,204,1,0,0,0,34,36,3,2,1,0,35,
+  	34,1,0,0,0,36,39,1,0,0,0,37,35,1,0,0,0,37,38,1,0,0,0,38,40,1,0,0,0,39,
+  	37,1,0,0,0,40,41,5,0,0,1,41,1,1,0,0,0,42,46,3,4,2,0,43,46,3,8,4,0,44,
+  	46,3,10,5,0,45,42,1,0,0,0,45,43,1,0,0,0,45,44,1,0,0,0,46,3,1,0,0,0,47,
+  	48,5,16,0,0,48,54,5,31,0,0,49,50,5,1,0,0,50,51,5,19,0,0,51,52,5,2,0,0,
+  	52,53,5,30,0,0,53,55,5,3,0,0,54,49,1,0,0,0,54,55,1,0,0,0,55,57,1,0,0,
+  	0,56,58,3,6,3,0,57,56,1,0,0,0,57,58,1,0,0,0,58,59,1,0,0,0,59,60,5,4,0,
+  	0,60,5,1,0,0,0,61,62,5,2,0,0,62,67,3,30,15,0,63,64,5,5,0,0,64,66,3,30,
+  	15,0,65,63,1,0,0,0,66,69,1,0,0,0,67,65,1,0,0,0,67,68,1,0,0,0,68,7,1,0,
+  	0,0,69,67,1,0,0,0,70,71,5,18,0,0,71,72,5,31,0,0,72,76,5,24,0,0,73,75,
+  	3,2,1,0,74,73,1,0,0,0,75,78,1,0,0,0,76,74,1,0,0,0,76,77,1,0,0,0,77,79,
+  	1,0,0,0,78,76,1,0,0,0,79,80,5,25,0,0,80,9,1,0,0,0,81,82,5,17,0,0,82,83,
+  	5,31,0,0,83,84,3,16,8,0,84,85,5,6,0,0,85,86,3,30,15,0,86,87,3,12,6,0,
+  	87,11,1,0,0,0,88,92,5,24,0,0,89,91,3,14,7,0,90,89,1,0,0,0,91,94,1,0,0,
+  	0,92,90,1,0,0,0,92,93,1,0,0,0,93,95,1,0,0,0,94,92,1,0,0,0,95,96,5,25,
+  	0,0,96,13,1,0,0,0,97,98,5,19,0,0,98,99,5,24,0,0,99,100,3,32,16,0,100,
+  	101,5,25,0,0,101,119,1,0,0,0,102,104,5,20,0,0,103,105,3,18,9,0,104,103,
+  	1,0,0,0,104,105,1,0,0,0,105,106,1,0,0,0,106,107,5,24,0,0,107,108,3,24,
+  	12,0,108,109,5,25,0,0,109,119,1,0,0,0,110,112,5,21,0,0,111,113,5,31,0,
+  	0,112,111,1,0,0,0,112,113,1,0,0,0,113,114,1,0,0,0,114,115,5,24,0,0,115,
+  	116,3,24,12,0,116,117,5,25,0,0,117,119,1,0,0,0,118,97,1,0,0,0,118,102,
+  	1,0,0,0,118,110,1,0,0,0,119,15,1,0,0,0,120,129,5,1,0,0,121,126,3,22,11,
+  	0,122,123,5,7,0,0,123,125,3,22,11,0,124,122,1,0,0,0,125,128,1,0,0,0,126,
+  	124,1,0,0,0,126,127,1,0,0,0,127,130,1,0,0,0,128,126,1,0,0,0,129,121,1,
+  	0,0,0,129,130,1,0,0,0,130,131,1,0,0,0,131,132,5,3,0,0,132,17,1,0,0,0,
+  	133,142,5,1,0,0,134,139,3,20,10,0,135,136,5,7,0,0,136,138,3,20,10,0,137,
+  	135,1,0,0,0,138,141,1,0,0,0,139,137,1,0,0,0,139,140,1,0,0,0,140,143,1,
+  	0,0,0,141,139,1,0,0,0,142,134,1,0,0,0,142,143,1,0,0,0,143,144,1,0,0,0,
+  	144,145,5,3,0,0,145,19,1,0,0,0,146,147,5,22,0,0,147,148,5,2,0,0,148,153,
+  	3,24,12,0,149,150,5,23,0,0,150,151,5,2,0,0,151,153,3,24,12,0,152,146,
+  	1,0,0,0,152,149,1,0,0,0,153,21,1,0,0,0,154,155,5,31,0,0,155,156,5,2,0,
+  	0,156,157,3,26,13,0,157,23,1,0,0,0,158,159,6,12,-1,0,159,176,3,32,16,
+  	0,160,161,3,30,15,0,161,170,5,1,0,0,162,167,3,24,12,0,163,164,5,7,0,0,
+  	164,166,3,24,12,0,165,163,1,0,0,0,166,169,1,0,0,0,167,165,1,0,0,0,167,
+  	168,1,0,0,0,168,171,1,0,0,0,169,167,1,0,0,0,170,162,1,0,0,0,170,171,1,
+  	0,0,0,171,172,1,0,0,0,172,173,5,3,0,0,173,176,1,0,0,0,174,176,5,31,0,
+  	0,175,158,1,0,0,0,175,160,1,0,0,0,175,174,1,0,0,0,176,182,1,0,0,0,177,
+  	178,10,4,0,0,178,179,7,0,0,0,179,181,3,24,12,5,180,177,1,0,0,0,181,184,
+  	1,0,0,0,182,180,1,0,0,0,182,183,1,0,0,0,183,25,1,0,0,0,184,182,1,0,0,
+  	0,185,188,3,30,15,0,186,188,3,28,14,0,187,185,1,0,0,0,187,186,1,0,0,0,
+  	188,27,1,0,0,0,189,190,5,13,0,0,190,191,5,31,0,0,191,192,5,14,0,0,192,
+  	29,1,0,0,0,193,195,5,15,0,0,194,193,1,0,0,0,194,195,1,0,0,0,195,196,1,
+  	0,0,0,196,201,5,31,0,0,197,198,5,15,0,0,198,200,5,31,0,0,199,197,1,0,
+  	0,0,200,203,1,0,0,0,201,199,1,0,0,0,201,202,1,0,0,0,202,31,1,0,0,0,203,
+  	201,1,0,0,0,204,205,7,1,0,0,205,33,1,0,0,0,22,37,45,54,57,67,76,92,104,
+  	112,118,126,129,139,142,152,167,170,175,182,187,194,201
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -219,18 +230,18 @@ CongParser::TranslationUnitContext* CongParser::translationUnit() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(33);
+    setState(37);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
       ((1ULL << _la) & 458752) != 0)) {
-      setState(30);
+      setState(34);
       stmnt();
-      setState(35);
+      setState(39);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(36);
+    setState(40);
     match(CongParser::EOF);
    
   }
@@ -286,26 +297,26 @@ CongParser::StmntContext* CongParser::stmnt() {
     exitRule();
   });
   try {
-    setState(41);
+    setState(45);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case CongParser::CONCEPT: {
         enterOuterAlt(_localctx, 1);
-        setState(38);
+        setState(42);
         conceptDefinitionStmnt();
         break;
       }
 
       case CongParser::NAMESPACE: {
         enterOuterAlt(_localctx, 2);
-        setState(39);
+        setState(43);
         namespaceStmnt();
         break;
       }
 
       case CongParser::FUNCTION: {
         enterOuterAlt(_localctx, 3);
-        setState(40);
+        setState(44);
         functionStmnt();
         break;
       }
@@ -377,35 +388,35 @@ CongParser::ConceptDefinitionStmntContext* CongParser::conceptDefinitionStmnt() 
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(43);
+    setState(47);
     match(CongParser::CONCEPT);
-    setState(44);
+    setState(48);
     antlrcpp::downCast<ConceptDefinitionStmntContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
-    setState(50);
+    setState(54);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == CongParser::T__0) {
-      setState(45);
-      match(CongParser::T__0);
-      setState(46);
-      match(CongParser::DESCRIPTION);
-      setState(47);
-      match(CongParser::T__1);
-      setState(48);
-      antlrcpp::downCast<ConceptDefinitionStmntContext *>(_localctx)->desc = match(CongParser::STRING);
       setState(49);
+      match(CongParser::T__0);
+      setState(50);
+      match(CongParser::DESCRIPTION);
+      setState(51);
+      match(CongParser::T__1);
+      setState(52);
+      antlrcpp::downCast<ConceptDefinitionStmntContext *>(_localctx)->desc = match(CongParser::STRING);
+      setState(53);
       match(CongParser::T__2);
     }
-    setState(53);
+    setState(57);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == CongParser::T__1) {
-      setState(52);
+      setState(56);
       conceptDefinitionBases();
     }
-    setState(55);
+    setState(59);
     match(CongParser::T__3);
    
   }
@@ -459,19 +470,19 @@ CongParser::ConceptDefinitionBasesContext* CongParser::conceptDefinitionBases() 
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(57);
+    setState(61);
     match(CongParser::T__1);
-    setState(58);
+    setState(62);
     qualifiedIdentifier();
-    setState(63);
+    setState(67);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == CongParser::T__4) {
-      setState(59);
+      setState(63);
       match(CongParser::T__4);
-      setState(60);
+      setState(64);
       qualifiedIdentifier();
-      setState(65);
+      setState(69);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -543,24 +554,24 @@ CongParser::NamespaceStmntContext* CongParser::namespaceStmnt() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(66);
+    setState(70);
     match(CongParser::NAMESPACE);
-    setState(67);
+    setState(71);
     antlrcpp::downCast<NamespaceStmntContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
-    setState(68);
-    match(CongParser::LBRACE);
     setState(72);
+    match(CongParser::LBRACE);
+    setState(76);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
       ((1ULL << _la) & 458752) != 0)) {
-      setState(69);
+      setState(73);
       stmnt();
-      setState(74);
+      setState(78);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(75);
+    setState(79);
     match(CongParser::RBRACE);
    
   }
@@ -625,17 +636,17 @@ CongParser::FunctionStmntContext* CongParser::functionStmnt() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(77);
-    match(CongParser::FUNCTION);
-    setState(78);
-    antlrcpp::downCast<FunctionStmntContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
-    setState(79);
-    parameterList();
-    setState(80);
-    match(CongParser::T__5);
     setState(81);
-    antlrcpp::downCast<FunctionStmntContext *>(_localctx)->type = qualifiedIdentifier();
+    match(CongParser::FUNCTION);
     setState(82);
+    antlrcpp::downCast<FunctionStmntContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
+    setState(83);
+    parameterList();
+    setState(84);
+    match(CongParser::T__5);
+    setState(85);
+    antlrcpp::downCast<FunctionStmntContext *>(_localctx)->type = qualifiedIdentifier();
+    setState(86);
     functionBody();
    
   }
@@ -697,20 +708,20 @@ CongParser::FunctionBodyContext* CongParser::functionBody() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(84);
-    match(CongParser::LBRACE);
     setState(88);
+    match(CongParser::LBRACE);
+    setState(92);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
       ((1ULL << _la) & 3670016) != 0)) {
-      setState(85);
+      setState(89);
       functionBodyStmnt();
-      setState(90);
+      setState(94);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(91);
+    setState(95);
     match(CongParser::RBRACE);
    
   }
@@ -754,6 +765,10 @@ CongParser::ExpressionContext* CongParser::FunctionGenericImplContext::expressio
 
 tree::TerminalNode* CongParser::FunctionGenericImplContext::RBRACE() {
   return getToken(CongParser::RBRACE, 0);
+}
+
+CongParser::GenericImplDetailsContext* CongParser::FunctionGenericImplContext::genericImplDetails() {
+  return getRuleContext<CongParser::GenericImplDetailsContext>(0);
 }
 
 CongParser::FunctionGenericImplContext::FunctionGenericImplContext(FunctionBodyStmntContext *ctx) { copyFrom(ctx); }
@@ -836,19 +851,19 @@ CongParser::FunctionBodyStmntContext* CongParser::functionBodyStmnt() {
     exitRule();
   });
   try {
-    setState(111);
+    setState(118);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case CongParser::DESCRIPTION: {
         _localctx = _tracker.createInstance<CongParser::FunctionDescriptionContext>(_localctx);
         enterOuterAlt(_localctx, 1);
-        setState(93);
+        setState(97);
         match(CongParser::DESCRIPTION);
-        setState(94);
+        setState(98);
         match(CongParser::LBRACE);
-        setState(95);
+        setState(99);
         literal();
-        setState(96);
+        setState(100);
         match(CongParser::RBRACE);
         break;
       }
@@ -856,13 +871,21 @@ CongParser::FunctionBodyStmntContext* CongParser::functionBodyStmnt() {
       case CongParser::GENERICIMPL: {
         _localctx = _tracker.createInstance<CongParser::FunctionGenericImplContext>(_localctx);
         enterOuterAlt(_localctx, 2);
-        setState(98);
+        setState(102);
         match(CongParser::GENERICIMPL);
-        setState(99);
+        setState(104);
+        _errHandler->sync(this);
+
+        _la = _input->LA(1);
+        if (_la == CongParser::T__0) {
+          setState(103);
+          genericImplDetails();
+        }
+        setState(106);
         match(CongParser::LBRACE);
-        setState(100);
+        setState(107);
         expression(0);
-        setState(101);
+        setState(108);
         match(CongParser::RBRACE);
         break;
       }
@@ -870,21 +893,21 @@ CongParser::FunctionBodyStmntContext* CongParser::functionBodyStmnt() {
       case CongParser::REQUIRES: {
         _localctx = _tracker.createInstance<CongParser::FunctionExpRequiresContext>(_localctx);
         enterOuterAlt(_localctx, 3);
-        setState(103);
+        setState(110);
         match(CongParser::REQUIRES);
-        setState(105);
+        setState(112);
         _errHandler->sync(this);
 
         _la = _input->LA(1);
         if (_la == CongParser::IDENTIFIER) {
-          setState(104);
+          setState(111);
           antlrcpp::downCast<FunctionExpRequiresContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
         }
-        setState(107);
+        setState(114);
         match(CongParser::LBRACE);
-        setState(108);
+        setState(115);
         expression(0);
-        setState(109);
+        setState(116);
         match(CongParser::RBRACE);
         break;
       }
@@ -944,30 +967,190 @@ CongParser::ParameterListContext* CongParser::parameterList() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(113);
+    setState(120);
     match(CongParser::T__0);
-    setState(122);
+    setState(129);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == CongParser::IDENTIFIER) {
-      setState(114);
+      setState(121);
       parameter();
-      setState(119);
+      setState(126);
       _errHandler->sync(this);
       _la = _input->LA(1);
       while (_la == CongParser::T__6) {
-        setState(115);
+        setState(122);
         match(CongParser::T__6);
-        setState(116);
+        setState(123);
         parameter();
-        setState(121);
+        setState(128);
         _errHandler->sync(this);
         _la = _input->LA(1);
       }
     }
-    setState(124);
+    setState(131);
     match(CongParser::T__2);
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- GenericImplDetailsContext ------------------------------------------------------------------
+
+CongParser::GenericImplDetailsContext::GenericImplDetailsContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+std::vector<CongParser::GenericImplDetailContext *> CongParser::GenericImplDetailsContext::genericImplDetail() {
+  return getRuleContexts<CongParser::GenericImplDetailContext>();
+}
+
+CongParser::GenericImplDetailContext* CongParser::GenericImplDetailsContext::genericImplDetail(size_t i) {
+  return getRuleContext<CongParser::GenericImplDetailContext>(i);
+}
+
+
+size_t CongParser::GenericImplDetailsContext::getRuleIndex() const {
+  return CongParser::RuleGenericImplDetails;
+}
+
+
+std::any CongParser::GenericImplDetailsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CongVisitor*>(visitor))
+    return parserVisitor->visitGenericImplDetails(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+CongParser::GenericImplDetailsContext* CongParser::genericImplDetails() {
+  GenericImplDetailsContext *_localctx = _tracker.createInstance<GenericImplDetailsContext>(_ctx, getState());
+  enterRule(_localctx, 18, CongParser::RuleGenericImplDetails);
+  size_t _la = 0;
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(133);
+    match(CongParser::T__0);
+    setState(142);
+    _errHandler->sync(this);
+
+    _la = _input->LA(1);
+    if (_la == CongParser::TIME
+
+    || _la == CongParser::SPACE) {
+      setState(134);
+      genericImplDetail();
+      setState(139);
+      _errHandler->sync(this);
+      _la = _input->LA(1);
+      while (_la == CongParser::T__6) {
+        setState(135);
+        match(CongParser::T__6);
+        setState(136);
+        genericImplDetail();
+        setState(141);
+        _errHandler->sync(this);
+        _la = _input->LA(1);
+      }
+    }
+    setState(144);
+    match(CongParser::T__2);
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- GenericImplDetailContext ------------------------------------------------------------------
+
+CongParser::GenericImplDetailContext::GenericImplDetailContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+tree::TerminalNode* CongParser::GenericImplDetailContext::TIME() {
+  return getToken(CongParser::TIME, 0);
+}
+
+CongParser::ExpressionContext* CongParser::GenericImplDetailContext::expression() {
+  return getRuleContext<CongParser::ExpressionContext>(0);
+}
+
+tree::TerminalNode* CongParser::GenericImplDetailContext::SPACE() {
+  return getToken(CongParser::SPACE, 0);
+}
+
+
+size_t CongParser::GenericImplDetailContext::getRuleIndex() const {
+  return CongParser::RuleGenericImplDetail;
+}
+
+
+std::any CongParser::GenericImplDetailContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CongVisitor*>(visitor))
+    return parserVisitor->visitGenericImplDetail(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+CongParser::GenericImplDetailContext* CongParser::genericImplDetail() {
+  GenericImplDetailContext *_localctx = _tracker.createInstance<GenericImplDetailContext>(_ctx, getState());
+  enterRule(_localctx, 20, CongParser::RuleGenericImplDetail);
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    setState(152);
+    _errHandler->sync(this);
+    switch (_input->LA(1)) {
+      case CongParser::TIME: {
+        enterOuterAlt(_localctx, 1);
+        setState(146);
+        match(CongParser::TIME);
+        setState(147);
+        match(CongParser::T__1);
+        setState(148);
+        expression(0);
+        break;
+      }
+
+      case CongParser::SPACE: {
+        enterOuterAlt(_localctx, 2);
+        setState(149);
+        match(CongParser::SPACE);
+        setState(150);
+        match(CongParser::T__1);
+        setState(151);
+        expression(0);
+        break;
+      }
+
+    default:
+      throw NoViableAltException(this);
+    }
    
   }
   catch (RecognitionException &e) {
@@ -1008,7 +1191,7 @@ std::any CongParser::ParameterContext::accept(tree::ParseTreeVisitor *visitor) {
 
 CongParser::ParameterContext* CongParser::parameter() {
   ParameterContext *_localctx = _tracker.createInstance<ParameterContext>(_ctx, getState());
-  enterRule(_localctx, 18, CongParser::RuleParameter);
+  enterRule(_localctx, 22, CongParser::RuleParameter);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1019,11 +1202,11 @@ CongParser::ParameterContext* CongParser::parameter() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(126);
+    setState(154);
     antlrcpp::downCast<ParameterContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
-    setState(127);
+    setState(155);
     match(CongParser::T__1);
-    setState(128);
+    setState(156);
     antlrcpp::downCast<ParameterContext *>(_localctx)->type = placeholderOrQualifiedId();
    
   }
@@ -1134,8 +1317,8 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
   CongParser::ExpressionContext *_localctx = _tracker.createInstance<ExpressionContext>(_ctx, parentState);
   CongParser::ExpressionContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 20;
-  enterRecursionRule(_localctx, 20, CongParser::RuleExpression, precedence);
+  size_t startState = 24;
+  enterRecursionRule(_localctx, 24, CongParser::RuleExpression, precedence);
 
     size_t _la = 0;
 
@@ -1149,15 +1332,15 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(147);
+    setState(175);
     _errHandler->sync(this);
-    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 13, _ctx)) {
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 17, _ctx)) {
     case 1: {
       _localctx = _tracker.createInstance<LiteralExpressionContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
 
-      setState(131);
+      setState(159);
       antlrcpp::downCast<LiteralExpressionContext *>(_localctx)->val = literal();
       break;
     }
@@ -1166,32 +1349,32 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
       _localctx = _tracker.createInstance<CallExpressionContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(132);
+      setState(160);
       antlrcpp::downCast<CallExpressionContext *>(_localctx)->fun = qualifiedIdentifier();
-      setState(133);
+      setState(161);
       match(CongParser::T__0);
-      setState(142);
+      setState(170);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
       if ((((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 1040220160) != 0)) {
-        setState(134);
+        ((1ULL << _la) & 4160782336) != 0)) {
+        setState(162);
         expression(0);
-        setState(139);
+        setState(167);
         _errHandler->sync(this);
         _la = _input->LA(1);
         while (_la == CongParser::T__6) {
-          setState(135);
+          setState(163);
           match(CongParser::T__6);
-          setState(136);
+          setState(164);
           expression(0);
-          setState(141);
+          setState(169);
           _errHandler->sync(this);
           _la = _input->LA(1);
         }
       }
-      setState(144);
+      setState(172);
       match(CongParser::T__2);
       break;
     }
@@ -1200,7 +1383,7 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
       _localctx = _tracker.createInstance<ParameterReferenceExpressionContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(146);
+      setState(174);
       antlrcpp::downCast<ParameterReferenceExpressionContext *>(_localctx)->param = match(CongParser::IDENTIFIER);
       break;
     }
@@ -1209,9 +1392,9 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
       break;
     }
     _ctx->stop = _input->LT(-1);
-    setState(154);
+    setState(182);
     _errHandler->sync(this);
-    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx);
+    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 18, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         if (!_parseListeners.empty())
@@ -1221,10 +1404,10 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
         _localctx = newContext;
         newContext->left = previousContext;
         pushNewRecursionContext(newContext, startState, RuleExpression);
-        setState(149);
+        setState(177);
 
         if (!(precpred(_ctx, 4))) throw FailedPredicateException(this, "precpred(_ctx, 4)");
-        setState(150);
+        setState(178);
         antlrcpp::downCast<ArithmeticExpressionContext *>(_localctx)->op = _input->LT(1);
         _la = _input->LA(1);
         if (!((((_la & ~ 0x3fULL) == 0) &&
@@ -1235,12 +1418,12 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
           _errHandler->reportMatch(this);
           consume();
         }
-        setState(151);
+        setState(179);
         antlrcpp::downCast<ArithmeticExpressionContext *>(_localctx)->right = expression(5); 
       }
-      setState(156);
+      setState(184);
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 18, _ctx);
     }
   }
   catch (RecognitionException &e) {
@@ -1280,7 +1463,7 @@ std::any CongParser::PlaceholderOrQualifiedIdContext::accept(tree::ParseTreeVisi
 
 CongParser::PlaceholderOrQualifiedIdContext* CongParser::placeholderOrQualifiedId() {
   PlaceholderOrQualifiedIdContext *_localctx = _tracker.createInstance<PlaceholderOrQualifiedIdContext>(_ctx, getState());
-  enterRule(_localctx, 22, CongParser::RulePlaceholderOrQualifiedId);
+  enterRule(_localctx, 26, CongParser::RulePlaceholderOrQualifiedId);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1290,20 +1473,20 @@ CongParser::PlaceholderOrQualifiedIdContext* CongParser::placeholderOrQualifiedI
     exitRule();
   });
   try {
-    setState(159);
+    setState(187);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case CongParser::T__14:
       case CongParser::IDENTIFIER: {
         enterOuterAlt(_localctx, 1);
-        setState(157);
+        setState(185);
         qualifiedIdentifier();
         break;
       }
 
       case CongParser::T__12: {
         enterOuterAlt(_localctx, 2);
-        setState(158);
+        setState(186);
         placeholder();
         break;
       }
@@ -1347,7 +1530,7 @@ std::any CongParser::PlaceholderContext::accept(tree::ParseTreeVisitor *visitor)
 
 CongParser::PlaceholderContext* CongParser::placeholder() {
   PlaceholderContext *_localctx = _tracker.createInstance<PlaceholderContext>(_ctx, getState());
-  enterRule(_localctx, 24, CongParser::RulePlaceholder);
+  enterRule(_localctx, 28, CongParser::RulePlaceholder);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1358,11 +1541,11 @@ CongParser::PlaceholderContext* CongParser::placeholder() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(161);
+    setState(189);
     match(CongParser::T__12);
-    setState(162);
+    setState(190);
     antlrcpp::downCast<PlaceholderContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
-    setState(163);
+    setState(191);
     match(CongParser::T__13);
    
   }
@@ -1404,7 +1587,7 @@ std::any CongParser::QualifiedIdentifierContext::accept(tree::ParseTreeVisitor *
 
 CongParser::QualifiedIdentifierContext* CongParser::qualifiedIdentifier() {
   QualifiedIdentifierContext *_localctx = _tracker.createInstance<QualifiedIdentifierContext>(_ctx, getState());
-  enterRule(_localctx, 26, CongParser::RuleQualifiedIdentifier);
+  enterRule(_localctx, 30, CongParser::RuleQualifiedIdentifier);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1416,25 +1599,25 @@ CongParser::QualifiedIdentifierContext* CongParser::qualifiedIdentifier() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(166);
+    setState(194);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == CongParser::T__14) {
-      setState(165);
+      setState(193);
       match(CongParser::T__14);
     }
-    setState(168);
+    setState(196);
     match(CongParser::IDENTIFIER);
-    setState(173);
+    setState(201);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == CongParser::T__14) {
-      setState(169);
+      setState(197);
       match(CongParser::T__14);
-      setState(170);
+      setState(198);
       match(CongParser::IDENTIFIER);
-      setState(175);
+      setState(203);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -1486,7 +1669,7 @@ std::any CongParser::LiteralContext::accept(tree::ParseTreeVisitor *visitor) {
 
 CongParser::LiteralContext* CongParser::literal() {
   LiteralContext *_localctx = _tracker.createInstance<LiteralContext>(_ctx, getState());
-  enterRule(_localctx, 28, CongParser::RuleLiteral);
+  enterRule(_localctx, 32, CongParser::RuleLiteral);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1498,10 +1681,10 @@ CongParser::LiteralContext* CongParser::literal() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(176);
+    setState(204);
     _la = _input->LA(1);
     if (!((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 503316480) != 0))) {
+      ((1ULL << _la) & 2013265920) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -1521,7 +1704,7 @@ CongParser::LiteralContext* CongParser::literal() {
 
 bool CongParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
-    case 10: return expressionSempred(antlrcpp::downCast<ExpressionContext *>(context), predicateIndex);
+    case 12: return expressionSempred(antlrcpp::downCast<ExpressionContext *>(context), predicateIndex);
 
   default:
     break;

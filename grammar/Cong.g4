@@ -32,15 +32,23 @@ functionBody
 
 functionBodyStmnt
     : DESCRIPTION LBRACE literal RBRACE # functionDescription
-    | GENERICIMPL LBRACE expression RBRACE # functionGenericImpl
+    | GENERICIMPL genericImplDetails? LBRACE expression RBRACE # functionGenericImpl
     | REQUIRES (name=IDENTIFIER)? LBRACE expression RBRACE # functionExpRequires
     ;
-
-
 
 parameterList
     : '(' (parameter (',' parameter)*)? ')'
     ;
+
+genericImplDetails
+    : '(' (genericImplDetail (',' genericImplDetail)*)? ')'
+    ;
+
+genericImplDetail
+    : TIME ':' expression
+    | SPACE ':' expression
+    ;
+
 
 parameter
     : name=IDENTIFIER ':' type=placeholderOrQualifiedId
@@ -79,6 +87,8 @@ NAMESPACE: 'namespace';
 DESCRIPTION: 'description';
 GENERICIMPL: 'generic';
 REQUIRES: 'requires';
+TIME: 'time';
+SPACE: 'space';
 
 LBRACE: '{';
 RBRACE: '}';

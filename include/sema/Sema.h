@@ -32,7 +32,7 @@ struct Sema final : DefaultNamespace
 
     template <class T, class... Args> requires std::is_base_of_v<Function, T>
     [[nodiscard]] static
-    opt<T*> create_function(Namespace* ns, Args&... args)
+    opt<T*> create_function(Namespace* ns, Args&&... args)
     {
         auto fn = std::make_unique<T>(std::forward<Args>(args)...);
         auto* ptr = fn.get();
@@ -45,6 +45,10 @@ struct Sema final : DefaultNamespace
     [[nodiscard]]
     const Concept* builtin_concept() const;
 
+    template <Operator T>
+    [[nodiscard]]
+    const Function* builtin_function() const;
+
 private:
     void register_builtin_concepts();
     void register_builtin_functions();
@@ -55,6 +59,12 @@ private:
     const Concept* boolean_concept;
     const Concept* real_concept;
     const Concept* number_concept;
+
+    const Function* add_function;
+    const Function* sub_function;
+    const Function* mod_function;
+    const Function* mul_function;
+    const Function* div_function;
 };
 
 #endif // SEMA_H

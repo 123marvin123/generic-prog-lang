@@ -19,6 +19,7 @@
 #include "RequiresStatement.h"
 #include "Utils.h"
 #include "jinja2cpp/reflected_value.h"
+#include "sema/GenericImplementation.h"
 #include "sema/SemaContext.h"
 #include "sema/SemaIdentifier.h"
 
@@ -75,10 +76,10 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
         return description.has_value() && !description.value().empty();
     }
 
-    void add_generic_implementation(s_ptr<Expression> exp);
+    void add_generic_implementation(const GenericImplementation& exp);
 
     [[nodiscard]]
-    vec<s_ptr<Expression>> get_implementations() const
+    const vec<GenericImplementation>& get_implementations() const
     {
         return generic_implementations;
     }
@@ -94,6 +95,16 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     [[nodiscard]]
     virtual bool is_dependent() const { throw std::runtime_error("Not implemented."); };
 
+    void set_time_complexity(s_ptr<Expression> exp) { time_complexity = std::move(exp); }
+
+    [[nodiscard]]
+    s_ptr<Expression> get_time_complexity() const { return time_complexity; }
+
+    void set_space_complexity(s_ptr<Expression> exp) { space_complexity = std::move(exp); }
+
+    [[nodiscard]]
+    s_ptr<Expression> get_space_complexity() const { return space_complexity; }
+
     [[nodiscard]]
     virtual std::variant<const Concept*, PlaceholderFunctionParameter*>
     get_result() const { throw std::runtime_error("Not implemented."); };
@@ -102,8 +113,9 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
 
 private:
     opt<std::string> description;
-    vec<s_ptr<Expression>> generic_implementations;
+    vec<GenericImplementation> generic_implementations;
     vec<RequiresStatement> exp_requires;
+    s_ptr<Expression> time_complexity, space_complexity;
 };
 
 struct ConcreteFunction final : Function, Introspection<ConcreteFunction>
@@ -221,59 +233,9 @@ template<> struct jinja2::TypeReflection<DependentFunction> : TypeReflected<Depe
 };
 */
 
-const Concept* get_object(const Function* f);
-
 template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionView>
 {
-    static auto& GetAccessors()
-    {
-        static std::unordered_map<std::string, FieldAccessor> accessors = {
-            {"name", [](const FunctionView& f) { return f.func->get_identifier(); }},
-            {"full_name", [](const FunctionView& f) { return f.func->get_full_name(); }},
-            {"description", [](const FunctionView& f) { return f.func->get_description().value_or(""); }},
-            {"result", [](const FunctionView& f)
-            {
-                if (std::holds_alternative<const Concept*>(f.func->get_result()))
-                {
-                    return Reflect(*std::get<const Concept*>(f.func->get_result()));
-                }
-
-                return Reflect(*get_object(f.func));
-            }},
-            {"ns", [](const FunctionView& f)
-            {
-                const utils::FQIInfo info = utils::split_fully_qualified_identifier(f.func->get_full_name());
-                ValuesList l(info.namespaces.begin(), info.namespaces.end());
-                return l;
-            }},
-            {"params", [](const FunctionView& f)
-            {
-                const auto& params = f.func->get_parameters();
-                ValuesList l{};
-                l.reserve(params.size());
-
-                std::ranges::transform(params, std::back_inserter(l), [](const auto* p) {
-                    if (const auto *concrete =
-                              utils::dyn_cast<ConcreteFunctionParameter>(p))
-                        return Reflect(*concrete);
-
-                      if (const auto *placeholder =
-                            utils::dyn_cast<PlaceholderFunctionParameter>(p))
-                      return Reflect(*placeholder);
-
-                    if (const auto *dependent =
-                              utils::dyn_cast<DependentFunctionParameter>(p))
-                        return Reflect(*dependent);
-
-                    return Reflect(*p);
-                });
-
-                return l;
-            }}
-        };
-
-        return accessors;
-    }
+    static std::unordered_map<std::string, FieldAccessor>& GetAccessors();
 };
 
 #endif //FUNCTION_H

@@ -59,6 +59,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitGenericImplDetail(CongParser::GenericImplDetailContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitParameter(CongParser::ParameterContext *ctx) override {
     return visitChildren(ctx);
   }

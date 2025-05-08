@@ -1,7 +1,6 @@
 #include "sema/Sema.h"
 
 #include <sema/Expression.h>
-#include <sema/FunctionParameter.h>
 #include <visitor/AbstractVisitor.h>
 
 opt<Concept*> Sema::create_concept(Namespace* ns, const std::string& name,
@@ -39,7 +38,11 @@ void Sema::register_builtin_concepts()
 
 void Sema::register_builtin_functions()
 {
-
+    add_function = create_function<ConcreteFunction>(this, "add", this, object_concept).value();
+    sub_function = create_function<ConcreteFunction>(this, "sub", this, object_concept).value();
+    mul_function = create_function<ConcreteFunction>(this, "mul", this, object_concept).value();
+    div_function = create_function<ConcreteFunction>(this, "div", this, object_concept).value();
+    mod_function = create_function<ConcreteFunction>(this, "mod", this, object_concept).value();
 }
 
 void Sema::register_builtin_operators()
@@ -113,4 +116,39 @@ const Concept* Sema::builtin_concept<double>() const
 {
     if (!real_concept) throw std::runtime_error("Real concept not registered");
     return real_concept;
+}
+
+template <>
+const Function* Sema::builtin_function<Operator::ADD>() const
+{
+    if (!add_function) throw std::runtime_error("Add function not registered");
+    return add_function;
+}
+
+template <>
+const Function* Sema::builtin_function<Operator::SUB>() const
+{
+    if (!sub_function) throw std::runtime_error("Sub function not registered");
+    return sub_function;
+}
+
+template <>
+const Function* Sema::builtin_function<Operator::MUL>() const
+{
+    if (!mul_function) throw std::runtime_error("Mul function not registered");
+    return mul_function;
+}
+
+template <>
+const Function* Sema::builtin_function<Operator::DIV>() const
+{
+    if (!div_function) throw std::runtime_error("Div function not registered");
+    return div_function;
+}
+
+template <>
+const Function* Sema::builtin_function<Operator::MOD>() const
+{
+    if (!mod_function) throw std::runtime_error("Mod function not registered");
+    return mod_function;
 }

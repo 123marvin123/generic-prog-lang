@@ -41,10 +41,10 @@ class Base:
         return Exp(self)
         
     # Apply-Eigenschaften
-    def apply_space(self):
+    def apply_space(self, *args):
         return Undefined("Operation space cost not defined")
         
-    def apply_time(self):
+    def apply_time(self, *args):
         return Undefined("Operation time cost not defined")
         
     def apply_value(self, *args):

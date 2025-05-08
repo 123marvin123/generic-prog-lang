@@ -5,9 +5,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <memory>
 #include <CLI/CLI.hpp>
+#include <memory>
 #include "Decls.h"
+#include "jinja2cpp/error_info.h"
 
 namespace utils
 {
@@ -71,6 +72,10 @@ namespace utils
     opt<Operator> get_operator_for_string(std::string_view s);
 
     std::string_view get_string_for_operator(Operator op);
+
+    std::string_view get_function_for_operator(const Sema* sema, Operator op);
+
+    void print_jinja2_error(const jinja2::ErrorInfo& info, const std::string& msg = "");
 
     const std::map<std::string_view, std::string_view> cpp_keyword_map = {
         {"alignas", "alignas_"},

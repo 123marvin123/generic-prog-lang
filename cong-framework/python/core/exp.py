@@ -19,11 +19,11 @@ class Exp(Base):
     def reduce_value(self):
         return self._impl.reduce_value()
     
-    def apply_space(self):
-        return self._impl.apply_space()
+    def apply_space(self, *args):
+        return self._impl.apply_space(*args)
         
-    def apply_time(self):
-        return self._impl.apply_time()
+    def apply_time(self, *args):
+        return self._impl.apply_time(*args)
     
     def apply_value(self, *args):
         return self._impl.apply_value(*args)

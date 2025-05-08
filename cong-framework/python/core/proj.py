@@ -5,12 +5,12 @@ from .exp import Exp
 class _Proj(Base):
 
     def __init__(self, n):
-        if n.value <= 0:
+        if n <= 0:
             raise ValueError("Proj benötigt einen Index >= 1")
         self.n = n
         
     def apply_value(self, *args):
-        index = self.n.value - 1
+        index = self.n - 1
         
         if index >= len(args):
             return Exp(self)

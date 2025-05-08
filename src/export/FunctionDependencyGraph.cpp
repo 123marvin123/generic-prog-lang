@@ -53,7 +53,7 @@ void FunctionDependencyGraph::analyze_function_dependencies(const Function* func
     std::set<const Function*> callees;
 
     for (const auto& impl : function->get_implementations()) {
-        analyze_expression_dependencies(impl.get(), callees);
+        analyze_expression_dependencies(impl.get_expression().get(), callees);
     }
 
     for (const auto& req : function->requirements()) {

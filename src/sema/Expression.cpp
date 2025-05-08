@@ -111,22 +111,38 @@ std::set<const Function *> CallExpression::get_depending_functions() const {
     return depending_functions;
 }
 
-std::string CallExpression::to_cpp() const noexcept {
+std::string CallExpression::to_cpp() const noexcept
+{
     vec<std::string> str_args{};
     str_args.reserve(args.size());
     for (const auto& arg : args)
         str_args.push_back(arg->to_cpp());
 
-    std::string joined_args = std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
-        [](std::string a, const std::string& b) {
-            return std::move(a) + ", " + b;
-        });
+    std::string joined_args =
+        std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
+                        [](std::string a, const std::string& b) { return std::move(a) + ", " + b; });
 
     const Namespace* ns = get_function()->get_namespace();
     std::string prefix = ns->get_full_name() + (ns->is_global() ? "" : "::");
     std::string id = utils::sanitize_cpp_identifier(get_function()->get_identifier());
-    
+
     return std::format("{}{}({})", prefix, id, joined_args);
+}
+
+std::string CallExpression::to_python() const noexcept
+{
+    vec<std::string> str_args{};
+    str_args.reserve(args.size());
+    for (const auto& arg : args)
+        str_args.push_back(arg->to_python());
+
+    std::string joined_args =
+        std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
+                        [](std::string a, const std::string& b) { return std::move(a) + ", " + b; });
+
+    std::string id = utils::sanitize_python_identifier(get_function()->get_identifier());
+
+    return std::format("{}({})", id, joined_args);
 }
 
 ArithmeticExpression::ArithmeticExpression(Sema* sema, s_ptr<Expression> left, s_ptr<Expression> right, const Operator op):

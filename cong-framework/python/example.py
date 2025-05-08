@@ -1,10 +1,10 @@
 
 from core.bind import Bind
 from core.exp import Exp, eval
-from core.function import FunctionSpecification, Function
+from core.function import FunctionSpecification, FunctionFromSpec, GenericFunction, CostFun
 from core.concept_sequence import SpecItemAt, SpecReplaceItemAt, ConceptObject
 from core.base import Base
-from core.primitive import Number, String
+from core.primitive import Number
 from core.proj import Proj
 
 class MySequence(Base):
@@ -36,10 +36,10 @@ class MySequence(Base):
         return f"MySequence({self._items})"
 
 def replaceItemAt(*args):
-    return Bind(Function(SpecReplaceItemAt()), *args)
+    return Bind(FunctionFromSpec(SpecReplaceItemAt()), *args)
 
 def itemAt(*args):
-    return Bind(Function(SpecItemAt()), *args)
+    return Bind(FunctionFromSpec(SpecItemAt()), *args)
 
 class SpecId(FunctionSpecification):
     def __init__(self):
@@ -48,10 +48,17 @@ class SpecId(FunctionSpecification):
             "Returns itself",
             [ConceptObject.instance()],
             ConceptObject.instance(),
-            [lambda x: x])
+            [
+                GenericFunction(
+                    lambda x: x,
+                    CostFun(lambda x: Number(1)),
+                    CostFun(lambda x: Number(0))
+                )
+            ]
+        )
 
 def id(*args):
-    return Bind(Function(SpecId()), *args)
+    return Bind(FunctionFromSpec(SpecId()), *args)
 
 if __name__ == "__main__":
     seq = Exp(MySequence(Number(0), Number(10)))
@@ -59,7 +66,7 @@ if __name__ == "__main__":
     result = eval(a)
     print(f"Ergebnis: {result}, Sequenz nach Ersetzung: {seq}")
 
-    replaceFirstItem = replaceItemAt(Proj(Number(1)), Number(0), Number(5))
+    replaceFirstItem = replaceItemAt(Proj(1), Number(0), Number(5))
 
     seq = Exp(MySequence(Number(0), Number(10)))
     result = eval(replaceFirstItem(seq))

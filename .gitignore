@@ -9,3 +9,4 @@ output/
 .cache/
 compile_commands.json
 __pycache__/
+.antlr/

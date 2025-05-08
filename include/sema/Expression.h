@@ -5,14 +5,13 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
+#include <memory>
+#include <ranges>
 #include "Debug.h"
 #include "Decls.h"
 #include "Function.h"
 #include "FunctionParameter.h"
 #include "Utils.h"
-#include <memory>
-#include <ranges>
-#include <utility>
 
 struct Expression : SemaElement, Introspection<Expression> {
   explicit Expression(Sema *sema) : sema(sema) {}
@@ -134,6 +133,12 @@ struct RealExpression final : ConstantExpression<double> {
   [[nodiscard]] std::string to_cpp() const noexcept override {
     return std::format("::cong::lang::RealStatic<{}>{{}}", eval());
   }
+
+  [[nodiscard]]
+  std::string to_python() const noexcept override
+  {
+    return std::format("Real({})", eval());
+  }
 };
 
 struct NumberExpression final : ConstantExpression<long> {
@@ -146,6 +151,12 @@ struct NumberExpression final : ConstantExpression<long> {
   [[nodiscard]] std::string to_cpp() const noexcept override {
     return std::format("::cong::lang::NaturalStatic<{}>{{}}", eval());
   }
+
+  [[nodiscard]]
+  std::string to_python() const noexcept override
+  {
+    return std::format("Number({})", eval());
+  };
 };
 
 struct BooleanExpression final : ConstantExpression<bool> {
@@ -159,6 +170,12 @@ struct BooleanExpression final : ConstantExpression<bool> {
     return std::format("::cong::lang::BooleanStatic<{}>{{}}",
                        eval() ? "true" : "false");
   }
+
+  [[nodiscard]]
+  std::string to_python() const noexcept override
+  {
+    return std::format("Boolean({})", eval() ? "True" : "False");
+  };
 };
 
 struct BoundFunctionParameterExpression;
@@ -267,9 +284,7 @@ struct CallExpression final : Expression, Introspection<CallExpression> {
 
   [[nodiscard]] std::string to_cpp() const noexcept override;
 
-  [[nodiscard]] std::string to_python() const noexcept override {
-    return to_cpp(); // TODO: fix
-  }
+  [[nodiscard]] std::string to_python() const noexcept override;
 
   struct DebugVisitor;
 
@@ -309,7 +324,8 @@ struct ArithmeticExpression final : Expression,
   }
 
   [[nodiscard]] std::string to_cpp() const noexcept override {
-    auto fun = "::cong::" + std::string{utils::get_string_for_operator(get_op())};
+
+    auto fun = "::cong::" + std::string{utils::get_function_for_operator(get_sema(), get_op())};
     for(auto& c : fun)
       c = tolower(c);
 
@@ -317,9 +333,10 @@ struct ArithmeticExpression final : Expression,
   }
 
   [[nodiscard]] std::string to_python() const noexcept override {
-    return std::format("{} {} {}", get_left()->to_python(),
-                       utils::get_string_for_operator(op),
-                       get_right()->to_python());
+    return std::format("{}({}, {})",
+        utils::get_function_for_operator(get_sema(), op),
+        get_left()->to_python(),
+        get_right()->to_python());
   }
 
   struct DebugVisitor;

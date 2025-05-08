@@ -10,6 +10,8 @@
 #include "AbstractVisitor.h"
 #include "Utils.h"
 #include "visitor/ExpressionVisitor.h"
+#include "sema/GenericImplementation.h"
+#include <unordered_map>
 
 struct FinalizingFunctionVisitor final : AbstractVisitor
 {
@@ -24,6 +26,10 @@ struct FinalizingFunctionVisitor final : AbstractVisitor
     std::any visitFunctionGenericImpl(CongParser::FunctionGenericImplContext* ctx) override;
 
     std::any visitFunctionExpRequires(CongParser::FunctionExpRequiresContext* ctx) override;
+
+    std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext* ctx) override;
+
+    std::any visitGenericImplDetail(CongParser::GenericImplDetailContext* ctx) override;
 
 private:
     Function* current_function;

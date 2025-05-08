@@ -2,10 +2,11 @@
 
 {% set reqs = function_requirements(def.full_name) %}
 {% set impls = function_generic_impls(def.full_name) %}
-{% set Name_ = sanitize(def.name) | capitalize %}
+{% set Name_ = sanitize(def.name) | title %}
 
 class Spec{{ Name_ }}(FunctionSpecification):
 
+{% set GenericLambdaParams = def.params | map(attribute='name') | map('sanitize') | join(', ') %}
     def __init__(self):
         super().__init__(
             "{{ sanitize(def.name) }}",
@@ -18,9 +19,19 @@ Concept{{ param.concept.name }}.instance()
                 {%- endif %}{{', ' if loop.nextitem is defined }}
             {%- endfor -%}],
             Concept{{ sanitize(def.result.name) }}.instance(),
-            [{%- for impl in impls -%}
-lambda {% for p in def.params -%}{{ sanitize(p.name) }}{{ ', ' if not loop.last }}{%- endfor -%}: {{ impl }}{{ ', ' if not loop.last }}
-            {%- endfor -%}]
+            [{% for impl in impls +%}
+                GenericFunction(
+                    lambda {{ GenericLambdaParams }}: {{ impl.exp }}{{ ', ' if ((impl.timecomplexity | list | length) + (impl.spacecomplexity | list | length)) > 0 }}
+                {% if impl.timecomplexity | list | length > 0 %}
+                    CostFun(lambda {{ GenericLambdaParams }}: {{ impl.timecomplexity }}){{', ' if spacecomplexity | list | length > 0 }}
+                {% endif %}
+                {% if impl.spacecomplexity | list | length > 0 %}
+                    CostFun(lambda {{ GenericLambdaParams }}: {{ impl.spacecomplexity }})
+                {% endif %}
+                )
+                {%- if not loop.last %}, {% endif %}
+            {% endfor +%}
+            ]
         )
 
 def {{ sanitize(def.name) }}(*args):

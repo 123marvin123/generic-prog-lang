@@ -11,8 +11,8 @@
 #include <utility>
 
 #include "sema/FunctionParameter.h"
-
-#include "Exception.h"
+#include "sema/GenericImplementation.h"
+#include "sema/GenericImplementation.h"
 
 opt<FunctionParameter*> Function::find_function_parameter(std::string_view identifier) const
 {
@@ -45,9 +45,9 @@ opt<PlaceholderFunctionParameter*> Function::find_placeholder(const std::string_
     return std::nullopt;
 }
 
-void Function::add_generic_implementation(s_ptr<Expression> exp)
+void Function::add_generic_implementation(const GenericImplementation& exp)
 {
-    if (const auto& exp_result = exp->get_result();
+    if (const auto& exp_result = exp.get_expression()->get_result();
         std::holds_alternative<const Concept*>(exp_result))
     {
         const auto& c = std::get<const Concept*>(exp_result);
@@ -60,7 +60,7 @@ void Function::add_generic_implementation(s_ptr<Expression> exp)
         }
     }
 
-    generic_implementations.push_back(std::move(exp));
+    generic_implementations.push_back(exp);
 }
 
 void Function::add_requirement(s_ptr<Expression> exp, opt<std::string> name)
@@ -113,12 +113,12 @@ void Function::DebugVisitor::visitFunction(const Function& f)
         ss << termcolor::red << "\"" << f.get_description().value() << "\"";
 
     ss << termcolor::reset << "\n";
-    if (const vec<s_ptr<Expression>>& generic_impls = f.get_implementations(); !generic_impls.empty())
+    if (const vec<GenericImplementation>& generic_impls = f.get_implementations(); !generic_impls.empty())
     {
-        for (const s_ptr<Expression>& exp : generic_impls)
+        for (const GenericImplementation& exp : generic_impls)
         {
             ss << spaces() << termcolor::bold << "generic" << termcolor::reset << " {\n";
-            ss << exp->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
+            ss << exp.get_expression()->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
         }
     }
 
@@ -137,9 +137,75 @@ void Function::DebugVisitor::visitFunction(const Function& f)
             ss << exp.get_expression()->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
         }
     }
+
+    /*
+    if (f.get_space_complexity())
+    {
+        ss << spaces() << termcolor::bold << "space complexity" << termcolor::reset << " {\n";
+        ss << f.get_space_complexity()->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
+    }
+
+    if (f.get_time_complexity())
+    {
+        ss << spaces() << termcolor::bold << "time complexity" << termcolor::reset << " {\n";
+        ss << f.get_time_complexity()->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
+    }
+    */
+
     ss << termcolor::reset;
 }
 const Concept* get_object(const Function* f)
 {
     return f->get_namespace()->get_sema()->find_concept("Object").value();
+}
+
+std::unordered_map<std::string, jinja2::FieldAccessor<FunctionView>>&
+jinja2::TypeReflection<FunctionView>::GetAccessors()
+{
+    static std::unordered_map<std::string, FieldAccessor> accessors = {
+        {"name", [](const FunctionView& f) { return f.func->get_identifier(); }},
+        {"full_name", [](const FunctionView& f) { return f.func->get_full_name(); }},
+        {"description", [](const FunctionView& f) { return f.func->get_description().value_or(""); }},
+        {"result", [](const FunctionView& f)
+        {
+            if (std::holds_alternative<const Concept*>(f.func->get_result()))
+            {
+                return Reflect(*std::get<const Concept*>(f.func->get_result()));
+            }
+
+            return Reflect(*f.func->get_namespace()->get_sema()->find_concept("Object").value());
+        }},
+        {"ns", [](const FunctionView& f)
+        {
+            const utils::FQIInfo info = utils::split_fully_qualified_identifier(f.func->get_full_name());
+            ValuesList l(info.namespaces.begin(), info.namespaces.end());
+            return l;
+        }},
+        {"params", [](const FunctionView& f)
+        {
+            const auto& params = f.func->get_parameters();
+            ValuesList l{};
+            l.reserve(params.size());
+
+            std::ranges::transform(params, std::back_inserter(l), [](const auto* p) {
+                if (const auto *concrete =
+                          utils::dyn_cast<ConcreteFunctionParameter>(p))
+                    return Reflect(*concrete);
+
+                  if (const auto *placeholder =
+                        utils::dyn_cast<PlaceholderFunctionParameter>(p))
+                      return Reflect(*placeholder);
+
+                    if (const auto *dependent =
+                              utils::dyn_cast<DependentFunctionParameter>(p))
+                        return Reflect(*dependent);
+
+                    return Reflect(*p);
+                });
+
+            return l;
+        }}
+    };
+
+    return accessors;
 }

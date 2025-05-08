@@ -1,9 +1,4 @@
 fun id(a: <T>) -> T {
     description { "the argument itself" }
-    generic { a }
-}
-
-fun add(a: Real, b: Real) -> Real {
-    description { "adds two numbers" }
-    generic { a + b }
+    generic(space: 0, time: 0) { a }
 }
