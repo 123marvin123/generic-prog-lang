@@ -11,6 +11,7 @@
 #include "Function.h"
 #include "FunctionParameter.h"
 #include "Utils.h"
+#include <format>
 
 struct Expression : SemaElement, Introspection<Expression> {
   explicit Expression(Sema *sema) : sema(sema) {}
