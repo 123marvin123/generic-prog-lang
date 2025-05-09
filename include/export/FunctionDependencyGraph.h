@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 #include <set>
+#include "sema/GenericImplementation.h"
 
 struct FunctionDependencyGraph
 {

@@ -12,7 +12,15 @@
 
 #include "sema/FunctionParameter.h"
 #include "sema/GenericImplementation.h"
-#include "sema/GenericImplementation.h"
+
+Function::Function(std::string name, const Namespace* parent)
+    : SemaIdentifier(std::move(name), parent)
+    {
+        if (get_identifier().empty()) throw std::runtime_error("Name must not be empty");
+        if (!parent) throw std::runtime_error("Parent must not be empty");
+    }
+
+Function::~Function() = default;
 
 opt<FunctionParameter*> Function::find_function_parameter(std::string_view identifier) const
 {

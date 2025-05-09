@@ -7,9 +7,7 @@
 
 #include <utility>
 #include <unordered_map>
-#include <format>
 #include <variant>
-#include <ranges>
 
 #include "Debug.h"
 #include "Decls.h"
@@ -19,19 +17,15 @@
 #include "RequiresStatement.h"
 #include "Utils.h"
 #include "jinja2cpp/reflected_value.h"
-#include "sema/GenericImplementation.h"
 #include "sema/SemaContext.h"
 #include "sema/SemaIdentifier.h"
 
 struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<Function>
 {
     Function(std::string name,
-             const Namespace* parent)
-        : SemaIdentifier(std::move(name), parent)
-    {
-        if (get_identifier().empty()) throw std::runtime_error("Name must not be empty");
-        if (!parent) throw std::runtime_error("Parent must not be empty");
-    }
+             const Namespace* parent);
+
+    ~Function();
 
     [[nodiscard]]
     opt<FunctionParameter*> find_function_parameter(std::string_view) const;

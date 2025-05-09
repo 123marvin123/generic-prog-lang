@@ -13,7 +13,9 @@ struct Sema final : DefaultNamespace
         if (!create_builtin) return;
 
         register_builtin_concepts();
+#ifndef __CATCH2_TEST__
         register_builtin_functions();
+#endif
         register_builtin_operators();
     }
 

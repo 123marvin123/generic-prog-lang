@@ -32,6 +32,8 @@ struct Sema;
 struct Object;
 struct Expression;
 
+struct GenericImplementation;
+
 enum class Operator
 {
     ADD,

@@ -6,7 +6,6 @@
 #define EXPRESSION_H
 
 #include <memory>
-#include <ranges>
 #include "Debug.h"
 #include "Decls.h"
 #include "Function.h"

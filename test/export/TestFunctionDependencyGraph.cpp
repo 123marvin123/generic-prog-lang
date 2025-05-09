@@ -5,6 +5,7 @@
 #include <export/FunctionDependencyGraph.h>
 #include <random>
 #include "../Common.h"
+#include "sema/GenericImplementation.h"
 
 struct FunctionDependencyGraphFixture
 {
@@ -31,9 +32,9 @@ TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Linear dependencies are sorted
     const auto B = *Sema::create_function<ConcreteFunction>(sema_ptr, "B", sema_ptr, boolean);
     const auto C = *Sema::create_function<ConcreteFunction>(sema_ptr, "C", sema_ptr, boolean);
 
-    A->add_generic_implementation(BooleanExpression::create(sema_ptr, true));
-    B->add_generic_implementation(CallExpression::create(sema_ptr, A, {}));
-    C->add_generic_implementation(CallExpression::create(sema_ptr, B, {}));
+    A->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true)));
+    B->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, A, {})));
+    C->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, B, {})));
     INFO("Created linear dependency chain: C -> B -> A");
 
     vec<Function*> functions = sema_ptr->functions();
@@ -74,16 +75,16 @@ TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Complex dependencies are sorte
     auto* D = *Sema::create_function<ConcreteFunction>(sema_ptr, "D", sema_ptr, boolean);
     auto* E = *Sema::create_function<ConcreteFunction>(sema_ptr, "E", sema_ptr, boolean);
 
-    X->add_generic_implementation(BooleanExpression::create(sema_ptr, true));
-    Y->add_generic_implementation(BooleanExpression::create(sema_ptr, true));
+    X->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true)));
+    Y->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true)));
 
-    A->add_generic_implementation(CallExpression::create(sema_ptr, X, {}));
-    B->add_generic_implementation(CallExpression::create(sema_ptr, Y, {}));
-    C->add_generic_implementation(ArithmeticExpression::create(sema_ptr, CallExpression::create(sema_ptr, A, {}),
-                                                               CallExpression::create(sema_ptr, B, {}), Operator::ADD));
-    D->add_generic_implementation(CallExpression::create(sema_ptr, B, {}));
-    E->add_generic_implementation(ArithmeticExpression::create(sema_ptr, CallExpression::create(sema_ptr, A, {}),
-                                                               CallExpression::create(sema_ptr, D, {}), Operator::ADD));
+    A->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, X, {})));
+    B->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, Y, {})));
+    C->add_generic_implementation(GenericImplementation(ArithmeticExpression::create(sema_ptr, CallExpression::create(sema_ptr, A, {}),
+                                                               CallExpression::create(sema_ptr, B, {}), Operator::ADD)));
+    D->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, B, {})));
+    E->add_generic_implementation(GenericImplementation(ArithmeticExpression::create(sema_ptr, CallExpression::create(sema_ptr, A, {}),
+                                                               CallExpression::create(sema_ptr, D, {}), Operator::ADD)));
     INFO("Created complex dependency graph");
 
     std::vector<const Function*> functions = {X, Y, A, B, C, D, E};
@@ -124,9 +125,9 @@ TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Cyclic dependency throws excep
     const auto C = *Sema::create_function<ConcreteFunction>(sema_ptr, "C", sema_ptr, boolean);
 
     // Create a cycle A -> B -> C -> A
-    A->add_generic_implementation(CallExpression::create(sema_ptr, B, {}));
-    B->add_generic_implementation(CallExpression::create(sema_ptr, C, {}));
-    C->add_generic_implementation(CallExpression::create(sema_ptr, A, {}));
+    A->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, B, {})));
+    B->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, C, {})));
+    C->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, A, {})));
     INFO("Created cyclic dependency: A -> B -> C -> A");
 
     FunctionDependencyGraph graph;

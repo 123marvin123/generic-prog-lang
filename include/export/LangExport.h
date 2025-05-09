@@ -14,6 +14,7 @@
 #include "ConceptDependencyGraph.h"
 #include "FunctionDependencyGraph.h"
 #include "jinja2cpp/user_callable.h"
+#include "sema/GenericImplementation.h"
 
 struct LangExport
 {

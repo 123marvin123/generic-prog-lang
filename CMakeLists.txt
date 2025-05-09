@@ -116,6 +116,9 @@ foreach (TEST_FILE ${TEST_FILES})
             ${CMAKE_SOURCE_DIR}/generated/CongParser.cpp
     )
 
+    target_compile_definitions(${TEST_NAME} PRIVATE
+        __CATCH2_TEST__
+    )
     add_dependencies(${TEST_NAME} generate_grammar_files)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} --order rand --warn NoAssertions -d yes)
 endforeach ()
