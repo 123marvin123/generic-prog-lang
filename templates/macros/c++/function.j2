@@ -96,7 +96,7 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
 {% for impl in function_generic_impls(def.full_name) %}
 /*
  * Generic Implementation #{{ loop.index }}:
- * {{ impl.exp }}
+ * {{ impl.expression }}
 */
 template<>
 struct Spec{{ Name_ }}::GenericImpl<cong::lang::core::NaturalStatic<{{ loop.index0 }}>>
@@ -112,7 +112,7 @@ struct Spec{{ Name_ }}::GenericImpl<cong::lang::core::NaturalStatic<{{ loop.inde
         using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
         static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
         {
-            return {{ impl.exp }};
+            return {{ impl.expression }};
         }
     public:
         using Type = std::invoke_result_t<decltype(call_), Args...>;

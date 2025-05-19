@@ -11,9 +11,9 @@
 
 #include "{{ConceptObject.name}}.hh"
 {% for param in needed_files %}
-#include "{{ param.name}}.hh"
+#include "{{ sanitize(param.name) }}.hh"
 {% endfor %}
 
-#include "{{fun.name}}.hh"
+#include "{{ sanitize(fun.name) }}.hh"
 
 {{ FunctionDeclaration(fun) }}
