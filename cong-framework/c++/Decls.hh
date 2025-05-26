@@ -2,24 +2,10 @@
 
 #include <tuple>
 #include <utility>                      // for stdlib core functions
-
+#include "Seq/core/Tuple.hh"
 // Tuple
 namespace cong::lang
 {
-    namespace core
-    {
-        template <typename... ItemS>
-        using Tuple = std::tuple<ItemS...>;
-
-        template <typename... ItemS>
-        constexpr
-        Tuple<ItemS...>
-        tuple(ItemS&&... itemS)
-        {
-            return {std::forward<ItemS>(itemS)...};
-        }
-    };
-
     namespace intern
     {
         class Environment;

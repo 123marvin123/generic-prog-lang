@@ -48,8 +48,8 @@ struct Spec{{ Name_ }} {
         template<class...>
         struct Call
         {
-            //TODO: add using Type = core::Undefined instead of 'Present'
-            static constexpr cong::lang::core::True call(...);
+            using Type = cong::lang::core::Undefined;
+            static constexpr Type call(...);
         };
     };
 
@@ -64,6 +64,12 @@ struct Spec{{ Name_ }} {
             static constexpr Type call(...);
         };
     };
+
+    using GenericImpls = cong::lang::core::Tuple<
+    {% for impl in function_generic_impls(def.full_name) %}
+        GenericImpl<cong::lang::core::NaturalStatic<{{ loop.index0 }}>>{%- if loop.last == false %}, {% endif %}
+    {% endfor %}
+    >;
 };
 
 {% for req in function_requirements(def.full_name) %}
@@ -82,7 +88,7 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
     {
         static constexpr auto call({%- for p in def.params -%}Arg{{ loop.index }}_&& {{ p.name }}{{' , ' if not loop.last }}{% endfor -%})
         {
-            using ExpType_ = decltype({{ req.expression }});
+            using ExpType_ = std::decay_t<decltype({{ req.expression }})>;
             const auto& result = [&]{ return {{ req.expression }}; };
             return cong::lang::intern::CondEval<
                         typename ::cong::lang::intern::IsExp::Call<ExpType_>::Type,
@@ -90,6 +96,7 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
                         ExpType_
                    >::call(result);
         }
+        using Type = std::invoke_result_t<decltype(call), {% for p in def.params -%}Arg{{ loop.index }}_{{' , ' if not loop.last }}{% endfor -%}>;
     };
 };{{' \n' if not loop.last }}{% endfor %} 
 
@@ -126,20 +133,8 @@ template <typename... Exp_>
 constexpr
 {{ Name_ }}<Exp_...> {{ name_ }}(Exp_&&... args) 
 {
-    // TODO: lazy eval of requirements
-    /*if constexpr (cong::lang::core::intern::is_constexpr_evaluable<cong::lang::intern::EvalRequirements, Spec{{ Name_ }}, Exp_...>::value) 
-    {
-        constexpr auto res = cong::lang::intern::EvalRequirements::Call<Spec{{ Name_ }}, Exp_...>
+    cong::lang::intern::EvalRequirements::Call<Spec{{ Name_ }}, Exp_...>
                 ::call(std::forward<Exp_>(args)...);
-        static_assert(
-            cong::lang::core::Truthy::Call<decltype(res)>::call(res),
-            "Requirements not met at compile-time.");
-    } else
-    {
-        if (const auto res = cong::lang::intern::EvalRequirements::Call<Spec{{ Name_ }}, Exp_...>::call(std::forward<Exp_>(args)...);
-            cong::lang::core::Falsy::Call<decltype(res)>::call(res))
-            throw std::runtime_error("Requirements not met at runtime.");
-    }*/
 
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},

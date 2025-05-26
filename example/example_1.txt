@@ -26,4 +26,5 @@ fun isNotEqual(a: <T>, b: <K>) -> Boolean {
 
 fun not(a: Boolean) -> Boolean {
     description { "negates a" }
+    requires { a }
 }

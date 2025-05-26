@@ -32,20 +32,6 @@ namespace cong::lang::core
         False accept(...);
         template <typename Type_>
         True accept(Type_);
-
-        template<typename Fun_, typename Spec_, typename... T>
-        class is_constexpr_evaluable {
-            static constexpr auto test(int) -> decltype(
-                Fun_::template Call<Spec_, T...>::call(std::declval<T>()...),
-                std::true_type{}
-            );
-
-            template<typename...>
-            static constexpr std::false_type test(...);
-
-        public:
-            static constexpr bool value = decltype(test<Fun_, Spec_>(0))::value;
-        };
     }
 
     // C++ type traits

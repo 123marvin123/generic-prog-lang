@@ -2,14 +2,23 @@
 
 #include "../../Boolean/core/BooleanStatic.hh"
 #include "../../Number/core/NaturalStatic.hh"
-#include "../../Decls.hh"
 #include "../../Type.hh"
 
 #include <utility>
-#include <functional>
 
 namespace cong::lang::core
 {
+    template <typename... ItemS>
+    using Tuple = std::tuple<ItemS...>;
+
+    template <typename... ItemS>
+    constexpr
+    Tuple<ItemS...>
+    tuple(ItemS&&... itemS)
+    {
+        return {std::forward<ItemS>(itemS)...};
+    }
+
     struct IsTuple
     {
     private:

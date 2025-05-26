@@ -63,6 +63,26 @@ namespace cong::lang::core
     using True = BooleanStatic<true>;
     using False = BooleanStatic<false>;
 
+    template<core::Boolean native_>
+    struct core::Truthy::Call<BooleanStatic<native_>>
+    {
+        using Type = bool;
+        static constexpr Type call(...)
+        {
+            return native_;
+        }
+    };
+
+    template<core::Boolean native_>
+    struct core::Falsy::Call<BooleanStatic<native_>>
+    {
+        using Type = bool;
+        static constexpr Type call(...)
+        {
+            return native_ == false;
+        }
+    };
+    
     template <class Fun_,
               class Cond_,
               typename Default_>

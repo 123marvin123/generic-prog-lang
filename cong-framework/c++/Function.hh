@@ -8,6 +8,7 @@
 #include "Number/core/NaturalStatic.hh"
 #include "Boolean/BooleanStatic.hh"
 
+#include "CollectGenericImpls.hh"
 #include "Fun.hh"
 #include "Type.hh"
 #include "Undefined.hh"
@@ -21,40 +22,111 @@ namespace cong::lang
     {
         struct EvalRequirements {
         private:
-            template<class N, class IsAvail_, class Dec_, class... Args>
+            template<class N, class IsAvail_, class IsStatic_, class Dec_, class... Args>
             struct Dispatch;
 
-            template<class N, class Dec_, class... Args>
-            struct Dispatch<N, False, Dec_, Args...>
+            template<class N, class Dec_, class IsStatic_, class... Args>
+            struct Dispatch<N, core::False, IsStatic_, Dec_, Args...>
             {
                 static constexpr auto call(Args&&...)
                 {
-                    return True{};
+                    return core::True{};
                 }
             };
 
+            // Case: requirement is static
             template<class N, class Dec_, class... Args>
-            struct Dispatch<N, True, Dec_, Args...>
+            struct Dispatch<N, core::True, core::True, Dec_, Args...>
             {
                 static constexpr auto call(Args&&... args)
                 {
                     using Call_ = typename Dec_::template Requirement<N>::template Call<Args...>;
-                    using Succ_ = core::Succ::Call<N>::Type;
+                    using Succ_ = typename core::Succ::Call<N>::Type;
+                    using SuccReq_ = typename Dec_::template Requirement<Succ_>;
+
+                    using SuccIsStatic_ = std::conditional_t<
+                        std::is_same_v<typename SuccReq_::Present, core::True>,
+                        typename IsStatic<typename SuccReq_::template Call<Args...>::Type >::Type,
+                        core::False
+                    >;
+
+                    using A = decltype(Call_::call(std::forward<Args>(args)...));
+                    using B = decltype(Dispatch<
+                        Succ_,
+                        typename SuccReq_::Present, SuccIsStatic_, Dec_, Args...
+                    >::call(std::forward<Args>(args)...));
+
+                    static_assert(A::native() && B::native(), "Requirement not met.");
+
+                    return A{};
+                }
+            };
+
+            // Case: requirement is dynamic
+            template<class N, class Dec_, class... Args>
+            struct Dispatch<N, core::True, core::False, Dec_, Args...>
+            {
+                static auto call(Args&&... args)
+                {
+                    using Call_ = typename Dec_::template Requirement<N>::template Call<Args...>;
+                    using Succ_ = typename core::Succ::Call<N>::Type;
+                    using SuccReq_ = typename Dec_::template Requirement<Succ_>;
+
+                    using SuccIsStatic_ = std::conditional_t<
+                        std::is_same_v<typename SuccReq_::Present, core::True>,
+                        typename IsStatic<typename SuccReq_::template Call<Args...>::Type >::Type,
+                        core::False
+                    >;
 
                     auto a = Call_::call(std::forward<Args>(args)...) ;
-                    auto b = Dispatch<Succ_, typename Dec_::template Requirement<Succ_>::Present, Dec_, Args...>::call
+                    auto b = Dispatch<Succ_, typename SuccReq_::Present, SuccIsStatic_, Dec_, Args...>::call
                            (std::forward<Args>(args)...);
 
-                    return core::Truthy::Call<decltype(a)>::call(a) &&
-                        core::Truthy::Call<decltype(b)>::call(b);
+                    if (!core::Truthy::Call<decltype(a)>::call(a) || !core::Truthy::Call<decltype(b)>::call(b))
+                    {
+                        throw std::runtime_error("Requirement not met");
+                    }
+
+                    return a;
                 }
             };
 
         public:
             template<class Dec_, class... Args>
-            struct Call : Dispatch<core::Zero, typename Dec_::template Requirement<core::Zero>::Present, Dec_, Args...>
+            struct Call : Dispatch<
+                core::Zero,
+                typename Dec_::template Requirement<core::Zero>::Present,
+                std::conditional_t<
+                    std::is_same_v<typename Dec_::template Requirement<core::Zero>::Present, core::True>,
+                    typename IsStatic<typename Dec_::template Requirement<core::Zero>::template Call<Args...>::Type >::Type,
+                    core::False
+                >,
+                Dec_, Args...>
             {
             };
+        };
+
+        template<class Impl_>
+        class ConcreteFunctionCall : public Base
+        {
+            using Base_ = Base;
+        public:
+            using ReduceSpace = core::FunStaticMake<core::Zero>;
+            using ReduceTime = core::FunStaticMake<core::One>; // @todo appropriate?
+            using ReduceValue = core::FunId;
+
+            CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
+
+            using ApplyValue = Impl_;
+        };
+
+        template<class Dec_, class Spec_>
+        class GenericFunctionCall : public Base
+        {
+            using Base_ = Base;
+
+        public:
+            CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
         };
 
         template <class Dec_, class Spec_>
@@ -87,100 +159,58 @@ namespace cong::lang
             private:
                 // Dispatches are Fun
 
-                template <typename Exp__, typename TupleOfExp__, typename Offset_>
-                struct DispatchOffset;
+                /*template <typename Exp__, typename TupleOfExp__, typename Offset_>
+                struct DispatchOffset;*/
 
-                template<typename Exp__, typename TupleOfExp__, typename Offset_, typename Available__>
-                struct DispatchAvailable;
+                template<typename Exp__, typename TupleOfExp__, typename ResultingType_>
+                struct DispatchStaticAvailable;
 
-                // generic implementation is defined for given arguments;
-                // propagate the call to that implementation
+                template<typename TupleOfImpl_>
+                struct DispatchDynamicAvailable;
+
+                // There is at least one dynamic implementation available for
+                // given arguments; we need to look for the best one at runtime
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchDefined,
-                 (Exp__, TupleOfExp__, Apply_, Offset_, Type_), (),
-                 (
-                     (Base__, (Apply_))
-                 ),
-                 Base__
-                );
-
-                // generic implementation is not defined for given arguments;
-                // re-try with predecessor in tuple of generic implementations
-                CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchDefined,
-                 (Exp__, TupleOfExp__, Apply_, Offset_), (core::Undefined),
-                 (
-                     (Base__, (DispatchOffset<Exp__,
-                                             TupleOfExp__,
-                                             typename core::Succ::Call<Offset_>::Type>))
-                 ),
-                 Base__
-                );
-
-                // call generic implementation (converted to Fun) on given arguments, examine definedness
-                CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchImpl,
-                 (Exp__, TupleOfExp__, Apply_, Offset_), (),
-                 (
-                     (Type_, (typename Apply_::template Call<Exp__, TupleOfExp__>::Type)),
-                     (Base__, (DispatchDefined<Exp__, TupleOfExp__, Apply_, Offset_, Type_>))
-                 ),
-                 Base__
-                );
-
-                // final case: no further generic implementation (previous offset was zero)
-                /*CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchOffset,
-                 (Exp__, TupleOfExp__, TupleOfImpl_), (core::NaturalStatic<0>),
-                 (
-                     (Make_, (core::FunStaticMake<core::Undefined>)),
-                     (Base__, (local::ApplyByFun<Make_>))
-                 ),
-                 Base__
-                );*/
-
-                // standard case: try generic implementation at position before the previous
-                CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchOffset,
-                 (Exp__, TupleOfExp__, Offset_), (),
-                 (
-                     (Impl_, (typename Spec_::template GenericImpl<Offset_>)),
-                     (Base__, (DispatchAvailable<Exp__, TupleOfExp__, Offset_, typename Impl_::Present>))
-                 ),
-                 Base__
-                );
-
-                CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchAvailable,
-                    (Exp__, TupleOfExp__, Offset_), (cong::lang::core::True),
+                (DispatchDynamicAvailable,
+                    (TupleOfImpl__), (),
                     (
-                        (Impl_, (typename Spec_::template GenericImpl<Offset_>)),
-                        (Base__, (DispatchImpl<Exp__, TupleOfExp__, Impl_, Offset_>))
+                        (Base__, (SelectDynamicGenericImpl<TupleOfImpl__>))
                     ),
                     Base__
                 );
 
+                // Static implementation is defined for given arguments;
+                // propagate the call to that implementation, no need to search
+                // for dynamic implementation because we prefer static eval 
+                // whenever possible
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchAvailable,
-                 (Exp__, TupleOfExp__, Offset_), (cong::lang::core::False),
-                 (
-                    (Make_, (core::FunStaticMake<core::Undefined>)),
-                    (Base__, (local::ApplyByFun<Make_>))
-                 ),
-                 Base__
+                (DispatchStaticAvailable, 
+                    (Exp__, TupleOfExp__, Impl_), (), 
+                    (
+                        (Base__, (Impl_))
+                    ), 
+                    Base__
+                );
+
+                // static implementation not available for given arguments;
+                // we need to look if dynamic implementation is available
+                CONG_LANG_CORE_FUN_PROPAGATE
+                (DispatchStaticAvailable,
+                    (Exp__, TupleOfExp__), (cong::lang::core::Undefined),
+                    (
+                        (DynamicImpls_, (typename CollectDynamicGenericImpls<Spec_, Exp__, TupleOfExp__>::Type)),
+                        (Base__, (DispatchDynamicAvailable<DynamicImpls_>))
+                    ),
+                    Base__
                 );
 
 
             public:
-                // pick last (backwards order) generic impl. whose application is not Undefined
-                // @todo instead, pick the "best" algorithm
-                // starting the search from the end of the seq of generic impl. (length as initial offset)
                 CONG_LANG_CORE_FUN_CALL_PROPAGATE
                 (
                     (
-                        (Base__, (DispatchOffset<Exp_,
-                                                TupleOfExp_,
-                                                core::Zero>))
+                        (StaticAvailable_, (typename FindStaticGenericImpl<Spec_, Exp_, TupleOfExp_>::Type)),
+                        (Base__, (DispatchStaticAvailable<Exp_, TupleOfExp_, StaticAvailable_>))
                     ),
                     Base__
                 );

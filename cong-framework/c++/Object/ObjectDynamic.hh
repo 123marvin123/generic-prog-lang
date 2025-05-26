@@ -6,40 +6,49 @@
 #include "../Number/core/NaturalStatic.hh"
 #include "../ApplyMember.hh"
 
-namespace cong::lang::local {
-  template <typename Type_>
-    class ObjectDynamic
-      : public intern::Val
-  {
-    using Base_ = intern::Val;
-  public:
-    using Native = typename core::ToNonRValRef::Call<Type_>::Type;
-  private:
-    Native native_;
-  public:
-    // @todo adjust initialization across different Exp variants
-    template <typename Init_>
-    explicit constexpr
-    ObjectDynamic(Init_&& init)
-      : native_{std::forward<Init_>(init)}
-    {}
+namespace cong::lang {
 
-    constexpr
-    //typename core::Traits<typename core::Traits<Native>::ToConst>::ToReference
-    const Native&
-    native() const
-    {
-      return native_;
-    }
+      struct DynamicTag {};
+      namespace local {
 
-    Native&
-    native()
-    {
-      return native_;
-    }
+      template <typename Type_>
+        class ObjectDynamic
+          : public intern::Val, public DynamicTag
+      {
+        using Base_ = intern::Val;
+      public:
+        using Native = typename core::ToNonRValRef::Call<Type_>::Type;
+      private:
+        Native native_;
+      public:
+        // @todo adjust initialization across different Exp variants
+        template <typename Init_>
+        explicit constexpr
+        ObjectDynamic(Init_&& init)
+          : native_{std::forward<Init_>(init)}
+        {}
 
-    using ApplySpace = core::FunStaticMake<core::NaturalStatic<1>>;
+        constexpr
+        //typename core::Traits<typename core::Traits<Native>::ToConst>::ToReference
+        const Native&
+        native() const
+        {
+          return native_;
+        }
 
-    CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
-  };
+        Native&
+        native()
+        {
+          return native_;
+        }
+
+        using ApplySpace = core::FunStaticMake<core::NaturalStatic<1>>;
+
+        CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
+      };
+  }
+
+    template <typename Native_>
+    using ObjectDynamic = intern::Exp<local::ObjectDynamic<Native_>>;
+
 };
