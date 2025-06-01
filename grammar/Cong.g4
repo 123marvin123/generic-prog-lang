@@ -59,6 +59,11 @@ expression
     | val=literal # literalExpression
     | fun=qualifiedIdentifier '(' (expression (',' expression)*)? ')' # callExpression
     | param=IDENTIFIER # parameterReferenceExpression
+    | LET name=IDENTIFIER '=' value=expression LBRACE body=expressionBlock RBRACE # letExpression
+    ;
+
+expressionBlock
+    : (expression ';')* expression
     ;
 
 placeholderOrQualifiedId
@@ -83,6 +88,7 @@ literal
 CONCEPT: 'concept';
 FUNCTION: 'fun';
 NAMESPACE: 'namespace';
+LET: 'let';
 
 DESCRIPTION: 'description';
 GENERICIMPL: 'generic';

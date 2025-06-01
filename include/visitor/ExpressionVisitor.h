@@ -8,8 +8,15 @@
 #include "AbstractVisitor.h"
 #include "sema/Expression.h"
 #include "sema/Namespace.h"
-#include "CongBaseVisitor.h"
-#include "Utils.h"
+
+// Structure to represent a let binding for scope checking
+struct LetBinding {
+    std::string identifier;
+    s_ptr<Expression> value;
+    
+    LetBinding(std::string id, s_ptr<Expression> val) 
+        : identifier(std::move(id)), value(std::move(val)) {}
+};
 
 struct ExpressionVisitor final : AbstractVisitor
 {
@@ -26,9 +33,18 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext* ctx) override;
 
+    std::any visitLetExpression(CongParser::LetExpressionContext* ctx) override;
+
 private:
     Namespace* ns;
     Function* fun;
+    std::stack<std::vector<LetBinding>> let_binding_stack;
+    
+    // Check for name collisions with existing symbols
+    void checkNameCollision(const std::string& identifier) const;
+    
+    // Find a let binding in the current scope stack
+    opt<LetBinding> findLetBinding(const std::string& identifier) const;
 };
 
 #endif //EXPRESSIONVISITOR_H

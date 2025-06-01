@@ -75,6 +75,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitLetExpression(CongParser::LetExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -84,6 +88,10 @@ public:
   }
 
   virtual std::any visitParameterReferenceExpression(CongParser::ParameterReferenceExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitExpressionBlock(CongParser::ExpressionBlockContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -239,14 +239,103 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with different operat
     const auto number_concept = *sema->find_concept("Number");
     INFO(sema->to_string());
 
-    auto add = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::ADD);
-    auto subtract = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::SUB);
-    auto multiply = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::MUL);
-    auto divide = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::DIV);
+    const auto add = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::ADD);
+    const auto subtract = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::SUB);
+    const auto multiply = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::MUL);
+    const auto divide = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::DIV);
     INFO("Created arithmetic expressions with different operators");
 
     REQUIRE(number_concept == std::get<const Concept*>(add->get_result()));
     REQUIRE(number_concept == std::get<const Concept*>(subtract->get_result()));
     REQUIRE(number_concept == std::get<const Concept*>(multiply->get_result()));
     REQUIRE(number_concept == std::get<const Concept*>(divide->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LetExpression basic functionality", "[expression][let]")
+{
+    INFO(sema->to_string());
+
+    auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+
+    vec<s_ptr<Expression>> body_exprs;
+    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    
+    const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
+    
+    REQUIRE(let_expr->get_identifier() == "x");
+    REQUIRE(let_expr->get_value() == value_expr);
+    REQUIRE(let_expr->get_body() == body_exprs);
+    
+    const auto result = let_expr->get_result();
+
+    REQUIRE(std::holds_alternative<const Concept*>(result));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LetExpression with multiple body expressions", "[expression][let]")
+{
+    INFO(sema->to_string());
+    
+    const auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    
+    vec<s_ptr<Expression>> body_exprs;
+    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 10));
+    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 20));
+    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 30));
+    
+    const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
+    
+    const auto result = let_expr->get_result();
+    REQUIRE(std::holds_alternative<const Concept*>(result));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LetExpression C++ export", "[expression][let][export]")
+{
+    INFO(sema->to_string());
+    
+    auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    vec<s_ptr<Expression>> body_exprs;
+    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    
+    auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
+    
+    std::string cpp_output = let_expr->to_cpp();
+
+    REQUIRE(cpp_output.find("[&]() {") != std::string::npos);
+    REQUIRE(cpp_output.find("auto x = ::cong::lang::NaturalStatic<42>{};") != std::string::npos);
+    REQUIRE(cpp_output.find("return ::cong::lang::NaturalStatic<100>{};") != std::string::npos);
+    REQUIRE(cpp_output.find("}()") != std::string::npos);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LetExpression Python export", "[expression][let][export]")
+{
+    INFO(sema->to_string());
+    
+    const auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    vec<s_ptr<Expression>> body_exprs;
+    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    
+    const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
+    
+    std::string python_output = let_expr->to_python();
+
+    REQUIRE(python_output.find("(lambda: (") != std::string::npos);
+    REQUIRE(python_output.find("setattr(locals(), 'x', Number(42))") != std::string::npos);
+    REQUIRE(python_output.find("Number(100)") != std::string::npos);
+    REQUIRE(python_output.find(")[-1])()") != std::string::npos);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LetExpression invalid construction", "[expression][let]")
+{
+    INFO(sema->to_string());
+    
+    const auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    
+    vec<s_ptr<Expression>> empty_body;
+    REQUIRE_THROWS_AS(LetExpression(sema_ptr, "x", value_expr, empty_body), std::runtime_error);
+    
+    vec<s_ptr<Expression>> body_exprs;
+    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    REQUIRE_THROWS_AS(LetExpression(sema_ptr, "", value_expr, body_exprs), std::runtime_error);
+
+    REQUIRE_THROWS_AS(LetExpression(sema_ptr, "x", nullptr, body_exprs), std::runtime_error);
 }

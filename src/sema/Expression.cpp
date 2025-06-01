@@ -180,6 +180,89 @@ std::variant<const Concept*, const PlaceholderFunctionParameter*> ArithmeticExpr
     return right_result;
 }
 
+LetExpression::LetExpression(Sema *sema, const std::string &identifier, 
+                             s_ptr<Expression> value, vec<s_ptr<Expression>> body)
+    : Expression(sema), identifier(identifier), value(std::move(value)), body(std::move(body))
+{
+    if (!this->value)
+        throw std::runtime_error("Let expression value must not be empty");
+    if (this->body.empty())
+        throw std::runtime_error("Let expression body must not be empty");
+    if (identifier.empty())
+        throw std::runtime_error("Let expression identifier must not be empty");
+}
+
+std::variant<const Concept *, const PlaceholderFunctionParameter *>
+LetExpression::get_result() const {
+    if (!body.empty()) {
+        return body.back()->get_result();
+    }
+    throw std::runtime_error("Let expression body is empty");
+}
+
+std::string LetExpression::to_cpp() const noexcept {
+    std::ostringstream oss;
+    oss << "[&]() {\n";
+    oss << "    auto " << utils::sanitize_cpp_identifier(identifier) << " = " << value->to_cpp() << ";\n";
+    
+    // All expressions except the last are statements
+    for (size_t i = 0; i < body.size() - 1; ++i) {
+        oss << "    " << body[i]->to_cpp() << ";\n";
+    }
+    
+    // The last expression is the return value
+    if (!body.empty()) {
+        oss << "    return " << body.back()->to_cpp() << ";\n";
+    }
+    
+    oss << "}()";
+    return oss.str();
+}
+
+std::string LetExpression::to_python() const noexcept {
+    std::ostringstream oss;
+    oss << "(lambda: (\n";
+    oss << "    setattr(locals(), '" << identifier << "', " << value->to_python() << "),\n";
+    
+    // All expressions except the last
+    for (size_t i = 0; i < body.size() - 1; ++i) {
+        oss << "    " << body[i]->to_python() << ",\n";
+    }
+    
+    // The last expression is the return value
+    if (!body.empty()) {
+        oss << "    " << body.back()->to_python() << "\n";
+    }
+    
+    oss << ")[-1])()";
+    return oss.str();
+}
+
+LetVariableReferenceExpression::LetVariableReferenceExpression(Sema *sema, const std::string &identifier, s_ptr<Expression> bound_value)
+    : Expression(sema), identifier(identifier), bound_value(std::move(bound_value))
+{
+    if (identifier.empty())
+        throw std::runtime_error("Let variable reference identifier must not be empty");
+    if (!this->bound_value)
+        throw std::runtime_error("Let variable reference bound value must not be empty");
+}
+
+std::variant<const Concept *, const PlaceholderFunctionParameter *>
+LetVariableReferenceExpression::get_result() const {
+    // The result of a let variable reference is the result of the bound expression
+    return bound_value->get_result();
+}
+
+std::string LetVariableReferenceExpression::to_cpp() const noexcept {
+    // In C++, we just use the identifier name since the variable is bound in the lambda scope
+    return utils::sanitize_cpp_identifier(identifier);
+}
+
+std::string LetVariableReferenceExpression::to_python() const noexcept {
+    // In Python, we just use the identifier name since it's in the local scope
+    return identifier;
+}
+
 void Expression::DebugVisitor::visitExpression(const Expression& e)
 {
     if (const auto& cast = utils::dyn_cast<Introspection<BaseConstantExpression>>(&e))
@@ -191,6 +274,10 @@ void Expression::DebugVisitor::visitExpression(const Expression& e)
     else if (const auto& cast = utils::dyn_cast<Introspection<BoundFunctionParameterExpression>>(&e))
         ss << cast->to_string(tabsize);
     else if (const auto& cast = utils::dyn_cast<Introspection<ArithmeticExpression>>(&e))
+        ss << cast->to_string(tabsize);
+    else if (const auto& cast = utils::dyn_cast<Introspection<LetExpression>>(&e))
+        ss << cast->to_string(tabsize);
+    else if (const auto& cast = utils::dyn_cast<Introspection<LetVariableReferenceExpression>>(&e))
         ss << cast->to_string(tabsize);
     else
         throw std::runtime_error("Expression type not handled.");
@@ -259,4 +346,39 @@ void ArithmeticExpression::DebugVisitor::visitExpression(const Expression& e)
     const std::string_view op_str = utils::get_string_for_operator(param.get_op());
 
     ss << spaces() << left->to_string() << " " << termcolor::blue << op_str << termcolor::reset << " " << right->to_string();
+}
+
+void LetExpression::DebugVisitor::visitExpression(const Expression& e)
+{
+    const auto& let_expr = dynamic_cast<const LetExpression&>(e);
+    
+    ss << spaces() << termcolor::green << "let " << termcolor::reset 
+       << termcolor::blue << let_expr.get_identifier() << termcolor::reset 
+       << " = ";
+    
+    // Show the value expression
+    ss << let_expr.get_value()->to_string(0) << " " << termcolor::green << "{" << termcolor::reset << "\n";
+    
+    tabsize += 2;
+    
+    // Show body expressions
+    for (size_t i = 0; i < let_expr.get_body().size(); ++i) {
+        ss << let_expr.get_body()[i]->to_string(tabsize);
+        if (i < let_expr.get_body().size() - 1) {
+            ss << ";";
+        }
+        ss << "\n";
+    }
+    
+    tabsize -= 2;
+    ss << spaces() << termcolor::green << "}" << termcolor::reset;
+}
+
+void LetVariableReferenceExpression::DebugVisitor::visitExpression(const Expression& e)
+{
+    const auto& let_var_ref = dynamic_cast<const LetVariableReferenceExpression&>(e);
+    
+    ss << spaces() << termcolor::cyan << "let_var(" << termcolor::reset 
+       << termcolor::blue << let_var_ref.get_identifier() << termcolor::reset 
+       << termcolor::cyan << ")" << termcolor::reset;
 }

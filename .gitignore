@@ -10,3 +10,4 @@ output/
 compile_commands.json
 __pycache__/
 .antlr/
+gen/

@@ -346,6 +346,88 @@ private:
   Operator op;
 };
 
+struct LetExpression final : Expression, Introspection<LetExpression> {
+  LetExpression(Sema *sema, const std::string &identifier, 
+                s_ptr<Expression> value, vec<s_ptr<Expression>> body);
+
+  LetExpression(const LetExpression &other)
+      : Expression(other), identifier(other.identifier), 
+        value(other.value), body(other.body) {}
+
+  [[nodiscard]]
+  const std::string &get_identifier() const {
+    return identifier;
+  }
+
+  [[nodiscard]]
+  s_ptr<Expression> get_value() const {
+    return value;
+  }
+
+  [[nodiscard]]
+  const vec<s_ptr<Expression>> &get_body() const {
+    return body;
+  }
+
+  [[nodiscard]]
+  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  get_result() const override;
+
+  static s_ptr<LetExpression> create(Sema *sema, const std::string &identifier,
+                                     s_ptr<Expression> value,
+                                     vec<s_ptr<Expression>> body) {
+    return Expression::create<LetExpression>(sema, identifier, value, std::move(body));
+  }
+
+  [[nodiscard]] std::string to_cpp() const noexcept override;
+
+  [[nodiscard]] std::string to_python() const noexcept override;
+
+  struct DebugVisitor;
+
+private:
+  std::string identifier;
+  s_ptr<Expression> value;
+  vec<s_ptr<Expression>> body;
+};
+
+// Expression for referencing a let-bound variable
+struct LetVariableReferenceExpression final : Expression, Introspection<LetVariableReferenceExpression> {
+  LetVariableReferenceExpression(Sema *sema, const std::string &identifier, s_ptr<Expression> bound_value);
+
+  LetVariableReferenceExpression(const LetVariableReferenceExpression &other)
+      : Expression(other), identifier(other.identifier), bound_value(other.bound_value) {}
+
+  [[nodiscard]]
+  const std::string &get_identifier() const {
+    return identifier;
+  }
+
+  [[nodiscard]]
+  s_ptr<Expression> get_bound_value() const {
+    return bound_value;
+  }
+
+  [[nodiscard]]
+  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  get_result() const override;
+
+  static s_ptr<LetVariableReferenceExpression> create(Sema *sema, const std::string &identifier,
+                                                     s_ptr<Expression> bound_value) {
+    return Expression::create<LetVariableReferenceExpression>(sema, identifier, bound_value);
+  }
+
+  [[nodiscard]] std::string to_cpp() const noexcept override;
+
+  [[nodiscard]] std::string to_python() const noexcept override;
+
+  struct DebugVisitor;
+
+private:
+  std::string identifier;
+  s_ptr<Expression> bound_value;
+};
+
 //@section DebugVisitor
 
 struct Expression::DebugVisitor final : BaseDebugVisitor {
@@ -410,6 +492,22 @@ struct BoundFunctionParameterExpression::DebugVisitor final : BaseDebugVisitor {
 };
 
 struct ArithmeticExpression::DebugVisitor final : BaseDebugVisitor {
+  explicit DebugVisitor(const int tabsize) : BaseDebugVisitor(tabsize) {}
+
+  void visit(const Expression &e) { visitExpression(e); }
+
+  void visitExpression(const Expression &e) override;
+};
+
+struct LetExpression::DebugVisitor final : BaseDebugVisitor {
+  explicit DebugVisitor(const int tabsize) : BaseDebugVisitor(tabsize) {}
+
+  void visit(const Expression &e) { visitExpression(e); }
+
+  void visitExpression(const Expression &e) override;
+};
+
+struct LetVariableReferenceExpression::DebugVisitor final : BaseDebugVisitor {
   explicit DebugVisitor(const int tabsize) : BaseDebugVisitor(tabsize) {}
 
   void visit(const Expression &e) { visitExpression(e); }

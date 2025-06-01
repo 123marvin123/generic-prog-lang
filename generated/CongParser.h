@@ -14,10 +14,11 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
-    T__14 = 15, CONCEPT = 16, FUNCTION = 17, NAMESPACE = 18, DESCRIPTION = 19, 
-    GENERICIMPL = 20, REQUIRES = 21, TIME = 22, SPACE = 23, LBRACE = 24, 
-    RBRACE = 25, VARARGS = 26, REAL = 27, BOOL = 28, NUMBER = 29, STRING = 30, 
-    IDENTIFIER = 31, WHITESPACE = 32, COMMENT = 33, LINE_COMMENT = 34, OTHER = 35
+    T__14 = 15, T__15 = 16, CONCEPT = 17, FUNCTION = 18, NAMESPACE = 19, 
+    LET = 20, DESCRIPTION = 21, GENERICIMPL = 22, REQUIRES = 23, TIME = 24, 
+    SPACE = 25, LBRACE = 26, RBRACE = 27, VARARGS = 28, REAL = 29, BOOL = 30, 
+    NUMBER = 31, STRING = 32, IDENTIFIER = 33, WHITESPACE = 34, COMMENT = 35, 
+    LINE_COMMENT = 36, OTHER = 37
   };
 
   enum {
@@ -25,8 +26,8 @@ public:
     RuleConceptDefinitionBases = 3, RuleNamespaceStmnt = 4, RuleFunctionStmnt = 5, 
     RuleFunctionBody = 6, RuleFunctionBodyStmnt = 7, RuleParameterList = 8, 
     RuleGenericImplDetails = 9, RuleGenericImplDetail = 10, RuleParameter = 11, 
-    RuleExpression = 12, RulePlaceholderOrQualifiedId = 13, RulePlaceholder = 14, 
-    RuleQualifiedIdentifier = 15, RuleLiteral = 16
+    RuleExpression = 12, RuleExpressionBlock = 13, RulePlaceholderOrQualifiedId = 14, 
+    RulePlaceholder = 15, RuleQualifiedIdentifier = 16, RuleLiteral = 17
   };
 
   explicit CongParser(antlr4::TokenStream *input);
@@ -59,6 +60,7 @@ public:
   class GenericImplDetailContext;
   class ParameterContext;
   class ExpressionContext;
+  class ExpressionBlockContext;
   class PlaceholderOrQualifiedIdContext;
   class PlaceholderContext;
   class QualifiedIdentifierContext;
@@ -319,6 +321,23 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  LetExpressionContext : public ExpressionContext {
+  public:
+    LetExpressionContext(ExpressionContext *ctx);
+
+    antlr4::Token *name = nullptr;
+    CongParser::ExpressionContext *value = nullptr;
+    CongParser::ExpressionBlockContext *body = nullptr;
+    antlr4::tree::TerminalNode *LET();
+    antlr4::tree::TerminalNode *LBRACE();
+    antlr4::tree::TerminalNode *RBRACE();
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    ExpressionContext *expression();
+    ExpressionBlockContext *expressionBlock();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  ArithmeticExpressionContext : public ExpressionContext {
   public:
     ArithmeticExpressionContext(ExpressionContext *ctx);
@@ -354,6 +373,20 @@ public:
 
   ExpressionContext* expression();
   ExpressionContext* expression(int precedence);
+  class  ExpressionBlockContext : public antlr4::ParserRuleContext {
+  public:
+    ExpressionBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ExpressionBlockContext* expressionBlock();
+
   class  PlaceholderOrQualifiedIdContext : public antlr4::ParserRuleContext {
   public:
     PlaceholderOrQualifiedIdContext(antlr4::ParserRuleContext *parent, size_t invokingState);

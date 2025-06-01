@@ -49,11 +49,15 @@ public:
 
     virtual std::any visitCallExpression(CongParser::CallExpressionContext *context) = 0;
 
+    virtual std::any visitLetExpression(CongParser::LetExpressionContext *context) = 0;
+
     virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *context) = 0;
 
     virtual std::any visitLiteralExpression(CongParser::LiteralExpressionContext *context) = 0;
 
     virtual std::any visitParameterReferenceExpression(CongParser::ParameterReferenceExpressionContext *context) = 0;
+
+    virtual std::any visitExpressionBlock(CongParser::ExpressionBlockContext *context) = 0;
 
     virtual std::any visitPlaceholderOrQualifiedId(CongParser::PlaceholderOrQualifiedIdContext *context) = 0;
 

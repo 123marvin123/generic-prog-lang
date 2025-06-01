@@ -1,4 +1,4 @@
 fun id(a: <T>) -> T {
     description { "the argument itself" }
-    generic(space: 0, time: 0) { a }
+    generic(space: 0, time: 0) { let p = a { p } }
 }
