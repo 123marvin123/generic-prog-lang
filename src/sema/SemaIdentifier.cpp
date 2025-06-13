@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 19.03.25.
-//
 #include "sema/SemaIdentifier.h"
 #include "sema/Namespace.h"
 

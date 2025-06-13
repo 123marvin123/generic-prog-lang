@@ -1,0 +1,224 @@
+
+concept Seq (description: "") : Object;
+
+concept Gap (description: "") : Object;
+concept Selection (description: "") : Object;
+
+fun emptySeq() -> Seq {
+    description { "empty sequence" }
+}
+
+fun seq(p1: Object) -> Seq {
+    description { "sequence of single item p(1)" }
+}
+
+fun reverse(p1: Seq) -> Seq {
+    description { "sequence of items of p(1) in reverse order" }
+}
+
+fun concatenate(p1: Seq, p2: Seq) -> Seq {
+    description { "concatenation of p(1) and p(2)" }
+}
+
+fun repeat(p1: Seq, p2: Natural) -> Seq {
+    description { "concatenation of p(2) instances of p(1)" }
+}
+
+fun transposeSeq(p1: Seq) -> Seq {
+    description { "transposition of p(1) to a sequence of the sequences of the n-th items in the sequences in p(1)" }
+}
+
+fun transform(p1: Map, p2: Seq) -> Seq {
+    description { "sequence of results of applying p(1) (regardless of order) to each item in p(2)" }
+}
+
+fun fold(p1: Map, p2: <T>, p3: Seq) -> T {
+    description { "successive application of p(1) to start object p(2) and items of p(3), passing on the accumulated result as first argument" }
+}
+
+fun fold1(p1: Map, p2: Seq) -> Object {
+    description { "successive application of p(1) to items of p(2), passing on the accumulated result as first argument" }
+    requires { not(isEqual(p2, emptySeq())) }
+    generic() {
+        fold(p1, 
+             select(p2, first(p2)), 
+             select(p2, suffix(p2, after(p2, first(p2)))))
+    }
+}
+
+fun item(p1: Seq) -> Object {
+    description { "any (random) item of p(1)" }
+}
+
+fun pick(p1: Seq) -> Object {
+    description { "arbitrary (possibly particular) item of p(1)" }
+    generic() { item(p1) }
+}
+
+fun length(p1: Object) -> Natural {
+    description { "length of p(1)" }
+    //generic() { fold(p1, quote(succ(p1)), 0) }
+}
+
+fun isEmptySeq(p1: Seq) -> Boolean {
+    description { "is p(1) empty?" }
+    generic() { isEqual(length(p1), 0) }
+}
+
+fun offset(p1: Seq) -> Object {
+    description { "any (unspecified) offset of p(1)" }
+}
+
+fun position(p1: Seq, p2: Natural) -> Selection {
+    description { "selection of item at offset p(2) in p(1)" }
+}
+
+fun first(p1: Seq) -> Selection {
+    description { "selection of first item in p(1)" }
+}
+
+fun last(p1: Seq) -> Selection {
+    description { "selection of the last item in p(1)" }
+}
+
+fun before(p1: Seq, p2: Selection) -> Gap {
+    description { "gap in p(1) before p(2)" }
+}
+
+fun after(p1: Seq, p2: Selection) -> Gap {
+    description { "gap in p(1) after p(2)" }
+}
+
+fun prefix(p1: Seq, p2: Gap) -> Selection {
+    description { "prefix selection of p(1) before p(2)" }
+}
+
+fun suffix(p1: Seq, p2: Gap) -> Selection {
+    description { "suffix selection of p(1) after p(2)" }
+}
+
+fun infix(p1: Seq, p2: Gap, p3: Gap) -> Selection {
+    description { "infix selection of p(1) between p(2) and p(3)" }
+}
+
+fun matching(p1: Seq, p2: Map) -> Selection {
+    description { "selection of all items of p(1) for which p(2) holds" }
+}
+
+fun flip(p1: Seq, p2: Selection) -> Selection {
+    description { "inverse of selection p(2) in p(1)" }
+}
+
+fun select(p1: Seq, p2: Selection) -> Seq {
+    description { "sequence of items of p(1) selected by p(2)" }
+}
+
+fun insert(p1: Seq, p2: Gap, p3: Seq) -> Seq {
+    description { "insertion of p(3) at p(2) in p(1)" }
+    generic() {
+        concatenate(concatenate(select(p1, prefix(p1, p2)), 
+                               p3), 
+                   select(p1, suffix(p1, p2)))
+    }
+}
+
+fun replace(p1: Seq, p2: Selection, p3: Seq) -> Seq {
+    description { "replacement in p(1) of p(2) in p(3)" }
+    requires { isLessEqual(length(p2), length(p3)) }
+}
+
+fun itemAt(p1: Seq, p2: Natural) -> Object {
+    description { "item of p(1) at the offset p(2)" }
+    requires { isGreater(length(p1), p2) }
+}
+
+fun repItemAt(p1: Seq, p2: Natural, p3: Object) -> Seq {
+    description { "replacement of p(2) in p(3) by p(1) (lengths of p(1) and p(2) are not necessarily equal)" }
+}
+
+fun isItem(p1: Seq, p2: Object) -> Boolean {
+    description { "is p(2) an item of p(1)?" }
+}
+
+fun isPrefix(p1: Seq, p2: Seq) -> Boolean {
+    description { "is p(1) a prefix of p(2)?" }
+    generic() {
+        isEqual(p1, select(p2, prefix(p2, before(p2, position(p2, length(p1))))))
+    }
+}
+
+fun isSuffix(p1: Seq, p2: Seq) -> Boolean {
+    description { "is p(1) a suffix of p(2)?" }
+    /*generic() {
+        isEqual(p1, select(p2, suffix(p2, before(p2, position(p2, difference(length(p2), length(p1)))))))
+    }*/
+}
+
+fun isInfix(p1: Seq, p2: Seq) -> Boolean {
+    description { "is p(1) an infix of p(2)?" }
+}
+
+fun isSubSeq(p1: Seq, p2: Seq) -> Boolean {
+    description { "is p(1) a sub-sequence of p(2)?" }
+}
+
+fun setOfPrefix(p1: Seq) -> Set {
+    description { "set of all prefixes in p(1)" }
+}
+
+fun setOfSuffix(p1: Seq) -> Set {
+    description { "set of all suffixes in p(1)" }
+}
+
+fun setOfInfix(p1: Seq) -> Set {
+    description { "set of all infix sequences in p(1)" }
+}
+
+fun setOfSubSeq(p1: Seq) -> Set {
+    description { "set of sub-sequences of p(1)" }
+}
+
+fun setOfItem(p1: Seq) -> Set {
+    description { "set of items of p(1)" }
+}
+
+fun seqOfUnique(p1: Seq) -> Seq {
+    description { "sub-sequence of first occurrences of each item in p(1)" }
+}
+
+fun setOfPermutation(p1: Set) -> Set {
+    description { "(multi) set of all enumerations of p(1), which occur multiplicatively if p(1) is a multi set" }
+}
+
+fun enumeration(p1: Set) -> Seq {
+    description { "sequence of elements of p(1) in arbitrary order" }
+}
+
+fun enumerationBy(p1: Set, p2: Map) -> Seq {
+    description { "sequence of elements of p(1) in order given by p(2)" }
+}
+
+fun serialize(p1: Seq, p2: Object) -> Seq {
+    description { "attachment of serial representation of p(2) to p(1)" }
+}
+
+fun deSerialize(p1: Seq) -> Seq {
+    description { "extraction of serial \\texttt{Object} representation from p(1)" }
+}
+
+fun iterator(p1: Seq) -> Object {
+    description { "iterator over p(1)" }
+}
+
+fun hasMore(p1: Object) -> Boolean {
+    description { "does iterator p(1) have further items?" }
+}
+
+fun access(p1: Object) -> Object {
+    description { "item that iterator p(1) refers to" }
+}
+
+fun advance(p1: Object) -> Object {
+    description { "advance iterator p(1) to next item" }
+    generic() { p1 }
+}

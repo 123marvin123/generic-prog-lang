@@ -36,7 +36,6 @@ std::string Preprocessor::process_recursive(const std::filesystem::path& input_f
             std::filesystem::path basePath = std::filesystem::path(input_file).parent_path();
             std::filesystem::path resolvedPath = basePath / importPath;
 
-
             result << process_recursive(resolvedPath.string(), visitedFiles);
             } else {
                 result << line << '\n';

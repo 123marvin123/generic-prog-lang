@@ -1,23 +1,12 @@
-//
-// Created by Marvin Haschker on 09.03.25.
-//
+#pragma once
 
-#ifndef SEMAIDENTIFIER_H
-#define SEMAIDENTIFIER_H
-
-#include "sema/SemaElement.h"
+#include "SemaElement.h"
 #include <string>
 #include <memory>
 
 #include "Decls.h"
 
 struct Namespace;
-
-template <class T>
-concept IsIdentifier = requires(const T& t) {
-    { t.get_identifier() } -> std::convertible_to<std::string_view>;
-    { t.get_namespace() } -> std::convertible_to<const Namespace*>;
-};
 
 struct SemaIdentifier : SemaElement
 {
@@ -43,8 +32,3 @@ private:
     const std::string identifier;
     const Namespace* ns;
 };
-
-static_assert(IsIdentifier<SemaIdentifier>, "SemaIdentifier must satisfy the IsIdentifier concept");
-
-
-#endif //SEMAIDENTIFIER_H

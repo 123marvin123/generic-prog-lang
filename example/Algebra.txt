@@ -1,0 +1,55 @@
+concept Algebra (description: "algebraic structure");
+
+fun isMagma(p1: Set, p2: Map) -> Boolean {
+    description { "is p(1) a magma with respect to p(2)?" }
+}
+
+fun isAbelian(p1: Set, p2: Map) -> Boolean {
+    description { "is p(1) Abelian with respect to p(2)?" }
+}
+
+fun isSemigroup(p1: Set, p2: Map) -> Boolean {
+    description { "is p(1) a semigroup with respect to p(2)?" }
+}
+
+fun isMonoid(p1: Set, p2: Map) -> Boolean {
+    description { "is p(1) a monoid with respect to p(2)?" }
+}
+
+fun neutral(p1: Set, p2: Map) -> Object {
+    description { "neutral element of p(1) with respect to p(2)" }
+    requires { isMonoid(p1, p2) }
+}
+
+fun isGroup(p1: Set, p2: Map) -> Boolean {
+    description { "is p(1) a group with respect to p(2)?" }
+}
+
+fun inv(p1: Set, p2: Map) -> Map {
+    description { "inverse operation on p(1) with respect to p(2)" }
+    requires { isGroup(p1, p2) }
+}
+
+fun isAbelianGroup(p1: Set, p2: Map) -> Boolean {
+    description { "is p(1) a abelian group with respect to p(2)?" }
+}
+
+fun isField(p1: Set, p2: Map, p3: Map) -> Boolean {
+    description { "is p(1) a field with respect to p(2) (addition) and p(3) (multiplication)?" }
+}
+
+fun hyper(p1: Natural, p2: Natural, p3: Natural) -> Natural {
+    description { "p(1)-th hyperoperation on p(2) and p(3): $H_{\\cd{p(1)}}(\\cd{p(2)},\\cd{p(3)})=\\cd{p(2)}[\\cd{p(1)}]\\cd{p(3)}$" }
+    /*generic() {
+        cond(isEqual(p1, 0),
+             succ(p3),
+             cond(isEqual(p3, 0),
+                  cond(isEqual(p1, 1),
+                       p2,
+                       cond(isEqual(p1, 2),
+                            0,
+                            1)),
+                  p3
+                 ))
+    }*/
+}

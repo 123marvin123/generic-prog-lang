@@ -1,5 +1,8 @@
 
-// Generated from /Users/haschker/Arbeitsbereich/generic-prog-lang/grammar/Cong.g4 by ANTLR 4.13.2
+#include "CongLexer.h"
+
+
+// Generated from /Users/haschker/Arbeitsbereich/generic-prog-lang/grammar/CongParser.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -13,7 +16,7 @@
  * This class defines an abstract visitor for a parse tree
  * produced by CongParser.
  */
-class  CongVisitor : public antlr4::tree::AbstractParseTreeVisitor {
+class  CongParserVisitor : public antlr4::tree::AbstractParseTreeVisitor {
 public:
 
   /**
@@ -39,11 +42,15 @@ public:
 
     virtual std::any visitFunctionExpRequires(CongParser::FunctionExpRequiresContext *context) = 0;
 
+    virtual std::any visitRawTextContent(CongParser::RawTextContentContext *context) = 0;
+
+    virtual std::any visitElement(CongParser::ElementContext *context) = 0;
+
     virtual std::any visitParameterList(CongParser::ParameterListContext *context) = 0;
 
-    virtual std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext *context) = 0;
-
     virtual std::any visitGenericImplDetail(CongParser::GenericImplDetailContext *context) = 0;
+
+    virtual std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext *context) = 0;
 
     virtual std::any visitParameter(CongParser::ParameterContext *context) = 0;
 

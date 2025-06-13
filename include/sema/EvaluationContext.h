@@ -7,6 +7,7 @@
 
 #include "Utils.h"
 #include "Expression.h"
+#include "SemaError.h"
 
 struct EvaluationContext
 {

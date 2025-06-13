@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 14.03.25.
-//
 #include "visitor/AbstractVisitor.h"
 
 AbstractVisitor::AbstractVisitor(Sema* sema, const bool createNamespaces) :
@@ -16,12 +13,13 @@ std::any AbstractVisitor::visitNamespaceStmnt(CongParser::NamespaceStmntContext*
     {
         if (const auto& res = Sema::create_namespace(context->IDENTIFIER()->getText(), sema, get_current_namespace()); res.has_value())
             ns = res.value();
-        else throw std::runtime_error(std::format("Could not create namespace {} because it already exist", context->IDENTIFIER()->getText()));
+        else throw SemaError(std::format("Could not create namespace {} because it already exist", context->IDENTIFIER()
+        ->getText()), context);
     } else
         ns = get_current_namespace()->find_namespace(context->IDENTIFIER()->getText()).value();
 
     if (!ns)
-        throw std::runtime_error("Could not find namespace");
+        throw SemaError("Could not find namespace", context);
 
     // Push the current namespace onto the stack
     namespaces.push(ns);

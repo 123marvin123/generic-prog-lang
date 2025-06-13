@@ -141,7 +141,7 @@ namespace cong::lang
             using ReduceValue = core::FunId;
 
         private:
-            using Length_ = typename core::Length::Call<typename Dec_::ParamTupleOfConcept>::Type;
+            using Length_ = typename core::Length::Call<typename Dec_::Params>::Type;
             using Interval_ = typename core::NaturalIntervalStaticFromNaturalStatic::Call<Length_>::Type;
 
         public:

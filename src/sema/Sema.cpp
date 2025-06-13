@@ -23,7 +23,6 @@ opt<Namespace*> Sema::create_namespace(const std::string& name, Sema* sema,
     const auto ptr = ns.get();
     if (!parent->register_namespace(std::move(ns)))
         return std::nullopt;
-    // ReSharper disable once CppDFALocalValueEscapesFunction
     return ptr;
 }
 
@@ -38,11 +37,13 @@ void Sema::register_builtin_concepts()
 
 void Sema::register_builtin_functions()
 {
-    add_function = create_function<ConcreteFunction>(this, "add", this, object_concept).value();
+    /*
+        add_function = create_function<ConcreteFunction>(this, "add", this, object_concept).value();
     sub_function = create_function<ConcreteFunction>(this, "sub", this, object_concept).value();
     mul_function = create_function<ConcreteFunction>(this, "mul", this, object_concept).value();
     div_function = create_function<ConcreteFunction>(this, "div", this, object_concept).value();
     mod_function = create_function<ConcreteFunction>(this, "mod", this, object_concept).value();
+    */
 }
 
 void Sema::register_builtin_operators()
@@ -85,7 +86,7 @@ void Sema::register_builtin_operators()
 template <>
 const Concept* Sema::builtin_concept<Object>() const
 {
-    if (!object_concept) throw std::runtime_error("Object concept not registered");
+    if (!object_concept) throw SemaError("Object concept not registered");
     return object_concept;
 }
 
@@ -93,62 +94,62 @@ const Concept* Sema::builtin_concept<Object>() const
 template <>
 const Concept* Sema::builtin_concept<std::string>() const
 {
-    if (!string_concept) throw std::runtime_error("String concept not registered");
+    if (!string_concept) throw SemaError("String concept not registered");
     return string_concept;
 }
 
 template <>
 const Concept* Sema::builtin_concept<bool>() const
 {
-    if (!boolean_concept) throw std::runtime_error("Boolean concept not registered");
+    if (!boolean_concept) throw SemaError("Boolean concept not registered");
     return boolean_concept;
 }
 
 template <>
 const Concept* Sema::builtin_concept<long>() const
 {
-    if (!number_concept) throw std::runtime_error("Number concept not registered");
+    if (!number_concept) throw SemaError("Number concept not registered");
     return number_concept;
 }
 
 template <>
 const Concept* Sema::builtin_concept<double>() const
 {
-    if (!real_concept) throw std::runtime_error("Real concept not registered");
+    if (!real_concept) throw SemaError("Real concept not registered");
     return real_concept;
 }
 
 template <>
 const Function* Sema::builtin_function<Operator::ADD>() const
 {
-    if (!add_function) throw std::runtime_error("Add function not registered");
+    if (!add_function) throw SemaError("Add function not registered");
     return add_function;
 }
 
 template <>
 const Function* Sema::builtin_function<Operator::SUB>() const
 {
-    if (!sub_function) throw std::runtime_error("Sub function not registered");
+    if (!sub_function) throw SemaError("Sub function not registered");
     return sub_function;
 }
 
 template <>
 const Function* Sema::builtin_function<Operator::MUL>() const
 {
-    if (!mul_function) throw std::runtime_error("Mul function not registered");
+    if (!mul_function) throw SemaError("Mul function not registered");
     return mul_function;
 }
 
 template <>
 const Function* Sema::builtin_function<Operator::DIV>() const
 {
-    if (!div_function) throw std::runtime_error("Div function not registered");
+    if (!div_function) throw SemaError("Div function not registered");
     return div_function;
 }
 
 template <>
 const Function* Sema::builtin_function<Operator::MOD>() const
 {
-    if (!mod_function) throw std::runtime_error("Mod function not registered");
+    if (!mod_function) throw SemaError("Mod function not registered");
     return mod_function;
 }

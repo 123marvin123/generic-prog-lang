@@ -1,10 +1,9 @@
-
-#ifndef SEMA_H
-#define SEMA_H
+#pragma once
 
 #include "Function.h"
-#include "sema/Concept.h"
-#include "sema/Namespace.h"
+#include "Concept.h"
+#include "Namespace.h"
+#include "SemaError.h"
 
 struct Sema final : DefaultNamespace
 {
@@ -68,5 +67,3 @@ private:
     const Function* mul_function;
     const Function* div_function;
 };
-
-#endif // SEMA_H

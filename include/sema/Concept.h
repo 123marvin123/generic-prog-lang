@@ -1,14 +1,14 @@
 #ifndef CONCEPT_H
 #define CONCEPT_H
 
-#include <CongBaseVisitor.h>
 #include <set>
 #include <string>
 
 #include "Debug.h"
-#include "sema/SemaIdentifier.h"
+#include "SemaIdentifier.h"
 #include "jinja2cpp/reflected_value.h"
 #include "Utils.h"
+#include "SemaError.h"
 
 struct Concept final : SemaIdentifier, Introspection<Concept>
 {

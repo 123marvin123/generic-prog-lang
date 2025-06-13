@@ -1,0 +1,14 @@
+concept GridHierarchy (description: "");
+concept Grid (description: "");
+
+fun seqOfGrid(p1: GridHierarchy) -> Seq {
+    description { "sequence of grids in p(1)" }
+}
+
+fun cover(p1: Grid, p2: Set) -> Grid {
+    description { "subgrid of p(1) that covers p(2)" }
+}
+
+fun seqOfCellOnRay(p1: Set, p2: Ray) -> Seq {
+    description { "sequence of d-cells in p(1) on ray p(2)" }
+}

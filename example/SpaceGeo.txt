@@ -1,0 +1,165 @@
+concept SpaceGeo (description: "geometric = Cartesian space") : Object;
+concept Ray : Object;
+
+fun isLinear(space_: Set) -> Boolean {
+    description { "is space_ a linear space?" }
+}
+
+fun scalar(space_: Set) -> Object {
+  description {
+    "scalar field of space_"
+  }
+  requires { isLinear(space_) }
+}
+
+fun dim(space_: Set) -> Natural {
+  description {
+    "dimension of space_"
+  }
+  requires { isLinear(space_) }
+}
+
+fun mulScalar(s: Object, v: Object, space_: Set) -> Object {
+  description {
+    "linear product of scalar p(1) and vector p(2) in space_"
+  }
+  //requires { hasElement(scalar(space_), s) }
+  requires { hasElement(space_, v) }
+  requires { isLinear(space_) }
+}
+
+fun isBasis(seq: Seq, space_: Set) -> Boolean {
+  description {
+    "is p(1) a basis of space_"
+  }
+  requires { isLinear(space_) }
+  requires { hasElement(space_, item(seq)) }
+}
+
+fun vectorForLinComb(coords: Seq, basis: Seq, space_: Set) -> Object {
+  description {
+    "vector given by linear combination of sequence of coordinates p(1) and basis p(2) in space_"
+  }
+  requires { isLinear(space_) }
+  //requires { hasElement(scalar(space_), item(coords)) }
+  requires { isBasis(basis, space_) }
+}
+
+fun vector(point: Set) -> Matrix {
+  description {
+    "vector from origin to p(1)"
+  }
+}
+
+fun seqOfCoord(vector: Object, p2: Seq, p3: Set) -> Seq {
+  description {
+    "sequence of coordinates of vector p(1) with respect to basis p(2) in p(3)"
+  }
+}
+
+fun isLinearTopological(space_: Set) -> Boolean {
+  description {
+    "is p(1) a linear topological space?"
+  }
+}
+
+fun isMetric(space_: Set) -> Boolean {
+  description {
+    "is p(1) a metric space?"
+  }
+}
+
+fun distance(p1: Object, p2: Object, space_: Set) -> Real {
+  description {
+    "distance of p(1) and p(2) in p(3)"
+  }
+  requires { hasElement(space_, p1) }
+  requires { hasElement(space_, p2) }
+  requires { isMetric(space_) }
+}
+
+fun isComplete(space_: Set) -> Boolean {
+  description {
+    "is p(1) a complete space?"
+  }
+}
+
+fun isNormed(space_: Set) -> Boolean {
+  description {
+    "is p(1) a normed space?"
+  }
+}
+
+fun norm(vector: Object, space_: Set) -> Real {
+  description {
+    "norm of p(1) in p(2)"
+  }
+  requires { hasElement(space_, vector) }
+  requires { isNormed(space_) }
+}
+
+fun isBanachian(space_: Set) -> Boolean {
+  description {
+    "is p(1) a Banach space (normed and complete)?"
+  }
+}
+
+fun isPreHilbertian(space_: Set) -> Boolean {
+  description {
+    "is p(1) a pre-Hilbert space (having an inner product)?"
+  }
+}
+
+fun mulInner(v1: Object, v2: Object, space_: Set) -> Object {
+  description {
+    "inner product of p(1) and p(2) in p(3)"
+  }
+  requires { hasElement(space_, v1) }
+  requires { hasElement(space_, v2) }
+  requires { isPreHilbertian(space_) }
+}
+
+fun isOrthogonal(v1: Object, v2: Object, space_: Set) -> Boolean {
+  description {
+    "is p(1) orthogonal to p(2) in p(3)?"
+  }
+  requires { hasElement(space_, v1) }
+  requires { hasElement(space_, v2) }
+  requires { isPreHilbertian(space_) }
+}
+
+fun isHilbertian(space_: Set) -> Boolean {
+  description {
+    "is p(1) a Hilbert space (inner product and complete)?"
+  }
+}
+
+fun isEuclidean(space_: Set) -> Boolean {
+  description {
+    "is p(1) a Euclidean space?"
+  }
+}
+
+fun isCartesian(space_: Set) -> Boolean {
+  description {
+    "is p(1) a Cartesian space?"
+  }
+}
+
+fun isPoly(poly: Set, space_: Set) -> Boolean {
+  description {
+    "is p(1) a polytope (boundary piecewise linear)?"
+  }
+}
+
+fun isConvex(set: Set, space_: Set) -> Boolean {
+  description {
+    "is p(1) convex?"
+  }
+}
+
+fun center(set: Set) -> Object {
+  description {
+    "point at which the barycenter of p(1) is located"
+  }
+}

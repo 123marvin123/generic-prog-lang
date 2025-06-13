@@ -1,15 +1,10 @@
-//
-// Created by Marvin Haschker on 11.03.25.
-//
+#pragma once
 
-#ifndef FUNCTIONPARAMETER_H
-#define FUNCTIONPARAMETER_H
-
-#include <utility>
 #include <memory>
 #include "Decls.h"
 #include "Debug.h"
-#include "sema/Concept.h"
+#include "Concept.h"
+#include "SemaError.h"
 #include "jinja2cpp/reflected_value.h"
 
 struct FunctionParameter : SemaElement, Introspection<FunctionParameter>
@@ -18,7 +13,7 @@ struct FunctionParameter : SemaElement, Introspection<FunctionParameter>
 
     explicit FunctionParameter(std::string name) : name(std::move(name))
     {
-        if (get_identifier().empty()) throw std::runtime_error("Name must not be empty");
+        if (get_identifier().empty()) throw SemaError("Name must not be empty");
     }
 
     [[nodiscard]]
@@ -27,7 +22,7 @@ struct FunctionParameter : SemaElement, Introspection<FunctionParameter>
     [[nodiscard]]
     const Function* get_function() const
     {
-        if (!function) throw std::runtime_error("Function is not yet set");
+        if (!function) throw SemaError("Function is not yet set");
         return function;
     }
 
@@ -69,7 +64,7 @@ struct ConcreteFunctionParameter final : FunctionParameter, Introspection<Concre
                               const Concept* type) :
         FunctionParameter(name), type(type)
     {
-        if (!type) throw std::runtime_error("Type must not be empty");
+        if (!type) throw SemaError("Concept must not be empty");
     }
 
     [[nodiscard]]
@@ -115,7 +110,7 @@ struct PlaceholderFunctionParameter final : FunctionParameter, Introspection<Pla
                                     std::string type_placeholder) :
         FunctionParameter(name), type_placeholder(std::move(type_placeholder))
     {
-        if (get_type_placeholder_name().empty()) throw std::runtime_error("Placeholder name must not be empty");
+        if (get_type_placeholder_name().empty()) throw SemaError("Placeholder name must not be empty");
     }
 
     [[nodiscard]]
@@ -163,7 +158,7 @@ struct DependentFunctionParameter final : FunctionParameter, Introspection<Depen
                                const PlaceholderFunctionParameter* placeholder) :
         FunctionParameter(name), placeholder(placeholder)
     {
-        if (!get_placeholder()) throw std::runtime_error("Placeholder must not be empty");
+        if (!get_placeholder()) throw SemaError("Placeholder must not be empty");
     }
 
     [[nodiscard]]
@@ -202,5 +197,3 @@ struct DependentFunctionParameter::DebugVisitor final : FunctionParameter::Debug
 
     void visitFunctionParameter(const FunctionParameter& p) override;
 };
-
-#endif //FUNCTIONPARAMETER_H

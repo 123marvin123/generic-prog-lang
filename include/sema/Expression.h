@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 12.03.25.
-//
-
-#ifndef EXPRESSION_H
-#define EXPRESSION_H
+#pragma once
 
 #include <memory>
 #include "Debug.h"
@@ -12,6 +7,7 @@
 #include "FunctionParameter.h"
 #include "Utils.h"
 #include <format>
+#include "SemaError.h"
 
 struct Expression : SemaElement, Introspection<Expression> {
   explicit Expression(Sema *sema) : sema(sema) {}
@@ -79,7 +75,7 @@ template <class T> struct ConstantExpression : BaseConstantExpression {
       : BaseConstantExpression(sema, resulting_concept),
         value(std::move(value)) {
     if (!resulting_concept)
-      throw std::runtime_error("Resulting concept must not be empty");
+      throw SemaError("Resulting concept must not be empty");
   }
 
   using value_type = T;
@@ -514,5 +510,3 @@ struct LetVariableReferenceExpression::DebugVisitor final : BaseDebugVisitor {
 
   void visitExpression(const Expression &e) override;
 };
-
-#endif // EXPRESSION_H

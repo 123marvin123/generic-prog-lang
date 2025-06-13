@@ -211,20 +211,20 @@ void JinjaPythonExport::register_function_functions()
                 return ret;
             }
 
-            std::ranges::transform(result.value()->get_implementations(), std::back_inserter(ret),
-                                   [](const GenericImplementation& impl)
-                                   {
-                                       jinja2::ValuesMap m;
-                                       m["exp"] = impl.get_expression()->to_python();
-                                       m["timecomplexity"] = impl.get_time_complexity()
-                                           ? impl.get_time_complexity()->to_python()
-                                           : jinja2::EmptyValue{};
-                                       m["spacecomplexity"] = impl.get_space_complexity()
-                                           ? impl.get_space_complexity()->to_python()
-                                           : jinja2::EmptyValue{};
+            for (const auto& impl : result.value()->get_implementations())
+            {
+                if (!impl.get_language().empty() && impl.get_language() != "python")
+                    continue;
 
-                                       return m;
-                                   });
+                jinja2::ValuesMap m;
+                m["expression"] = !impl.get_language().empty() ? impl.get_native_implementation() : impl
+                .get_expression()->to_python();
+                m["time_complexity"] =
+                    impl.get_time_complexity() ? impl.get_time_complexity()->to_python() : jinja2::EmptyValue{};
+                m["space_complexity"] =
+                    impl.get_space_complexity() ? impl.get_space_complexity()->to_python() : jinja2::EmptyValue{};
+                ret.push_back(m);
+            }
 
             return ret;
         },

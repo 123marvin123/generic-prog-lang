@@ -41,9 +41,10 @@ private:
     std::stack<std::vector<LetBinding>> let_binding_stack;
     
     // Check for name collisions with existing symbols
-    void checkNameCollision(const std::string& identifier) const;
+    void checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx = nullptr) const;
     
     // Find a let binding in the current scope stack
+    [[nodiscard]]
     opt<LetBinding> findLetBinding(const std::string& identifier) const;
 };
 

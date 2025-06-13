@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 14.03.25.
-//
 #include "instantiation/ConceptInstantiator.h"
 
 Concept* ConceptInstantiator::instantiate(CongParser::ConceptDefinitionStmntContext* ctx,
@@ -24,11 +21,11 @@ std::any ConceptInstantiator::Visitor::visitConceptDefinitionStmnt(CongParser::C
     {
         if (const auto& res = Sema::create_concept(ns, name); res.has_value())
             return res.value();
-        throw std::runtime_error(std::format("Could not create concept {} because it already exist", name));
+        throw SemaError(std::format("Could not create concept {} because it already exist", name), ctx);
     }
 
     const auto c = ns->find_concept(name);
-    if (!c) throw concept_not_found();
+    if (!c) throw SemaError(std::format("Concept {} not found", name), ctx);
 
     current_concept = c.value();
     if (ctx->desc)
@@ -50,11 +47,11 @@ std::any ConceptInstantiator::Visitor::visitConceptDefinitionBases(CongParser::C
             c.has_value() && c.value())
             concepts.emplace(c.value());
         else
-            throw concept_not_found();
+            throw SemaError(std::format("Could not find concept {}", fqiContext->getText()), ctx);
     }
 
     if (std::ranges::any_of(concepts, [this](const auto& i) { return current_concept == i; }))
-        throw invalid_concept_base();
+        throw SemaError("A concept cannot extend itself", ctx);
 
     current_concept->extend_bases(concepts);
 

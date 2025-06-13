@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 11.03.25.
-//
-
-#ifndef FUNCTION_H
-#define FUNCTION_H
+#pragma once
 
 #include <utility>
 #include <unordered_map>
@@ -17,8 +12,9 @@
 #include "RequiresStatement.h"
 #include "Utils.h"
 #include "jinja2cpp/reflected_value.h"
-#include "sema/SemaContext.h"
-#include "sema/SemaIdentifier.h"
+#include "SemaContext.h"
+#include "SemaIdentifier.h"
+#include "SemaError.h"
 
 struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<Function>
 {
@@ -119,7 +115,7 @@ struct ConcreteFunction final : Function, Introspection<ConcreteFunction>
                      const Concept* resulting_concept) : Function(std::move(name), parent),
                                                               resulting_concept(resulting_concept)
     {
-        if (!resulting_concept) throw std::runtime_error("Resulting concept must not be empty");
+        if (!resulting_concept) throw SemaError("Resulting concept must not be empty");
     }
 
     [[nodiscard]]
@@ -162,7 +158,7 @@ struct DependentFunction final : Function, Introspection<DependentFunction>
     [[nodiscard]] std::variant<const Concept*, PlaceholderFunctionParameter*>
     get_result() const override
     {
-        if (!dependency) throw std::runtime_error("Dependency is empty");
+        if (!dependency) throw SemaError("Dependency is empty");
         return dependency;
     }
 
@@ -193,43 +189,7 @@ public:
     friend struct jinja2::TypeReflection<FunctionView>;
 };
 
-/*
-template<> struct jinja2::TypeReflection<ConcreteFunction> : TypeReflected<ConcreteFunction>
-{
-    static auto& GetAccessors()
-    {
-        static auto parent = TypeReflection<FunctionView>::GetAccessors();
-        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
-
-        accessors.insert({
-            {"type", [](const ConcreteFunction&) { return "concrete_function"; }},
-            {"result_concept", [](const ConcreteFunction& f) { return Reflect(*std::get<const Concept*>(f.get_result())); }}
-        });
-
-        return accessors;
-    }
-};
-
-template<> struct jinja2::TypeReflection<DependentFunction> : TypeReflected<DependentFunction>
-{
-    static auto& GetAccessors()
-    {
-        static auto parent = TypeReflection<FunctionView>::GetAccessors();
-        static std::unordered_map<std::string, FieldAccessor> accessors(parent.begin(), parent.end());
-
-        accessors.insert({
-            {"type", [](const Function&) { return "dependent_function"; }},
-            {"result_dependency", [](const DependentFunction& f) { return Reflect(*std::get<PlaceholderFunctionParameter*>(f.get_result())); }}
-        });
-
-        return accessors;
-    }
-};
-*/
-
 template<> struct jinja2::TypeReflection<FunctionView> : TypeReflected<FunctionView>
 {
     static std::unordered_map<std::string, FieldAccessor>& GetAccessors();
 };
-
-#endif //FUNCTION_H

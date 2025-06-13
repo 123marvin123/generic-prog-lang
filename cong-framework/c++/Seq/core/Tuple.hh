@@ -3,7 +3,7 @@
 #include "../../Boolean/core/BooleanStatic.hh"
 #include "../../Number/core/NaturalStatic.hh"
 #include "../../Type.hh"
-
+#include <tuple>
 #include <utility>
 
 namespace cong::lang::core
@@ -247,6 +247,34 @@ namespace cong::lang::core
         struct Call<Tuple<ItemS...>>
         {
             using Type = Tuple<typename ToNonRValRef::Call<ItemS>::Type...>;
+        };
+    };
+
+    template<typename TargetType>
+    struct Contains {
+        template<typename Tuple_>
+        struct Call {
+        private:
+            
+            struct IsTargetType {
+                template<typename CurrentType>
+                struct Call {
+                    using Type = typename IsSame::Call<
+                        typename Plain::Call<CurrentType>::Type,
+                        typename Plain::Call<TargetType>::Type
+                    >::Type;
+                };
+            };
+            
+        public:
+            using Type = typename Fold::Call<
+                Or_,                    
+                False,                  
+                typename Transform::Call<
+                    IsTargetType,       
+                    Tuple_             
+                >::Type
+            >::Type;
         };
     };
 

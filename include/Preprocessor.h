@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 17.03.25.
-//
-
-#ifndef PREPROCESSOR_H
-#define PREPROCESSOR_H
+#pragma once
 
 #include <string>
 #include <regex>
@@ -19,5 +14,3 @@ private:
     std::string process_recursive(const std::filesystem::path& input_file, std::unordered_set<std::string>& visitedFiles); // NOLINT(*-no-recursion)
 
 };
-
-#endif //PREPROCESSOR_H

@@ -1,0 +1,33 @@
+concept Tree (description: "") : Object;
+
+fun height(tree: Tree) -> Natural {
+  description {
+    "height of p(1)"
+  }
+}
+
+fun setOfNode(tree: Tree) -> Set {
+  description {
+    "set of nodes of p(1)"
+  }
+}
+
+fun root(tree: Tree) -> Set {
+  description {
+    "set containing root node of p(1) (if not empty)"
+  }
+}
+
+fun setOfChild(tree: Tree, node: Object) -> Set {
+  description {
+    "set of children of p(2) in p(1)"
+  }
+  requires { hasElement(setOfNode(tree), node) }
+}
+
+fun isLeaf(tree: Tree, node: Object) -> Boolean {
+  description {
+    "is p(2) a leaf of p(1)?"
+  }
+  requires { hasElement(setOfNode(tree), node) }
+}

@@ -1,19 +1,14 @@
-//
-// Created by Marvin Haschker on 12.03.25.
-//
-
-#ifndef CONCEPTVISITOR_H
-#define CONCEPTVISITOR_H
+#pragma once
 
 #include <utility>
 #include <format>
 #include <visitor/AbstractVisitor.h>
 
-#include "CongBaseVisitor.h"
-#include "Exception.h"
+#include "CongParserBaseVisitor.h"
 #include "Utils.h"
 #include "sema/Concept.h"
 #include "sema/Sema.h"
+#include "sema/SemaError.h"
 
 struct ConceptInstantiator
 {
@@ -42,6 +37,3 @@ private:
         Concept* current_concept;
     };
 };
-; // namespace instantiation
-
-#endif // CONCEPTVISITOR_H

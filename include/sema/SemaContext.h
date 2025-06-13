@@ -1,14 +1,10 @@
-//
-// Created by Marvin Haschker on 09.03.25.
-//
-
-#ifndef LOOKUPCONTEXT_H
-#define LOOKUPCONTEXT_H
+#pragma once
 
 #include <optional>
 #include <algorithm>
-#include "sema/SemaElement.h"
+#include "SemaElement.h"
 #include "Decls.h"
+
 
 template <class T>
 class SemaContext : SemaElement
@@ -41,5 +37,3 @@ protected:
 
     ContainerType data;
 };
-
-#endif //LOOKUPCONTEXT_H

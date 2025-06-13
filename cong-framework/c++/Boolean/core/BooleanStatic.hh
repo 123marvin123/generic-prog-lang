@@ -187,4 +187,19 @@ namespace cong::lang::core
         {
         };
     };
+
+    struct IsSame
+    {
+        template <typename T1, typename T2>
+        struct Call
+        {
+            using Type = False;
+        };
+
+        template <typename T>
+        struct Call<T, T>
+        {
+            using Type = True;
+        };
+    };
 }; // namespace cong::lang::core

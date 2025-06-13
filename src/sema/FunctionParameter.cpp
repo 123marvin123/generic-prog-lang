@@ -1,6 +1,4 @@
-//
-// Created by Marvin Haschker on 11.03.25.
-//
+
 #include "sema/FunctionParameter.h"
 
 #include <Utils.h>

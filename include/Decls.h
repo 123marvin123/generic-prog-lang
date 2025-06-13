@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 09.03.25.
-//
-
-#ifndef DECLS_H
-#define DECLS_H
+#pragma once
 
 #include <vector>
 #include <set>
@@ -42,5 +37,3 @@ enum class Operator
     SUB,
     MOD
 };
-
-#endif //DECLS_H

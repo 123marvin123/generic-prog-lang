@@ -208,7 +208,7 @@ DirValidator::DirValidator(const bool& allow_overwrite) : Validator("DIR")
     };
 }
 
-std::string utils::sanitize_cpp_identifier(std::string_view identifier)
+std::string utils::sanitize_cpp_identifier(const std::string_view identifier)
 {
     auto it = cpp_keyword_map.find(identifier);
     if (it != cpp_keyword_map.end())

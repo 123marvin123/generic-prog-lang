@@ -320,8 +320,12 @@ TEST_CASE_METHOD(UtilsFixture, "Cross namespace concept dependency with simple n
 
     const auto& data = construct_parse_tree(program);
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
+
+    DeclarationVisitor vx{sema.get(), DeclarationVisitor::Mode::Functions, false};
+    vx.visit(data.parse_tree());
+
     DefinitionVisitor v2{sema.get()};
     v2.visit(data.parse_tree());
 

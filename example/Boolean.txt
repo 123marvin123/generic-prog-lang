@@ -1,0 +1,26 @@
+fun not(p1: Boolean) -> Boolean {
+    description { "$\\lnot$ p(1) (logical negation)" }
+}
+
+fun and(p1: Boolean, p2: Boolean) -> Boolean {
+    description { "p(1) $\\land$ p(2) (logical conjunction)" }
+}
+
+fun or(p1: Boolean, p2: Boolean) -> Boolean {
+    description { "p(1) $\\lor$ p(2) (logical disjunction)" }
+}
+
+fun xor(p1: Boolean, p2: Boolean) -> Boolean {
+    description { "p(1) $\\oplus$ p(2) (logical exclusive disjunction)" }
+    requires { isNotEqual(p1, p2) }
+    requires { or(and(p1, not(p2)), and(not(p1), p2)) }
+}
+
+fun imply(p1: Boolean, p2: Boolean) -> Boolean {
+    description { "p(1) $\\implies$ p(2) (logical implication)" }
+    requires { or(not(p1), p2) }
+}
+
+fun cond(p1: Boolean, p2: <T>, p3: <K>) -> Object {
+    description { "p(2) if p(1), else p(3)" }
+}

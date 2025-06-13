@@ -2,6 +2,7 @@
 
 #include <string>
 #include "Decls.h"
+#include "SemaError.h"
 
 class RequiresStatement
 {
@@ -9,7 +10,7 @@ public:
     explicit RequiresStatement(s_ptr<Expression> expression, opt<std::string> name = std::nullopt)
         : expression(std::move(expression)), name(std::move(name))
     {
-        if (!this->expression) throw std::runtime_error("Expression must not be null");
+        if (!this->expression) throw SemaError("Expression must not be null");
     }
 
     [[nodiscard]]

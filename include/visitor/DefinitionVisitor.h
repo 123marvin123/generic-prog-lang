@@ -5,7 +5,6 @@
 #ifndef DEFINITIONVISITOR_H
 #define DEFINITIONVISITOR_H
 
-#include "Exception.h"
 #include "sema/Sema.h"
 #include "visitor/AbstractVisitor.h"
 

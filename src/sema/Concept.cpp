@@ -1,13 +1,12 @@
 #include "sema/Concept.h"
 
 #include <utility>
-#include "Exception.h"
 #include "sema/Namespace.h"
 
 Concept::Concept(std::string name, Namespace* ns) :
     SemaIdentifier(std::move(name), ns)
 {
-    if (get_identifier().empty()) throw std::runtime_error("Name must not be empty");
+    if (get_identifier().empty()) throw SemaError("Name must not be empty");
 }
 
 Concept::Concept(std::string name, Namespace* ns, const std::set<const Concept*>& bases) :
@@ -52,7 +51,7 @@ bool Concept::is_legal_base(const Concept* potential_base) const
 
 bool Concept::matches_concept(const Concept* c) const
 {
-    return this == c || is_base_of(c);
+    return this == c || c->is_base_of(this);
 }
 
 Concept::OperationResult Concept::get_operation_result(const Operator op, const Concept* other) const

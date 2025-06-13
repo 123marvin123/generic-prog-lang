@@ -6,7 +6,7 @@
 {% set name_ = sanitize(def.name) %}
 
 struct Dec{{ Name_ }} {
-    using ParamTupleOfConcept = ::cong::lang::core::Tuple<
+    using Params = ::cong::lang::core::Tuple<
     {%- for param in def.params -%}
         {%- if param.type == "placeholder_function_parameter" or param.type == "dependent_function_parameter" %}
 {{ ConceptObject.ns | join('::') }}::Concept{{ ConceptObject.name }}
@@ -14,6 +14,9 @@ struct Dec{{ Name_ }} {
 {{ param.concept.ns | join('::') }}::Concept{{ param.concept.name }}
         {%- endif %}{{', ' if loop.nextitem is defined }}
     {%- endfor -%}>;
+
+    using ReturnConcept = {{ def.result.ns | join('::') }}::Concept{{ def.result.name }};
+
 };
 
 struct Spec{{ Name_ }};

@@ -1,5 +1,5 @@
 
-// Generated from /Users/haschker/Arbeitsbereich/generic-prog-lang/grammar/Cong.g4 by ANTLR 4.13.2
+// Generated from /Users/haschker/Arbeitsbereich/generic-prog-lang/grammar/CongLexer.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -12,13 +12,13 @@
 class  CongLexer : public antlr4::Lexer {
 public:
   enum {
-    T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
-    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
-    T__14 = 15, T__15 = 16, CONCEPT = 17, FUNCTION = 18, NAMESPACE = 19, 
-    LET = 20, DESCRIPTION = 21, GENERICIMPL = 22, REQUIRES = 23, TIME = 24, 
-    SPACE = 25, LBRACE = 26, RBRACE = 27, VARARGS = 28, REAL = 29, BOOL = 30, 
-    NUMBER = 31, STRING = 32, IDENTIFIER = 33, WHITESPACE = 34, COMMENT = 35, 
-    LINE_COMMENT = 36, OTHER = 37
+    CONCEPT = 1, FUNCTION = 2, NAMESPACE = 3, LET = 4, DESCRIPTION = 5, 
+    GENERICIMPL = 6, REQUIRES = 7, TIME = 8, SPACE = 9, LANG = 10, LBRACE = 11, 
+    RBRACE = 12, VARARGS = 13, LPAREN = 14, RPAREN = 15, COLON = 16, SEMI = 17, 
+    AMP = 18, ARROW = 19, COMMA = 20, ASSIGN = 21, PLUS = 22, MINUS = 23, 
+    MUL = 24, DIV = 25, MOD = 26, LT = 27, GT = 28, DOUBLE_COLON = 29, REAL = 30, 
+    BOOL = 31, NUMBER = 32, STRING = 33, IDENTIFIER = 34, WHITESPACE = 35, 
+    COMMENT = 36, LINE_COMMENT = 37, OTHER = 38
   };
 
   explicit CongLexer(antlr4::CharStream *input);

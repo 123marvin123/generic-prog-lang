@@ -51,7 +51,7 @@ TEST_CASE_METHOD(NamespaceFixture, "Concept search", "[namespace]")
     constexpr auto id = "X";
     const auto data = construct_parse_tree(std::format("concept {};", id));
 
-    DeclarationVisitor v{sema_ptr};
+    DeclarationVisitor v{sema_ptr, DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     INFO(sema->to_string());
@@ -65,7 +65,7 @@ TEST_CASE_METHOD(NamespaceFixture, "Namespace search", "[namespace]")
     constexpr auto id = "X";
     const auto data = construct_parse_tree(std::format("namespace {} {{}}", id));
 
-    DeclarationVisitor v{sema_ptr};
+    DeclarationVisitor v{sema_ptr, DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     INFO(sema->to_string());
@@ -79,8 +79,11 @@ TEST_CASE_METHOD(NamespaceFixture, "Function search", "[namespace]")
     constexpr auto id_f = "f";
     const auto data = construct_parse_tree(std::format("concept {}; fun {}() -> {} {{}}", id_c, id_f, id_c));
 
-    DeclarationVisitor v{sema_ptr};
+    DeclarationVisitor v{sema_ptr, DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
+
+    DeclarationVisitor v2{sema_ptr, DeclarationVisitor::Mode::Functions, false};
+    v2.visit(data.parse_tree());
 
     INFO(sema->to_string());
 
@@ -93,7 +96,7 @@ TEST_CASE_METHOD(NamespaceFixture, "Child namespace", "[namespace]")
     constexpr auto id2 = "Y";
     const auto data = construct_parse_tree(std::format("namespace {} {{ namespace {} {{}} }}", id1, id2));
 
-    DeclarationVisitor v{sema_ptr};
+    DeclarationVisitor v{sema_ptr, DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     INFO(sema->to_string());
@@ -119,7 +122,7 @@ TEST_CASE_METHOD(NamespaceFixture, "Full name with parent", "[namespace]")
     constexpr auto id2 = "Y";
     const auto data = construct_parse_tree(std::format("namespace {} {{ namespace {} {{}} }}", id1, id2));
 
-    DeclarationVisitor v{sema_ptr};
+    DeclarationVisitor v{sema_ptr, DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     INFO(sema->to_string());
@@ -142,8 +145,11 @@ TEST_CASE_METHOD(NamespaceFixture, "Remove functions", "[namespace]")
     const auto data = construct_parse_tree(std::format(
         "concept {}; fun {}() -> {} {{}} namespace {} {{}}", id_c, id_f, id_c, id_ns));
 
-    DeclarationVisitor v{sema_ptr};
+    DeclarationVisitor v{sema_ptr, DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
+
+    DeclarationVisitor v2{sema_ptr, DeclarationVisitor::Mode::Functions, false};
+    v2.visit(data.parse_tree());
 
     INFO(sema->to_string());
 

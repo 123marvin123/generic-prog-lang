@@ -48,7 +48,8 @@ CPMAddPackage(
 # Find the ANTLR4 executable
 find_program(ANTLR_EXECUTABLE antlr)
 
-set(GRAMMAR_FILE ${CMAKE_SOURCE_DIR}/grammar/Cong.g4)
+set(GRAMMAR_FILE ${CMAKE_SOURCE_DIR}/grammar/CongParser.g4)
+set(LEXER_FILE ${CMAKE_SOURCE_DIR}/grammar/CongLexer.g4)
 
 if (NOT ANTLR_EXECUTABLE)
     message(WARNING "antlr4 executable not found. We are not able to build grammar files.")
@@ -61,8 +62,8 @@ else ()
     add_custom_command(
             OUTPUT ${CMAKE_SOURCE_DIR}/generated/CongLexer.cpp ${CMAKE_SOURCE_DIR}/generated/CongParser.cpp
             COMMAND ${ANTLR_EXECUTABLE} -no-listener -visitor -Dlanguage=Cpp -o ${CMAKE_SOURCE_DIR}/generated
-            ${GRAMMAR_FILE}
-            DEPENDS ${GRAMMAR_FILE}
+            ${LEXER_FILE} ${GRAMMAR_FILE}
+            DEPENDS ${LEXER_FILE} ${GRAMMAR_FILE}
             COMMENT "Generating ANTLR lexer and parser from ${GRAMMAR_FILE}"
     )
 

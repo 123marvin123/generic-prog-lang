@@ -1,12 +1,6 @@
-//
-// Created by Marvin Haschker on 12.03.25.
-//
-
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
 #include <CLI/CLI.hpp>
-#include <memory>
 #include "Decls.h"
 #include "jinja2cpp/error_info.h"
 
@@ -190,16 +184,6 @@ namespace utils
         {"while", "while_"}, {"with", "with_"}, {"yield", "yield_"}
     };
 
-    /**
-    * @brief Sanitizes a C++ identifier to ensure it's not a reserved keyword.
-    * 
-    * This function checks if the provided identifier is a C++ reserved keyword.
-    * If it is, returns an alternative sanitized version of the identifier.
-    * Otherwise, returns the original identifier unchanged.
-    * 
-    * @param identifier The string view containing the identifier to sanitize
-    * @return std::string A sanitized version of the identifier that is not a C++ keyword
-    */
     std::string sanitize_cpp_identifier(std::string_view identifier);
     std::string sanitize_python_identifier(std::string_view identifier);
 }
@@ -210,5 +194,3 @@ class DirValidator : public CLI::Validator
 public:
     explicit DirValidator(const bool& allow_overwrite);
 };
-
-#endif // UTILS_H

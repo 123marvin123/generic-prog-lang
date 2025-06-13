@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 13.03.25.
-//
-
-#ifndef DEBUG_H
-#define DEBUG_H
+#pragma once
 
 #include <iostream>
 #include <termcolor/termcolor.hpp>
@@ -55,5 +50,3 @@ struct Introspection
         return visit.result();
     }
 };
-
-#endif //DEBUG_H

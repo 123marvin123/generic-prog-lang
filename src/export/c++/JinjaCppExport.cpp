@@ -4,6 +4,8 @@
 
 #include "export/c++/JinjaCppExport.h"
 
+#include <unordered_set>
+
 #include "Utils.h"
 #include "jinja2cpp/reflected_value.h"
 #include "jinja2cpp/template.h"
@@ -91,7 +93,8 @@ vec<std::filesystem::path> JinjaCppExport::process()
         }
         else
         {
-            utils::print_jinja2_error(res.error(), std::format("Failed to render template for concept {}", c->get_full_name()));
+            utils::print_jinja2_error(res.error(),
+                                      std::format("Failed to render template for concept {}", c->get_full_name()));
         }
     }
 
@@ -101,6 +104,11 @@ vec<std::filesystem::path> JinjaCppExport::process()
             get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
 
         std::unordered_set<std::variant<const Concept*, const Function*>> needed_files_set = {};
+
+        if (std::holds_alternative<const Concept*>(f->get_result()))
+            needed_files_set.emplace(std::get<const Concept*>(f->get_result()));
+        else
+            needed_files_set.emplace(f->get_namespace()->get_sema()->find_concept("Object").value());
 
         for (FunctionParameter* param : f->get_parameters())
         {
@@ -185,19 +193,25 @@ void JinjaCppExport::register_function_functions()
                 return ret;
             }
 
-            std::ranges::transform(result.value()->get_implementations(), std::back_inserter(ret),
-                                   [](const GenericImplementation& impl)
-                                   {
-                                       jinja2::ValuesMap m;
-                                       m["expression"] = impl.get_expression()->to_cpp();
-                                       m["time_complexity"] = impl.get_time_complexity()
-                                           ? impl.get_time_complexity()->to_cpp()
-                                           : jinja2::EmptyValue{};
-                                       m["space_complexity"] = impl.get_space_complexity()
-                                           ? impl.get_space_complexity()->to_cpp()
-                                           : jinja2::EmptyValue{};
-                                       return m;
-                                   });
+            for (const auto& impl : result.value()->get_implementations())
+            {
+                if (!impl.get_language().empty() && impl.get_language() != "c++")
+                    continue;
+
+                jinja2::ValuesMap m;
+
+                if (impl.get_language().empty())
+                    m["expression"] = impl.get_expression()->to_cpp();
+                else
+                    m["expression"] = impl.get_language();
+
+                m["time_complexity"] =
+                    impl.get_time_complexity() ? impl.get_time_complexity()->to_cpp() : jinja2::EmptyValue{};
+                m["space_complexity"] =
+                    impl.get_space_complexity() ? impl.get_space_complexity()->to_cpp() : jinja2::EmptyValue{};
+                ret.emplace_back(m);
+            }
+
 
             return ret;
         },

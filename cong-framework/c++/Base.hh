@@ -11,6 +11,7 @@ namespace cong::lang::intern
   class Base
   {
   public:
+    using Concepts = std::tuple<>;
     using IsStateful = core::FunStaticMake<core::False>;
 
     using ReduceSpace = core::FunStaticMake<core::Invalid>;

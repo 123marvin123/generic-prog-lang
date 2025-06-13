@@ -5,10 +5,11 @@
 #ifndef ABSTRACTVISITOR_H
 #define ABSTRACTVISITOR_H
 
-#include "CongBaseVisitor.h"
+#include "CongParserBaseVisitor.h"
 #include "sema/Sema.h"
+#include "sema/SemaError.h"
 
-struct AbstractVisitor : CongBaseVisitor
+struct AbstractVisitor : CongParserBaseVisitor
 {
     explicit AbstractVisitor(Sema* sema, bool createNamespaces);
 

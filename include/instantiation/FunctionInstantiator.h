@@ -5,16 +5,16 @@
 #ifndef FUNCTIONINSTANTIATOR_H
 #define FUNCTIONINSTANTIATOR_H
 
-#include <CongBaseVisitor.h>
+#include <CongParserBaseVisitor.h>
 #include <format>
 #include <visitor/AbstractVisitor.h>
 
-#include "Exception.h"
 #include "Utils.h"
 #include "sema/Function.h"
 #include "sema/FunctionParameter.h"
 #include "sema/Namespace.h"
 #include "sema/Sema.h"
+#include "sema/SemaError.h"
 
 struct FunctionInstantiator
 {

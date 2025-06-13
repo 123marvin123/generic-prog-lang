@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 08.03.25.
-//
 
 #include "sema/Namespace.h"
 #include "sema/Concept.h"

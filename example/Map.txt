@@ -1,0 +1,70 @@
+concept Map (description: "map of elements of a domain set to elements of a range set") : Object;
+
+fun domain(p1: Map) -> Set {
+    description { "domain of p(1)" }
+}
+
+fun codomain(p1: Map) -> Set {
+    description { "codomain of p(1)" }
+}
+
+fun identity(p1: Set) -> Map {
+    description { "map of (all elements of) p(1) to themselves" }
+}
+
+fun map(p1: Set, p2: Object) -> Map {
+    description { "map of (all elements of) p(1) to p(2)" }
+}
+
+fun applyFun(p1: Map, p2: <T>) -> Object {
+    description { "applies p(1) to p(2)" }
+    requires { hasElement(domain(p1), p2) }
+}
+
+fun image(p1: Map, p2: Set) -> Set {
+    description { "image of p(2) under p(1)" }
+}
+
+fun preImage(p1: Map, p2: Set) -> Set {
+    description { "pre-image of p(2) under p(1)" }
+}
+
+fun range(p1: Map) -> Set {
+    description { "range of p(1)" }
+    generic() { image(p1, domain(p1)) }
+}
+
+fun compose(p1: Map, p2: Map) -> Map {
+    description { "composition of p(1) and p(2)" }
+    requires { hasSubSet(domain(p2), range(p1)) }
+}
+
+fun embed(p1: Map, p2: Map) -> Map {
+    description { "replace p(1) by p(2) on domain of p(2)" }
+    requires { hasSubSet(domain(p1), domain(p2)) }
+}
+
+fun leftIntersection(p1: Map, p2: Map) -> Map {
+    description { "(left-side) intersection of p(1) and p(2)" }
+}
+
+fun leftDiff(p1: Map, p2: Map) -> Map {
+    description { "(left-side) difference of p(1) and p(2)" }
+}
+
+fun leftUnion(p1: Map, p2: Map) -> Map {
+    description { "left-side union of p(1) and p(2)" }
+}
+
+fun filter(p1: Set, p2: Map) -> Set {
+    description { "set of elements of p(1) for which predicate p(2) holds" }
+}
+
+fun convert(p1: Map, p2: Set) -> Set {
+    description { "(multi) set formed by applying p(1) to each element of p(2)" }
+}
+
+fun reduce(p1: Set, p2: Map) -> Object {
+    description { "successive application of p(2) to elements of p(1), in arbitrary order, passing on the accumulated result as first argument" }
+    requires { not(isEmptySet(p1)) }
+}

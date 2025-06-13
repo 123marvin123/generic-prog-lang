@@ -28,7 +28,7 @@ TEST_CASE_METHOD(ConceptFixture, "Concept declaration", "[concept]")
     const auto size = sema->concepts().size();
 
     INFO(sema->to_string());
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
     INFO("After declaration visitor: " << sema->to_string());
 
@@ -45,7 +45,7 @@ TEST_CASE_METHOD(ConceptFixture, "Concept definition", "[concept]")
     const auto size = sema->concepts().size();
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
     INFO("After declaration visitor");
 
@@ -66,7 +66,7 @@ TEST_CASE_METHOD(ConceptFixture, "Concept definition with bases", "[concept]")
     const auto size = sema->concepts().size();
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
     INFO("After declaration visitor");
 
@@ -86,12 +86,12 @@ TEST_CASE_METHOD(ConceptFixture, "Concept with circular base reference", "[conce
     const auto& data = construct_parse_tree(std::format("concept {} : {};", id, id));
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
     INFO("After declaration visitor");
 
     DefinitionVisitor v2{sema.get()};
-    REQUIRE_THROWS_AS(v2.visit(data.parse_tree()), invalid_concept_base);
+    REQUIRE_THROWS_AS(v2.visit(data.parse_tree()), SemaError);
 }
 
 TEST_CASE_METHOD(ConceptFixture, "Concept with self as base", "[concept]")
@@ -100,12 +100,12 @@ TEST_CASE_METHOD(ConceptFixture, "Concept with self as base", "[concept]")
     const auto& data = construct_parse_tree(std::format("concept {} : {};", id, id));
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
     INFO("After declaration visitor");
 
     DefinitionVisitor v2{sema.get()};
-    REQUIRE_THROWS_AS(v2.visit(data.parse_tree()), invalid_concept_base);
+    REQUIRE_THROWS_AS(v2.visit(data.parse_tree()), SemaError);
 }
 
 TEST_CASE_METHOD(ConceptFixture, "Concept with unknown base", "[concept]")
@@ -114,12 +114,12 @@ TEST_CASE_METHOD(ConceptFixture, "Concept with unknown base", "[concept]")
     const auto& data = construct_parse_tree(std::format("concept {} : Unknown;", id));
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
     INFO("After declaration visitor");
 
     DefinitionVisitor v2{sema.get()};
-    REQUIRE_THROWS_AS(v2.visit(data.parse_tree()), concept_not_found);
+    REQUIRE_THROWS_AS(v2.visit(data.parse_tree()), SemaError);
 }
 
 TEST_CASE_METHOD(ConceptFixture, "Is legal base validation", "[concept]")
@@ -129,7 +129,7 @@ TEST_CASE_METHOD(ConceptFixture, "Is legal base validation", "[concept]")
     const auto& data = construct_parse_tree(std::format("concept {}; concept {};", id_1, id_2));
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     DefinitionVisitor v2{sema.get()};
@@ -159,7 +159,7 @@ TEST_CASE_METHOD(ConceptFixture, "Is base of with cyclic dependency", "[concept]
         std::format("concept {}; concept {} : {}; concept {} : {};", id_3, id_2, id_3, id_1, id_2));
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     DefinitionVisitor v2{sema.get()};
@@ -182,7 +182,7 @@ TEST_CASE_METHOD(ConceptFixture, "Empty description", "[concept]")
     const auto& data = construct_parse_tree(std::format("concept {};", id_1));
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     DefinitionVisitor v2{sema.get()};
@@ -201,7 +201,7 @@ TEST_CASE_METHOD(ConceptFixture, "Concept with description", "[concept]")
     const auto& data = construct_parse_tree(std::format("concept {}(description: \"{}\");", id_1, id_desc));
     INFO(sema->to_string());
 
-    DeclarationVisitor v{sema.get()};
+    DeclarationVisitor v{sema.get(), DeclarationVisitor::Mode::Concepts};
     v.visit(data.parse_tree());
 
     DefinitionVisitor v2{sema.get()};

@@ -7,17 +7,14 @@
 #include <sema/Expression.h>
 #include <sema/Namespace.h>
 #include <sema/Sema.h>
-
-#include <utility>
-
-#include "sema/FunctionParameter.h"
-#include "sema/GenericImplementation.h"
+#include <sema/FunctionParameter.h>
+#include <sema/GenericImplementation.h>
 
 Function::Function(std::string name, const Namespace* parent)
     : SemaIdentifier(std::move(name), parent)
     {
-        if (get_identifier().empty()) throw std::runtime_error("Name must not be empty");
-        if (!parent) throw std::runtime_error("Parent must not be empty");
+        if (get_identifier().empty()) throw SemaError("Function name must not be empty");
+        if (!parent) throw SemaError("Parent namespace must not be empty");
     }
 
 Function::~Function() = default;
@@ -33,7 +30,7 @@ opt<FunctionParameter*> Function::find_function_parameter(std::string_view ident
 FunctionParameter* Function::register_function_parameter(u_ptr<FunctionParameter> fp)
 {
     if (find_function_parameter(fp->get_identifier()))
-        throw std::runtime_error(std::format("Function parameter {} already registered", fp->get_identifier()));
+        throw SemaError(std::format("Function parameter {} already registered", fp->get_identifier()));
 
     fp->set_function(this);
     auto* ptr = fp.get();
@@ -55,16 +52,20 @@ opt<PlaceholderFunctionParameter*> Function::find_placeholder(const std::string_
 
 void Function::add_generic_implementation(const GenericImplementation& exp)
 {
-    if (const auto& exp_result = exp.get_expression()->get_result();
-        std::holds_alternative<const Concept*>(exp_result))
+    if (exp.get_expression())
     {
-        const auto& c = std::get<const Concept*>(exp_result);
-        if (const auto& fun_result = get_result();
-            std::holds_alternative<const Concept*>(fun_result))
+        if (const auto& exp_result = exp.get_expression()->get_result();
+           std::holds_alternative<const Concept*>(exp_result))
         {
-            if (const auto& target_concept = std::get<const Concept*>(fun_result);
-                !c->matches_concept(target_concept))
-                throw std::runtime_error(std::format("Generic implementation does not match function return type"));
+            const auto& c = std::get<const Concept*>(exp_result);
+            if (const auto& fun_result = get_result();
+                std::holds_alternative<const Concept*>(fun_result))
+            {
+                if (const auto& target_concept = std::get<const Concept*>(fun_result);
+                    !c->matches_concept(target_concept))
+                    throw SemaError(std::format("Generic implementation ({}) does not match function return type ({})",
+                        c->get_identifier(), target_concept->get_identifier()));
+            }
         }
     }
 
@@ -75,10 +76,13 @@ void Function::add_requirement(s_ptr<Expression> exp, opt<std::string> name)
 {
     static const auto boolean = *get_namespace()->get_sema()->find_concept("Boolean");
 
-    if (!std::holds_alternative<const Concept*>(exp->get_result())) throw std::runtime_error("Expression must return a concrete concept");
+    if (!std::holds_alternative<const Concept*>(exp->get_result()))
+        throw SemaError("Expression must return a concrete concept");
     if (const auto conceptResult = std::get<const Concept*>(exp->get_result());
         conceptResult != boolean)
-        throw std::runtime_error(std::format("Expression must return {}, not {}", boolean->get_identifier(), conceptResult->get_identifier()));
+        throw SemaError(
+            std::format("Expression must return {}, not {}",
+                boolean->get_identifier(), conceptResult->get_identifier()));
 
     exp_requires.emplace_back(std::move(exp), std::move(name));
 }
@@ -146,7 +150,6 @@ void Function::DebugVisitor::visitFunction(const Function& f)
         }
     }
 
-    /*
     if (f.get_space_complexity())
     {
         ss << spaces() << termcolor::bold << "space complexity" << termcolor::reset << " {\n";
@@ -158,7 +161,7 @@ void Function::DebugVisitor::visitFunction(const Function& f)
         ss << spaces() << termcolor::bold << "time complexity" << termcolor::reset << " {\n";
         ss << f.get_time_complexity()->to_string(tabsize + 2) << "\n" << spaces() << "}\n";
     }
-    */
+
 
     ss << termcolor::reset;
 }

@@ -1,12 +1,6 @@
-//
-// Created by Marvin Haschker on 08.03.25.
-//
-
-#ifndef NAMESPACE_H
-#define NAMESPACE_H
+#pragma once
 
 #include <Debug.h>
-#include <set>
 #include <string>
 #include <optional>
 #include <ranges>
@@ -14,8 +8,9 @@
 #include "Concept.h"
 #include "Function.h"
 #include "Debug.h"
-#include "sema/SemaContext.h"
-#include "sema/SemaIdentifier.h"
+#include "SemaContext.h"
+#include "SemaIdentifier.h"
+#include "SemaError.h"
 #include "Decls.h"
 
 struct Namespace : SemaIdentifier, SemaContext<Namespace>, SemaContext<Concept>, SemaContext<Function>,
@@ -25,7 +20,7 @@ struct Namespace : SemaIdentifier, SemaContext<Namespace>, SemaContext<Concept>,
                         Namespace* parent = nullptr) :
         SemaIdentifier(std::move(name), parent), parent(parent), sema(sema)
     {
-        if (!is_global() && get_identifier().empty()) throw std::runtime_error("Name must not be empty");
+        if (!is_global() && get_identifier().empty()) throw SemaError("Name must not be empty");
     }
 
     ~Namespace() override = default;
@@ -143,4 +138,3 @@ struct DefaultNamespace : Namespace
     {
     }
 };
-#endif // NAMESPACE_H

@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 14.03.25.
-//
 #include "visitor/ExpressionVisitor.h"
 
 std::any ExpressionVisitor::visitLiteralExpression(CongParser::LiteralExpressionContext* ctx)
@@ -17,30 +14,34 @@ std::any ExpressionVisitor::visitLiteralExpression(CongParser::LiteralExpression
 
     if (exp) return utils::dyn_cast<Expression>(exp);
 
-    throw std::runtime_error("Unknown literal type");
+    throw std::runtime_error(std::format("Unknown literal type {}", ctx->getText()));
 }
 
 std::any ExpressionVisitor::visitParameterReferenceExpression(CongParser::ParameterReferenceExpressionContext* ctx)
 {
     const std::string paramName = ctx->param->getText();
-    
-    // First check for let-bindings in the current scope stack
+
     if (const auto let_binding = findLetBinding(paramName)) {
-        // Create a LetVariableReferenceExpression that references the bound value
         return utils::dyn_cast<Expression>(
             new LetVariableReferenceExpression(ns->get_sema(), paramName, let_binding->value)
         );
     }
     
-    // Then check for function parameters
     if (!fun)
-        throw std::runtime_error("we are not inside a function context");
+        throw std::runtime_error("We are not inside a function context");
 
     const opt<FunctionParameter*> param = fun->find_function_parameter(paramName);
     if (!param.has_value() || !param.value())
-        throw std::runtime_error(std::format("Could not find parameter {}", paramName));
+        throw SemaError(std::format("Could not find parameter {}", paramName), ctx);
 
-    return utils::dyn_cast<Expression>(new FunctionParameterExpression(ns->get_sema(), param.value()));
+    try
+    {
+        return utils::dyn_cast<Expression>(new FunctionParameterExpression(ns->get_sema(), param.value()));
+    }
+    catch (const SemaError& e)
+    {
+        throw SemaError(e.what(), ctx);
+    }
 }
 
 std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContext* ctx)
@@ -48,7 +49,7 @@ std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContex
     const utils::FQIInfo& info = utils::split_fully_qualified_identifier(ctx->fun->getText());
     const opt<Function*> target_fun = utils::resolve_fully_qualified_identifier<Function>(info, ns);
     if (!target_fun.has_value() || !target_fun.value())
-        throw std::runtime_error(std::format("Could not find function {}", ctx->fun->getText()));
+        throw SemaError(std::format("Could not find function {}", ctx->fun->getText()), ctx);
 
     vec<s_ptr<Expression>> subExpressions;
     subExpressions.reserve(ctx->expression().size());
@@ -59,16 +60,24 @@ std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContex
             result.has_value() && result.type() == typeid(Expression*))
             subExpressions.push_back(std::shared_ptr<Expression>(std::any_cast<Expression*>(result)));
         else
-            throw std::runtime_error(std::format("Could not parse expression {}", exp->getText()));
+            throw SemaError(std::format("Could not parse expression {}", exp->getText()), exp);
     }
 
     if (const auto& fun_params = target_fun.value()->get_parameters();
         subExpressions.size() < fun_params.size())
-        throw std::runtime_error(std::format("Function {} requires {} arguments but only {} were provided.",
+        throw SemaError(std::format("Function {} requires {} arguments but only {} were provided.",
                                              target_fun.value()->get_identifier(),
-                                             target_fun.value()->get_parameters().size(), subExpressions.size()));
+                                             target_fun.value()->get_parameters().size(), subExpressions.size()), ctx);
 
-    return utils::dyn_cast<Expression>(new CallExpression(ns->get_sema(), target_fun.value(), subExpressions));
+    try
+    {
+        return utils::dyn_cast<Expression>(new CallExpression(ns->get_sema(), target_fun.value(), subExpressions));
+    }
+    catch (const SemaError& e)
+    {
+        throw SemaError(e.what(), ctx);
+    }
+
 }
 
 std::any ExpressionVisitor::visitArithmeticExpression(CongParser::ArithmeticExpressionContext* ctx)
@@ -79,34 +88,41 @@ std::any ExpressionVisitor::visitArithmeticExpression(CongParser::ArithmeticExpr
     if (const std::any left = visit(ctx->left); left.has_value() && left.type() == typeid(Expression*))
         left_exp = std::any_cast<Expression*>(left);
     else
-        throw std::runtime_error("Left expression is not valid");
+        throw SemaError("Left expression is not valid", ctx);
 
     if (const std::any right = visit(ctx->right); right.has_value() && right.type() == typeid(Expression*))
         right_exp = std::any_cast<Expression*>(right);
     else
-        throw std::runtime_error("Right expression is not valid");
+        throw SemaError("Right expression is not valid", ctx);
 
     const std::string operator_str = ctx->op->getText();
     auto op_result = utils::get_operator_for_string(operator_str);
     if (!op_result.has_value())
         throw std::runtime_error(std::format("Unknown operator {}", operator_str));
 
-    return utils::dyn_cast<Expression>(
-        new ArithmeticExpression(ns->get_sema(), s_ptr<Expression>(left_exp), s_ptr<Expression>(right_exp), *op_result));
+    try
+    {
+        return utils::dyn_cast<Expression>(
+            new ArithmeticExpression(ns->get_sema(), s_ptr<Expression>(left_exp), s_ptr<Expression>(right_exp), *op_result));
+    }
+    catch (const SemaError& e)
+    {
+        throw SemaError(e.what(), ctx);
+    }
 }
 
 std::any ExpressionVisitor::visitLetExpression(CongParser::LetExpressionContext* ctx)
 {
     const std::string identifier = ctx->name->getText();
 
-    checkNameCollision(identifier);
+    checkNameCollision(identifier, ctx);
     
     Expression* value_exp = nullptr;
     if (const std::any value_result = visit(ctx->value); 
         value_result.has_value() && value_result.type() == typeid(Expression*))
         value_exp = std::any_cast<Expression*>(value_result);
     else
-        throw std::runtime_error(std::format("Could not parse let value expression for {}", identifier));
+        throw SemaError(std::format("Could not parse let value expression for {}", identifier), ctx);
     
     s_ptr<Expression> value_ptr(value_exp);
 
@@ -124,42 +140,50 @@ std::any ExpressionVisitor::visitLetExpression(CongParser::LetExpressionContext*
             body_expressions.push_back(s_ptr<Expression>(body_exp));
         } else {
             let_binding_stack.pop();
-            throw std::runtime_error(std::format("Could not parse body expression in let block for {}", identifier));
+            throw SemaError(std::format("Could not parse body expression in let block for {}", identifier), expr_ctx);
         }
     }
 
     let_binding_stack.pop();
     
     if (body_expressions.empty()) {
-        throw std::runtime_error(std::format("Let expression body for {} cannot be empty", identifier));
+        throw SemaError(std::format("Let expression body for {} cannot be empty", identifier), ctx);
     }
-    
-    return utils::dyn_cast<Expression>(
-        new LetExpression(ns->get_sema(), identifier, value_ptr, std::move(body_expressions)));
+
+    try
+    {
+        return utils::dyn_cast<Expression>(
+            new LetExpression(ns->get_sema(), identifier, value_ptr, std::move(body_expressions)));
+    }
+    catch (const SemaError& e)
+    {
+        throw SemaError(e.what(), ctx);
+    }
 }
 
-void ExpressionVisitor::checkNameCollision(const std::string& identifier) const
+void ExpressionVisitor::checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx)
+const
 {
     if (fun) {
         if (fun->find_function_parameter(identifier).has_value()) {
-            throw std::runtime_error(std::format("Name collision: '{}' is already a function parameter", identifier));
+            throw SemaError(std::format("Name collision: '{}' is already a function parameter", identifier), ctx);
         }
     }
     
     Namespace* current_ns = ns;
     while (current_ns) {
         if (current_ns->get_identifier() == identifier) {
-            throw std::runtime_error(std::format("Name collision: '{}' is already a namespace name", identifier));
+            throw SemaError(std::format("Name collision: '{}' is already a namespace name", identifier), ctx);
         }
         current_ns = current_ns->get_parent();
     }
 
     if (ns->find_function(identifier).has_value()) {
-        throw std::runtime_error(std::format("Name collision: '{}' is already a function name", identifier));
+        throw SemaError(std::format("Name collision: '{}' is already a function name", identifier), ctx);
     }
 
     if (findLetBinding(identifier).has_value()) {
-        throw std::runtime_error(std::format("Name collision: '{}' is already bound in current scope", identifier));
+        throw SemaError(std::format("Name collision: '{}' is already bound in current scope", identifier), ctx);
     }
 }
 

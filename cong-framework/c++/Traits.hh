@@ -10,6 +10,7 @@
 #include <climits> // *_MIN *_MAX
 #include <cwchar> // WCHAR_MIN WCHAR_MAX
 #include <utility> // for stdlib meta functions
+#include <type_traits>
 
 namespace cong::lang::core
 {
@@ -996,21 +997,6 @@ namespace cong::lang::core
         struct Call<T const volatile&>
         {
             using Type = Qual<True, True, True>;
-        };
-    };
-
-    struct IsSame
-    {
-        template <typename T1, typename T2>
-        struct Call
-        {
-            using Type = False;
-        };
-
-        template <typename T>
-        struct Call<T, T>
-        {
-            using Type = True;
         };
     };
 };
