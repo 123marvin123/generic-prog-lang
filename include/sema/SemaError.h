@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 #include <sstream>
+#include <format>
 #include "antlr4-runtime.h"
 
 struct SemaError final : std::runtime_error {
