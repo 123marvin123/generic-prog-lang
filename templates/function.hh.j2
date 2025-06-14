@@ -1,16 +1,9 @@
 {%- from "macros/c++/function.j2" import FunctionDefinition with context -%}
 #pragma once
 
-#include "Boolean/BooleanStatic.hh"
-#include "Number/core/NaturalStatic.hh"
-
-{% set ConceptObject = get_concept("Object") %}
-
-#include "{{ConceptObject.name}}.hh"
-{% for param in needed_files %}
-#include "{{ sanitize(param.name) }}.hh"
-{% endfor %}
-
 #include "{{ sanitize(fun.name) }}_dec.hh"
+
+#include "Boolean/BooleanStatic.hh"
+#include "Number/NaturalStatic.hh"
 
 {{ FunctionDefinition(fun) }}

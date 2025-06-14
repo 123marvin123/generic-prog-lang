@@ -115,6 +115,58 @@ struct Spec{{ Name_ }}::GenericImpl<cong::lang::core::NaturalStatic<{{ loop.inde
     template<typename Exp_, typename TupleOfExp_>
     struct Call;
 
+private:
+    struct ApplyTime_ {
+        template<typename Exp_, typename... Args>
+        struct Call;
+
+        template<typename Exp_, typename... Args>
+        struct Call<Exp_, cong::lang::core::Tuple<Args...>>
+        {
+        private:
+            using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
+            static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
+            {
+                {% if impl.time_complexity %}
+                return {{ impl.time_complexity }};
+                {% else %}
+                return cong::lang::NaturalStatic<cong::lang::core::natInf>{};
+                {% endif %}
+            }
+        public:
+            using Type = std::invoke_result_t<decltype(call_), Args...>;
+            static constexpr Type call(Exp_ exp, TupleOfExp_ args) {
+                return std::apply(call_, args);
+            }
+        };
+    };
+
+    struct ApplySpace_ {
+        template<typename Exp_, typename... Args>
+        struct Call;
+
+        template<typename Exp_, typename... Args>
+        struct Call<Exp_, cong::lang::core::Tuple<Args...>>
+        {
+        private:
+            using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
+            static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
+            {
+                {% if impl.space_complexity %}
+                return {{ impl.space_complexity }};
+                {% else %}
+                return cong::lang::NaturalStatic<cong::lang::core::natInf>{};
+                {% endif %}
+            }
+        public:
+            using Type = std::invoke_result_t<decltype(call_), Args...>;
+            static constexpr Type call(Exp_ exp, TupleOfExp_ args) {
+                return std::apply(call_, args);
+            }
+        };
+    };
+
+public:
     template<typename Exp_, typename... Args>
     struct Call<Exp_, cong::lang::core::Tuple<Args...>>
     {
@@ -122,9 +174,11 @@ struct Spec{{ Name_ }}::GenericImpl<cong::lang::core::NaturalStatic<{{ loop.inde
         using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
         static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
         {
-            return {{ impl.expression }};
+            {{ impl.expression }}
         }
     public:
+        using ApplyTime = ApplyTime_;
+        using ApplySpace = ApplySpace_;
         using Type = std::invoke_result_t<decltype(call_), Args...>;
         static constexpr Type call(Exp_ exp, TupleOfExp_ args) {
             return std::apply(call_, args);

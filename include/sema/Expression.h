@@ -42,6 +42,9 @@ struct Expression : SemaElement, Introspection<Expression> {
   [[nodiscard]]
   virtual std::string to_python() const noexcept = 0;
 
+  [[nodiscard]]
+  std::set<const Function *> get_depending_functions() const;
+
   struct DebugVisitor;
 
 private:
@@ -271,8 +274,6 @@ struct CallExpression final : Expression, Introspection<CallExpression> {
   std::variant<const Concept *, const PlaceholderFunctionParameter *>
   get_result() const override;
 
-  std::set<const Function *> get_depending_functions() const;
-
   static s_ptr<CallExpression> create(Sema *sema, const Function *fun,
                                       vec<s_ptr<Expression>> args) {
     return Expression::create<CallExpression>(sema, fun, std::move(args));
@@ -378,6 +379,9 @@ struct LetExpression final : Expression, Introspection<LetExpression> {
   [[nodiscard]] std::string to_cpp() const noexcept override;
 
   [[nodiscard]] std::string to_python() const noexcept override;
+
+  [[nodiscard]]
+  std::set<const Function *> get_depending_functions() const;
 
   struct DebugVisitor;
 

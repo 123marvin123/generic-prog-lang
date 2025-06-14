@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 12.03.25.
-//
 #include "Utils.h"
 #include "sema/Namespace.h"
 #include "sema/Sema.h"
@@ -210,8 +207,8 @@ DirValidator::DirValidator(const bool& allow_overwrite) : Validator("DIR")
 
 std::string utils::sanitize_cpp_identifier(const std::string_view identifier)
 {
-    auto it = cpp_keyword_map.find(identifier);
-    if (it != cpp_keyword_map.end())
+    if (const auto it = cpp_keyword_map.find(identifier);
+        it != cpp_keyword_map.end())
     {
         return std::string(it->second);
     }
@@ -221,8 +218,8 @@ std::string utils::sanitize_cpp_identifier(const std::string_view identifier)
 
 std::string utils::sanitize_python_identifier(std::string_view identifier)
 {
-    auto it = python_keyword_map.find(identifier);
-    if (it != python_keyword_map.end())
+    if (const auto it = python_keyword_map.find(identifier);
+        it != python_keyword_map.end())
     {
         return std::string(it->second);
     }

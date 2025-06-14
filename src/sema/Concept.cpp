@@ -3,7 +3,7 @@
 #include <utility>
 #include "sema/Namespace.h"
 
-Concept::Concept(std::string name, Namespace* ns) :
+Concept::Concept(std::string name, const Namespace* ns) :
     SemaIdentifier(std::move(name), ns)
 {
     if (get_identifier().empty()) throw SemaError("Name must not be empty");

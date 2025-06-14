@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 17.03.25.
-//
 #include "export/FunctionDependencyGraph.h"
 #include "sema/Sema.h"
 #include "sema/Function.h"
@@ -93,8 +90,6 @@ void FunctionDependencyGraph::topological_sort()
             visit_node(function, visited, inProgress);
         }
     }
-
-    //std::reverse(sortedFunctions.begin(), sortedFunctions.end());
 }
 
 void FunctionDependencyGraph::visit_node(const Function* f, std::set<const Function*>& visited,
@@ -105,7 +100,7 @@ void FunctionDependencyGraph::visit_node(const Function* f, std::set<const Funct
 
     for (const auto* dep : dependencies[f]) {
         if (inProgress.contains(dep)) {
-            throw std::runtime_error("Circular dependency detected between functions");
+            throw SemaError(std::format("Circular dependency detected between functions {} and {}", f->get_full_name(), dep->get_full_name()));
         }
 
         if (!visited.contains(dep)) {

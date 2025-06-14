@@ -38,7 +38,7 @@ void Sema::register_builtin_concepts()
 void Sema::register_builtin_functions()
 {
     /*
-        add_function = create_function<ConcreteFunction>(this, "add", this, object_concept).value();
+    add_function = create_function<ConcreteFunction>(this, "add", this, object_concept).value();
     sub_function = create_function<ConcreteFunction>(this, "sub", this, object_concept).value();
     mul_function = create_function<ConcreteFunction>(this, "mul", this, object_concept).value();
     div_function = create_function<ConcreteFunction>(this, "div", this, object_concept).value();

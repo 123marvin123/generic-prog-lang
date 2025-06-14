@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 14.03.25.
-//
 #include "sema/EvaluationContext.h"
 #include "sema/Function.h"
 

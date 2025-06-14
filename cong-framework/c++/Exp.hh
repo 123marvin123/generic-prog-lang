@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Bind.hh"
 #include "Boolean/core/BooleanStatic.hh"
 #include "Decls.hh"
 #include "Fun.hh"

@@ -1,4 +1,3 @@
-
 #include "instantiation/FunctionInstantiator.h"
 
 Function* FunctionInstantiator::instantiate(CongParser::FunctionStmntContext* ctx, Namespace* ns,
@@ -6,8 +5,13 @@ Function* FunctionInstantiator::instantiate(CongParser::FunctionStmntContext* ct
 {
     Visitor v{ns, declarationOnly};
 
-    if (const std::any result = v.visit(ctx); result.has_value() && result.type() == typeid(Function*))
-        return std::any_cast<Function*>(result);
+    if (const std::any result = v.visit(ctx); result.has_value()) {
+        try {
+            return std::any_cast<Function*>(result);
+        } catch (const std::bad_any_cast&) {
+            std::throw_with_nested(std::runtime_error("Could not cast function instantiation result to Function*"));
+        }
+    }
 
     throw SemaError("Could not instantiate function", ctx);
 }

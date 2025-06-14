@@ -15,10 +15,32 @@
 #include "sema/Expression.h"
 #include "sema/GenericImplementation.h"
 
+// Helper function to ensure a directory exists
+void ensure_directory_exists(const std::filesystem::path& dir_path)
+{
+    if (!std::filesystem::exists(dir_path))
+    {
+        if (!std::filesystem::create_directories(dir_path))
+        {
+            const auto error_code = std::error_code(errno, std::generic_category());
+            throw std::runtime_error(std::format("Failed to create directory {}: {}",
+                                      dir_path.string(), error_code.message()));
+        }
+    }
+}
+
 void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2::ValuesList& needed_files)
 {
+    std::filesystem::path current_path = get_output_folder();
+    // Namespace-Ordner erstellen
+    for (const auto& ns_part : f->get_namespace()->namespace_chain())
+    {
+        current_path /= utils::sanitize_cpp_identifier(ns_part->get_identifier());
+        ensure_directory_exists(current_path);
+    }
+
     std::filesystem::path out =
-        get_output_folder() / std::format("{}_dec.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
+        current_path / std::format("{}_dec.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
 
     if (const auto res = function_dec_tpl.RenderAsString(
             {{"fun", jinja2::Reflect(FunctionView{f})}, {"needed_files", needed_files}});
@@ -29,8 +51,9 @@ void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2:
         std::ofstream out_file(out);
         if (!out_file)
         {
-            std::cerr << "Failed to open output file: " << out << std::endl;
-            throw std::runtime_error(std::format("Failed to open output file: {}", out.string()));
+            auto error_code = std::error_code(errno, std::generic_category());
+            throw std::runtime_error(std::format("Failed to create {}: {}",
+                                      out.filename().string(), error_code.message()));
         }
         out_file << contents;
 
@@ -45,8 +68,16 @@ void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2:
 
 void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::ValuesList& needed_files)
 {
+    std::filesystem::path current_path = get_output_folder();
+    // Namespace-Ordner erstellen
+    for (const auto& ns_part : f->get_namespace()->namespace_chain())
+    {
+        current_path /= utils::sanitize_cpp_identifier(ns_part->get_identifier());
+        ensure_directory_exists(current_path);
+    }
+
     std::filesystem::path out =
-        get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
+        current_path / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
 
     if (const auto res =
             function_tpl.RenderAsString({{"fun", jinja2::Reflect(FunctionView{f})}, {"needed_files", needed_files}});
@@ -57,8 +88,9 @@ void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::
         std::ofstream out_file(out);
         if (!out_file)
         {
-            std::cerr << "Failed to open output file: " << out << std::endl;
-            throw std::runtime_error(std::format("Failed to open output file: {}", out.string()));
+            auto error_code = std::error_code(errno, std::generic_category());
+            throw std::runtime_error(std::format("Failed to create {}: {}",
+                                      out.filename().string(), error_code.message()));
         }
         out_file << contents;
 
@@ -73,10 +105,20 @@ void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::
 
 vec<std::filesystem::path> JinjaCppExport::process()
 {
+    output_files.clear(); // Clear at the beginning of processing
+
     for (const Concept* c : get_concepts())
     {
+        std::filesystem::path current_path = get_output_folder();
+        // Namespace-Ordner erstellen
+        for (const auto& ns_part : c->get_namespace()->namespace_chain())
+        {
+            current_path /= utils::sanitize_cpp_identifier(ns_part->get_identifier());
+            ensure_directory_exists(current_path);
+        }
+
         std::filesystem::path out =
-            get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(c->get_identifier()));
+            current_path / std::format("{}.hh", utils::sanitize_cpp_identifier(c->get_identifier()));
         if (const auto res = concept_tpl.RenderAsString({{"concept", jinja2::Reflect(c)}}); res.has_value())
         {
             const std::string& contents = res.value();
@@ -84,8 +126,9 @@ vec<std::filesystem::path> JinjaCppExport::process()
             std::ofstream out_file(out);
             if (!out_file)
             {
-                std::cerr << "Failed to open output file: " << out << std::endl;
-                throw std::runtime_error(std::format("Failed to open output file: {}", out.string()));
+                auto error_code = std::error_code(errno, std::generic_category());
+                throw std::runtime_error(std::format("Failed to create {}: {}",
+                                          out.filename().string(), error_code.message()));
             }
             out_file << contents;
 
@@ -100,9 +143,6 @@ vec<std::filesystem::path> JinjaCppExport::process()
 
     for (const Function* f : get_functions())
     {
-        std::filesystem::path out =
-            get_output_folder() / std::format("{}.hh", utils::sanitize_cpp_identifier(f->get_identifier()));
-
         std::unordered_set<std::variant<const Concept*, const Function*>> needed_files_set = {};
 
         if (std::holds_alternative<const Concept*>(f->get_result()))
@@ -118,9 +158,25 @@ vec<std::filesystem::path> JinjaCppExport::process()
 
         for (const auto& exp : f->requirements())
         {
-            if (auto call_exp = std::dynamic_pointer_cast<CallExpression>(exp.get_expression()))
+            const auto& funs = exp.get_expression()->get_depending_functions();
+            needed_files_set.insert(funs.begin(), funs.end());
+        }
+
+        for(const auto& impl : f->get_implementations())
+        {
+            if (!impl.get_language().empty() && impl.get_language() != "c++") continue;
+
+            const auto& funs = impl.get_expression()->get_depending_functions();
+            needed_files_set.insert(funs.begin(), funs.end());
+
+            if (impl.get_space_complexity())
             {
-                const auto funs = call_exp->get_depending_functions();
+                const auto& funs = impl.get_space_complexity()->get_depending_functions();
+                needed_files_set.insert(funs.begin(), funs.end());
+            }
+            if (impl.get_time_complexity())
+            {
+                const auto& funs = impl.get_time_complexity()->get_depending_functions();
                 needed_files_set.insert(funs.begin(), funs.end());
             }
         }
@@ -154,7 +210,7 @@ void JinjaCppExport::register_function_functions()
 {
     LangExport::register_function_functions();
 
-    const auto& func_reqs = MakeCallable(
+    const auto& func_reqs = jinja2::MakeCallable(
         [this](const std::string& fqi)
         {
             const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
@@ -163,7 +219,7 @@ void JinjaCppExport::register_function_functions()
 
             if (!result.has_value())
             {
-                std::cerr << "no result for " << fqi << "." << std::endl;
+                std::cerr << "C++: no result for " << fqi << "." << std::endl;
                 return ret;
             }
 
@@ -180,7 +236,7 @@ void JinjaCppExport::register_function_functions()
         },
         jinja2::ArgInfo{"fqi", true});
 
-    const auto& func_generic = MakeCallable(
+    const auto& func_generic = jinja2::MakeCallable(
         [this](const std::string& fqi)
         {
             const utils::FQIInfo info = utils::split_fully_qualified_identifier(fqi);
@@ -189,7 +245,7 @@ void JinjaCppExport::register_function_functions()
 
             if (!result.has_value())
             {
-                std::cerr << "no result for " << fqi << "." << std::endl;
+                std::cerr << "C++: no result for " << fqi << "." << std::endl;
                 return ret;
             }
 
@@ -201,9 +257,9 @@ void JinjaCppExport::register_function_functions()
                 jinja2::ValuesMap m;
 
                 if (impl.get_language().empty())
-                    m["expression"] = impl.get_expression()->to_cpp();
+                    m["expression"] = std::format("return {};", impl.get_expression()->to_cpp());
                 else
-                    m["expression"] = impl.get_language();
+                    m["expression"] = impl.get_native_implementation();
 
                 m["time_complexity"] =
                     impl.get_time_complexity() ? impl.get_time_complexity()->to_cpp() : jinja2::EmptyValue{};

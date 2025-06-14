@@ -2,7 +2,7 @@
 
 Concept* ConceptInstantiator::instantiate(CongParser::ConceptDefinitionStmntContext* ctx,
                                               Namespace* ns,
-                                              bool declarationOnly)
+                                          const bool declarationOnly)
 {
     Visitor v{ns, declarationOnly};
 

@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 25.03.25.
-//
 #include "export/LangExport.h"
 
 void LangExport::register_concept_functions()

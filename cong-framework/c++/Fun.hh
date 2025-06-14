@@ -70,6 +70,7 @@ namespace cong::lang::core
         struct Call
         {
             using Type = Type_;
+            static constexpr Type call(...) { return {}; }
         };
     };
 

@@ -6,7 +6,15 @@
 #include "Decls.hh"
 
 {% for include in concept.bases %}
-#include "{{ include.name }}.hh"
+{% set ParamName = sanitize(include.name) %}
+{% set Prefix = include.ns | join('/') -%}
+
+{%- if Prefix | length > 0 -%}
+#include "{{Prefix}}/{{ ParamName }}.hh"
+{%- else -%}
+#include "{{ ParamName }}.hh"
+{%- endif -%}
+
 {% endfor %}
 
 {{ ConceptDefinition(concept) }}

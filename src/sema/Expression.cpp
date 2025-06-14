@@ -5,6 +5,35 @@
 #include "sema/Expression.h"
 #include "sema/Sema.h"
 
+std::set<const Function*> Expression::get_depending_functions() const
+{
+    std::set<const Function*> depending_functions{};
+
+    if (const auto& self = utils::dyn_cast<CallExpression>(this))
+    {
+        depending_functions.emplace(self->get_function());
+        for (const auto& arg : self->get_arguments())
+        {
+            const auto nested_functions = arg->get_depending_functions();
+            depending_functions.insert(nested_functions.begin(), nested_functions.end());
+        }
+    }
+
+    if (const auto& self = utils::dyn_cast<LetExpression>(this))
+    {
+        const auto value_depending = self->get_value()->get_depending_functions();
+        depending_functions.insert(value_depending.begin(), value_depending.end());
+
+        for (const auto& body : self->get_body())
+        {
+            const auto nested_functions = body->get_depending_functions();
+            depending_functions.insert(nested_functions.begin(), nested_functions.end());
+        }
+    }
+
+    return depending_functions;
+}
+
 StringExpression::StringExpression(Sema* sema, const std::string& value) :
     ConstantExpression(sema, sema->builtin_concept<std::string>(), value)
 {
@@ -48,7 +77,7 @@ CallExpression::CallExpression(Sema* sema, const Function* fun, vec<s_ptr<Expres
 {
     if (!fun)
         throw SemaError("Function must not be empty");
-    if (get_arguments().size() < fun->get_parameters().size())
+    if (get_arguments().size() != fun->get_parameters().size())
         throw SemaError(std::format("Function {} expects {} arguments but {} were provided", fun->get_identifier(),
                                     fun->get_parameters().size(), get_arguments().size()));
 
@@ -92,26 +121,6 @@ std::variant<const Concept*, const PlaceholderFunctionParameter*> CallExpression
     return target_param;
 }
 
-std::set<const Function*> CallExpression::get_depending_functions() const
-{
-    std::set<const Function*> depending_functions{};
-
-    depending_functions.emplace(this->get_function());
-
-    for (const s_ptr<Expression>& exp : this->get_arguments())
-    {
-        if (const auto call_exp = utils::dyn_ptr_cast<CallExpression>(exp))
-        {
-            // Recursively call get_depending_functions and insert the result
-            // into the depending_functions set
-            auto nested_functions = call_exp->get_depending_functions();
-            depending_functions.insert(nested_functions.begin(), nested_functions.end());
-        }
-    }
-
-    return depending_functions;
-}
-
 std::string CallExpression::to_cpp() const noexcept
 {
     vec<std::string> str_args{};
@@ -140,9 +149,13 @@ std::string CallExpression::to_python() const noexcept
     for (const auto& arg : args)
         str_args.push_back(arg->to_python());
 
-    std::string joined_args =
-        std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
-                        [](std::string a, const std::string& b) { return std::move(a) + ", " + b; });
+    std::string joined_args;
+    if (!str_args.empty())
+    {
+        joined_args =
+            std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
+                            [](std::string a, const std::string& b) { return std::move(a) + ", " + b; });
+    }
 
     std::string id = utils::sanitize_python_identifier(get_function()->get_identifier());
 
@@ -210,7 +223,7 @@ std::string LetExpression::to_cpp() const noexcept
 {
     std::ostringstream oss;
     oss << "[&]() {\n";
-    oss << "    auto " << utils::sanitize_cpp_identifier(identifier) << " = " << value->to_cpp() << ";\n";
+    oss << "    const auto " << utils::sanitize_cpp_identifier(identifier) << " = " << value->to_cpp() << ";\n";
 
     // All expressions except the last are statements
     for (size_t i = 0; i < body.size() - 1; ++i)
@@ -232,7 +245,8 @@ std::string LetExpression::to_python() const noexcept
 {
     std::ostringstream oss;
     oss << "(lambda: (\n";
-    oss << "    setattr(locals(), '" << identifier << "', " << value->to_python() << "),\n";
+    oss << "    setattr(locals(), '" << utils::sanitize_python_identifier(identifier) << "', " << value->to_python()
+        << "),\n";
 
     // All expressions except the last
     for (size_t i = 0; i < body.size() - 1; ++i)
@@ -262,20 +276,17 @@ LetVariableReferenceExpression::LetVariableReferenceExpression(Sema* sema, const
 
 std::variant<const Concept*, const PlaceholderFunctionParameter*> LetVariableReferenceExpression::get_result() const
 {
-    // The result of a let variable reference is the result of the bound expression
     return bound_value->get_result();
 }
 
 std::string LetVariableReferenceExpression::to_cpp() const noexcept
 {
-    // In C++, we just use the identifier name since the variable is bound in the lambda scope
     return utils::sanitize_cpp_identifier(identifier);
 }
 
 std::string LetVariableReferenceExpression::to_python() const noexcept
 {
-    // In Python, we just use the identifier name since it's in the local scope
-    return identifier;
+    return utils::sanitize_python_identifier(identifier);
 }
 
 void Expression::DebugVisitor::visitExpression(const Expression& e)

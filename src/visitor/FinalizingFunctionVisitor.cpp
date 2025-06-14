@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 14.03.25.
-//
 #include "visitor/FinalizingFunctionVisitor.h"
 
 enum class GenericImplQualityType
@@ -44,7 +41,7 @@ std::any FinalizingFunctionVisitor::visitFunctionExpRequires(CongParser::Functio
         result.has_value() && result.type() == typeid(Expression*))
     {
         auto expr = std::any_cast<Expression*>(result);
-        const opt<std::string> name = ctx->name ? ctx->name->getText() : "";
+        const opt<std::string> name = ctx->name ? opt{ctx->name->getText()} : std::nullopt;
 
         current_function->add_requirement(s_ptr<Expression>(expr), name);
         return expr;
@@ -125,8 +122,7 @@ std::any FinalizingFunctionVisitor::visitFunctionGenericImpl(CongParser::Functio
 
         if (startToken && stopToken)
         {
-            antlr4::CharStream* inputStream = startToken->getInputStream();
-            if (inputStream)
+            if (antlr4::CharStream* inputStream = startToken->getInputStream())
             {
                 antlr4::misc::Interval interval(startToken->getStartIndex(), stopToken->getStopIndex());
                 originalText = inputStream->getText(interval);

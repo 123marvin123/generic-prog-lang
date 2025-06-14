@@ -28,7 +28,7 @@ std::any ExpressionVisitor::visitParameterReferenceExpression(CongParser::Parame
     }
     
     if (!fun)
-        throw std::runtime_error("We are not inside a function context");
+        throw SemaError("We are not inside a function context", ctx);
 
     const opt<FunctionParameter*> param = fun->find_function_parameter(paramName);
     if (!param.has_value() || !param.value())
@@ -64,10 +64,10 @@ std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContex
     }
 
     if (const auto& fun_params = target_fun.value()->get_parameters();
-        subExpressions.size() < fun_params.size())
-        throw SemaError(std::format("Function {} requires {} arguments but only {} were provided.",
-                                             target_fun.value()->get_identifier(),
-                                             target_fun.value()->get_parameters().size(), subExpressions.size()), ctx);
+        subExpressions.size() != fun_params.size())
+        throw SemaError(std::format("Function {} requires {} arguments but {} were provided.",
+                                     target_fun.value()->get_identifier(),
+                                     fun_params.size(), subExpressions.size()), ctx);
 
     try
     {
@@ -192,8 +192,8 @@ opt<LetBinding> ExpressionVisitor::findLetBinding(const std::string& identifier)
     std::stack<std::vector<LetBinding>> temp_stack = let_binding_stack;
     
     while (!temp_stack.empty()) {
-        const auto& current_scope = temp_stack.top();
-        for (const auto& binding : current_scope) {
+        for (const auto& current_scope = temp_stack.top();
+            const auto& binding : current_scope) {
             if (binding.identifier == identifier) {
                 return binding;
             }

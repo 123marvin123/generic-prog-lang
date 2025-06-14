@@ -16,6 +16,7 @@ class Processor final
     u_ptr<CongLexer> lexer;
     u_ptr<CongParser> parser;
     u_ptr<antlr4::CommonTokenStream> token_stream;
+    u_ptr<CustomErrorListener> customErrorListener;
 public:
 
     explicit Processor(const std::filesystem::path& f)
@@ -28,8 +29,9 @@ public:
         this->token_stream = std::make_unique<antlr4::CommonTokenStream>(this->lexer.get());
         this->parser = std::make_unique<CongParser>(this->token_stream.get());
 
+        this->customErrorListener = std::make_unique<CustomErrorListener>();
         this->parser->removeErrorListeners();
-        this->parser->addErrorListener(new CustomErrorListener());
+        this->parser->addErrorListener(customErrorListener.get());
     }
 
     [[nodiscard]]
@@ -58,12 +60,9 @@ public:
             FinalizingFunctionVisitor v4{sema.get()};
             v4.visit(tree);
         }
-        catch (const SemaError& error)
+        catch (...)
         {
-            std::cerr << error.what() << std::endl;
-            std::cerr << error.printErrorContext() << std::endl;
-
-            throw std::runtime_error(std::format("Compilation failed due to semantic error: {}", error.what()));
+            std::throw_with_nested(std::runtime_error("Semantic actions failed"));
         }
 
         return std::move(sema);

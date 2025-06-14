@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 18.03.25.
-//
 #include "export/JinjaEngine.h"
 
 #include <utility>
@@ -27,18 +24,25 @@ const
         }
     }
     else
-        create_directory(output_folder);
-
-    if (lang == LanguageMode::Cpp)
     {
-        JinjaCppExport cpp_export{sema, template_folder, output_folder, concept_graph.sorted_concepts(), function_graph.sorted_functions()};
+        create_directory(output_folder);
+    }
+
+    switch (lang)
+    {
+    case LanguageMode::Cpp:
+    {
+        JinjaCppExport cpp_export{sema, template_folder, output_folder, concept_graph.sorted_concepts(),
+                             function_graph.sorted_functions()};
         return cpp_export.process();
     }
-    else if (lang == LanguageMode::Python)
+    case LanguageMode::Python:
     {
-        JinjaPythonExport python_export{sema, template_folder, output_folder, concept_graph.sorted_concepts(), function_graph.sorted_functions()};
+        JinjaPythonExport python_export{sema, template_folder, output_folder, concept_graph.sorted_concepts(),
+                                        function_graph.sorted_functions()};
         return python_export.process();
     }
-
-    throw std::runtime_error("Unknown language mode");
+        default:
+        throw std::runtime_error("Unhandled language mode");
+    }
 }

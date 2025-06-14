@@ -3,8 +3,13 @@
 void CustomErrorListener::syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line,
                                       size_t charPositionInLine, const std::string& msg, std::exception_ptr e)
 {
-    std::cerr << "Error on line " << line << ":" << charPositionInLine << " at " << offendingSymbol->getText()
-                  << ": " << msg << std::endl;
+    std::cerr << "Error on line " << line << ":" << charPositionInLine << " at ";
+    if (offendingSymbol) {
+        std::cerr << offendingSymbol->getText();
+    } else {
+        std::cerr << "<unknown>";
+    }
+    std::cerr << ": " << msg << std::endl;
 
     auto parser = dynamic_cast<antlr4::Parser*>(recognizer);
     if (!parser) return;

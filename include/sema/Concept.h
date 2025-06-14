@@ -23,7 +23,7 @@ struct Concept final : SemaIdentifier, Introspection<Concept>
 
     using OperationTable = std::map<Operator, std::map<const Concept*, std::map<const Concept*, OperationResult>>>;
 
-    Concept(std::string, Namespace*);
+    Concept(std::string, const Namespace*);
     Concept(std::string, Namespace*, const std::set<const Concept*>&);
 
     void extend_bases(const std::set<const Concept*>&);

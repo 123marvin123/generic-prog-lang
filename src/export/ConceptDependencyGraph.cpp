@@ -1,6 +1,3 @@
-//
-// Created by Marvin Haschker on 17.03.25.
-//
 #include "export/ConceptDependencyGraph.h"
 #include "sema/Sema.h"
 #include "sema/Concept.h"
@@ -74,7 +71,7 @@ void ConceptDependencyGraph::visit_node(const Concept* c, std::set<const Concept
 
     for (const auto* dep : dependencies[c]) {
         if (inProgress.contains(dep))
-            throw std::runtime_error("Circular dependency detected between concepts");
+            throw SemaError(std::format("Circular dependency detected between concepts {} and {}", c->get_full_name(), dep->get_full_name()));
 
         if (!visited.contains(dep))
             visit_node(dep, visited, inProgress);

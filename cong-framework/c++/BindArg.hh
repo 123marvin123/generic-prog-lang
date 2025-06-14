@@ -2,10 +2,7 @@
 
 #include "Exp.hh"
 #include "Base.hh"
-
 #include "Decls.hh"
-#include "Boolean/core/BooleanStatic.hh"
-
 #include "Traits.hh"
 
 #include <utility>
@@ -40,7 +37,7 @@ namespace cong::lang
                 struct Call
                 {
                 private:
-                    using ApplyValue_ = intern::ApplyValue::Call<Exp_, Arg_>;
+                    using ApplyValue_ = ::cong::lang::intern::ApplyValue::Call<Exp_, Arg_>;
 
                 public:
                     using Type = typename ApplyValue_::Type;

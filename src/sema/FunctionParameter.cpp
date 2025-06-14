@@ -1,4 +1,3 @@
-
 #include "sema/FunctionParameter.h"
 
 #include <Utils.h>

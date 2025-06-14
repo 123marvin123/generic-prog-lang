@@ -1,21 +1,29 @@
-fun isModelOf(p1: <T>, p2: <K>) -> Boolean {
-    description { "does object p(1) model concept p(2)?" }
-}
 
-fun id(p1: <T>) -> T {
-    description { "p(1) (the argument itself)" }
-    generic() { p1 }
-}
+    fun isModelOf(p1: <T>, p2: <K>) -> Boolean {
+        description { "does object p(1) model concept p(2)?" }
+    }
 
-fun assign(p1: <T>, p2: T) -> T {
-    description { "p(2) (the second argument) - side effect: if p(1) is modifiable, it will also have the value of p(2)" }
-}
+    fun id(p1: <T>) -> T {
+        description { "p(1) (the argument itself)" }
+        generic() { p1 }
+    }
 
-fun isEqual(p1: <T>, p2: T) -> Boolean {
-    description { "p(1) $=$ p(2) (is p(1) equal to p(2)?)" }
-}
+    fun assign(p1: <T>, p2: T) -> T {
+        description { "p(2) (the second argument) - side effect: if p(1) is modifiable, it will also have the value of p(2)" }
+    }
 
-fun isNotEqual(p1: <T>, p2: T) -> Boolean {
-    description { "p(1) $\\neq$ p(2) (is p(1) not equal to p(2)?)" }
-    requires { not(isEqual(p1, p2)) }
-}
+    fun isEqual(p1: <T>, p2: T) -> Boolean {
+        description { "p(1) $=$ p(2) (is p(1) equal to p(2)?)" }
+    }
+
+    fun isNotEqual(p1: <T>, p2: T) -> Boolean {
+        description { "p(1) $\\neq$ p(2) (is p(1) not equal to p(2)?)" }
+        requires { not(isEqual(p1, p2)) }
+    }
+
+    fun test(p1: Object) -> Boolean {
+        description { "does p(1) pass the test?" }
+        generic(time: let len = ::length(p1) { len }, space: 0) {
+            true
+        }
+    }
