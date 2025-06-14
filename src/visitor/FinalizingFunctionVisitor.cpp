@@ -41,7 +41,7 @@ std::any FinalizingFunctionVisitor::visitFunctionExpRequires(CongParser::Functio
         result.has_value() && result.type() == typeid(Expression*))
     {
         auto expr = std::any_cast<Expression*>(result);
-        const opt<std::string> name = ctx->name ? opt{ctx->name->getText()} : std::nullopt;
+        const opt<std::string> name = ctx->name ? opt<std::string>{ctx->name->getText()} : std::nullopt;
 
         current_function->add_requirement(s_ptr<Expression>(expr), name);
         return expr;
