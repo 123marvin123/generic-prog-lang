@@ -48,7 +48,7 @@ void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2:
     {
         const std::string& contents = res.value();
 
-        std::ofstream out_file(out);
+        std::ofstream out_file(out, std::ios::app);
         if (!out_file)
         {
             auto error_code = std::error_code(errno, std::generic_category());
@@ -85,7 +85,7 @@ void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::
     {
         const std::string& contents = res.value();
 
-        std::ofstream out_file(out);
+        std::ofstream out_file(out, std::ios::app);
         if (!out_file)
         {
             auto error_code = std::error_code(errno, std::generic_category());
@@ -123,7 +123,7 @@ vec<std::filesystem::path> JinjaCppExport::process()
         {
             const std::string& contents = res.value();
 
-            std::ofstream out_file(out);
+            std::ofstream out_file(out, std::ios::app);
             if (!out_file)
             {
                 auto error_code = std::error_code(errno, std::generic_category());

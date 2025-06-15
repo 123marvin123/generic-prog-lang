@@ -5,9 +5,6 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <iostream>
-
-#include "Exception.h"
 #include "sema/Sema.h"
 
 #include "visitor/DeclarationVisitor.h"

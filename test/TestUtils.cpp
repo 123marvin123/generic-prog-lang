@@ -172,12 +172,11 @@ TEST_CASE_METHOD(UtilsFixture, "dyn_ptr_cast returns nullptr for incorrect type"
 TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with valid concept identifier", "[utils]")
 {
     constexpr auto c_id = "Object";
-    const utils::FQIInfo fqiInfo{{}, c_id, true};
+    const utils::FQIInfo fqiInfo{{"object"}, c_id, true};
 
     const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqiInfo, sema.get());
     REQUIRE(result.has_value());
-    REQUIRE(std::string((*sema->find_concept(c_id))->get_identifier()) ==
-            std::string((*result)->get_identifier()));
+    REQUIRE(sema->builtin_concept<Object>() == result);
 }
 
 TEST_CASE_METHOD(UtilsFixture, "resolve_fully_qualified_identifier with invalid concept identifier", "[utils]")

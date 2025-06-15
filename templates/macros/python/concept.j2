@@ -1,12 +1,9 @@
 {% macro ConceptDefinition(def) %}
-{# --- Imports --- #}
-
-{# TODO: Import base concepts based on def.bases #}
 {% for base in def.bases %}
-from {{ python_import_path(base) }} import Concept{{ sanitize(base.name) }}
+from {{ base.ns | join('.') }}{% if base.ns | length > 0 %}.{% endif %}{{ base.name }} import Concept{{ sanitize(base.name) }}
 {% endfor %}
 
-from .cong.core.concept import Concept
+from .core.concept import Concept
 
 class Concept{{ sanitize(def.name) }}(Concept):
 

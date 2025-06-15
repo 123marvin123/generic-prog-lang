@@ -106,7 +106,6 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
 {% for impl in function_generic_impls(def.full_name) %}
 /*
  * Generic Implementation #{{ loop.index }}:
- * {{ impl.expression }}
 */
 template<>
 struct Spec{{ Name_ }}::GenericImpl<cong::lang::core::NaturalStatic<{{ loop.index0 }}>>

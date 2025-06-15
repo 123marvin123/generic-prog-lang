@@ -84,7 +84,7 @@ vec<std::filesystem::path> JinjaPythonExport::process()
 
         if (const auto& res = concept_tpl.RenderAsString(context))
         {
-            std::ofstream out_file(out_path);
+            std::ofstream out_file(out_path, std::ios::app);
             if (!out_file)
             {
                 auto error_code = std::error_code(errno, std::generic_category());
@@ -120,7 +120,7 @@ vec<std::filesystem::path> JinjaPythonExport::process()
 
         if (const auto res = function_tpl.RenderAsString(context); res.has_value())
         {
-            std::ofstream out_file(out_path);
+            std::ofstream out_file(out_path, std::ios::app);
             if (!out_file)
             {
                 auto error_code = std::error_code(errno, std::generic_category());
@@ -146,14 +146,21 @@ void JinjaPythonExport::register_concept_functions()
     LangExport::register_concept_functions(); // Basis-Funktionen (z.B. Namespace)
 
     const auto& sanitize = jinja2::MakeCallable(
-        [](const std::string& id) { return utils::sanitize_python_identifier(id); }, jinja2::ArgInfo{"id", true});
+        [](const std::string& id)
+        {
+            return utils::sanitize_python_identifier(id);
+        }, jinja2::ArgInfo{"id", true});
 
     get_template_env().AddGlobal("sanitize", sanitize);
 
     // TODO:
     const auto& python_import_path =
-        jinja2::MakeCallable([](const std::string& sema_object) { return jinja2::Value("some_module.some_item"); },
-                             jinja2::ArgInfo{"sema_object", true});
+        jinja2::MakeCallable([](const std::string& sema_object)
+        {
+            std::cout << sema_object << std::endl;
+            return std::string("some_module.some_item");
+        },
+        jinja2::ArgInfo{"sema_object", true});
 
     get_template_env().AddGlobal("python_import_path", python_import_path);
 }

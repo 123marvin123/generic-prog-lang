@@ -33,7 +33,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Constant expression invalid construction", 
 
 TEST_CASE_METHOD(ExpressionFixture, "Constant expression evaluates to value", "[expression]")
 {
-    const auto c_str = *sema->find_concept("String");
+    const auto c_str = *sema->find_concept("string::String");
     const std::string val = "hello";
     INFO(sema->to_string());
 
@@ -45,7 +45,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Constant expression evaluates to value", "[
 
 TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression concrete construction", "[expression]")
 {
-    const auto* object = *sema->find_concept("Object");
+    const auto* object = *sema->find_concept("object::Object");
     const auto* f = *Sema::create_function<ConcreteFunction>(sema_ptr, "test", sema_ptr, object);
     const auto p = std::make_shared<ConcreteFunctionParameter>("param", object);
     p->set_function(f);
@@ -59,7 +59,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression concrete cons
 
 TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression placeholder construction", "[expression]")
 {
-    const auto* object = *sema->find_concept("Object");
+    const auto* object = *sema->find_concept("object::Object");
     auto* f = *Sema::create_function<ConcreteFunction>(sema_ptr, "test", sema_ptr, object);
     const auto* p = f->register_function_parameter(std::make_unique<PlaceholderFunctionParameter>("param", "T"));
     INFO(sema->to_string());
@@ -72,7 +72,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression placeholder c
 
 TEST_CASE_METHOD(ExpressionFixture, "Bound function parameter expression construction", "[expression]")
 {
-    const auto* object = *sema->find_concept("Object");
+    const auto* object = *sema->find_concept("object::Object");
     auto* f = *Sema::create_function<ConcreteFunction>(sema_ptr, "test", sema_ptr, object);
     const auto* p = f->register_function_parameter(std::make_unique<PlaceholderFunctionParameter>("param", "T"));
     INFO(sema->to_string());
@@ -97,11 +97,11 @@ TEST_CASE_METHOD(ExpressionFixture, "Call expression with null function throws",
 
 TEST_CASE_METHOD(ExpressionFixture, "Call expression with invalid arguments throws", "[expression]")
 {
-    const auto* object = *sema->find_concept("Object");
+    const auto* object = sema->builtin_concept<Object>();
     auto* f = *Sema::create_function<ConcreteFunction>(sema_ptr, "test", sema_ptr, object);
 
-    f->register_function_parameter(std::make_unique<ConcreteFunctionParameter>("param", sema->find_concept("Boolean").value()));
-    f->register_function_parameter(std::make_unique<ConcreteFunctionParameter>("param2", sema->find_concept("Object").value()));
+    f->register_function_parameter(std::make_unique<ConcreteFunctionParameter>("param", sema->builtin_concept<bool>()));
+    f->register_function_parameter(std::make_unique<ConcreteFunctionParameter>("param2", sema->builtin_concept<Object>()));
     INFO(sema->to_string());
 
     REQUIRE_THROWS_AS(CallExpression(sema_ptr, f, {
@@ -114,7 +114,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Call expression with invalid arguments thro
 
 TEST_CASE_METHOD(ExpressionFixture, "Call expression result on concrete function", "[expression]")
 {
-    auto c_bool = *sema->find_concept("Boolean");
+    auto c_bool = sema->builtin_concept<bool>();
     auto f = Sema::create_function<ConcreteFunction>(sema_ptr, "f", sema_ptr, c_bool);
     INFO(sema->to_string());
 
@@ -133,7 +133,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Call expression result on dependent functio
     const auto callExp = std::make_shared<CallExpression>(sema_ptr, f, vec<s_ptr<Expression>>{ some_arg });
     INFO("Created call expression with string argument");
 
-    REQUIRE(sema->find_concept("String").value() == std::get<const Concept*>(callExp->get_result()));
+    REQUIRE(sema->builtin_concept<std::string>() == std::get<const Concept*>(callExp->get_result()));
 }
 
 TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression construction", "[expression]")
@@ -163,7 +163,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression result with same type
 {
     const auto num1 = NumberExpression::create(sema_ptr, 5);
     const auto num2 = NumberExpression::create(sema_ptr, 10);
-    const auto number_concept = *sema->find_concept("Number");
+    const auto number_concept = sema->builtin_concept<long>();
     INFO(sema->to_string());
 
     const ArithmeticExpression expr(sema_ptr, num1, num2, Operator::ADD);
@@ -177,7 +177,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression result with mixed typ
 {
     const auto num = NumberExpression::create(sema_ptr, 5);
     const auto real = RealExpression::create(sema_ptr, 3.14);
-    const auto real_concept = *sema->find_concept("Real");
+    const auto real_concept = sema->builtin_concept<double>();
     INFO(sema->to_string());
 
     const ArithmeticExpression expr(sema_ptr, num, real, Operator::MUL);
@@ -203,7 +203,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with placeholder", "[
     REQUIRE(std::holds_alternative<const PlaceholderFunctionParameter*>(expr->get_result()));
     REQUIRE(p == std::get<const PlaceholderFunctionParameter*>(expr->get_result()));
 
-    const auto number = *sema->find_concept("Number");
+    const auto number = sema->builtin_concept<long>();
     const auto bound_expr = EvaluationContext::bind_expression(expr, { {p, number} });
     INFO("Bound expression with Number concept");
 
@@ -218,7 +218,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with bound parameter"
     f->set_dependency(p);
     INFO(sema->to_string());
 
-    const auto number_concept = *sema->find_concept("Number");
+    const auto number_concept = sema->builtin_concept<long>();
 
     const auto param_expr = FunctionParameterExpression::create(sema_ptr, p);
     const auto bound_expr = param_expr->bind(number_concept);
@@ -236,7 +236,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with different operat
 {
     const auto num1 = NumberExpression::create(sema_ptr, 5);
     const auto num2 = NumberExpression::create(sema_ptr, 10);
-    const auto number_concept = *sema->find_concept("Number");
+    const auto number_concept = sema->builtin_concept<long>();
     INFO(sema->to_string());
 
     const auto add = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::ADD);

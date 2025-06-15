@@ -24,7 +24,7 @@ struct FunctionDependencyGraphFixture
 TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Linear dependencies are sorted correctly",
                  "[function_dependency_graph]")
 {
-    auto boolean = *sema->find_concept("Boolean");
+    auto boolean = sema->builtin_concept<bool>();
     INFO(sema->to_string());
 
     // Create functions with simple linear dependencies: C -> B -> A
@@ -63,7 +63,7 @@ TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Linear dependencies are sorted
 TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Complex dependencies are sorted correctly",
                  "[function_dependency_graph]")
 {
-    auto boolean = *sema->find_concept("Boolean");
+    auto boolean = sema->builtin_concept<bool>();
     INFO(sema->to_string());
 
     auto* X = *Sema::create_function<ConcreteFunction>(sema_ptr, "X", sema_ptr, boolean);
@@ -117,7 +117,7 @@ TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Complex dependencies are sorte
 
 TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Cyclic dependency throws exception", "[function_dependency_graph]")
 {
-    auto boolean = *sema->find_concept("Boolean");
+    auto boolean = sema->builtin_concept<bool>();
     INFO(sema->to_string());
 
     const auto A = *Sema::create_function<ConcreteFunction>(sema_ptr, "A", sema_ptr, boolean);

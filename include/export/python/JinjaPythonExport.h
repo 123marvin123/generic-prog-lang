@@ -20,7 +20,7 @@ struct JinjaPythonExport final : LangExport
 private:
     void register_concept_functions() override;
     void register_function_functions() override;
-    void ensure_python_module(const std::filesystem::path& dir_path);
+    static void ensure_python_module(const std::filesystem::path& dir_path);
 
     vec<std::filesystem::path> output_files;
 

@@ -3,8 +3,7 @@
 #include <utility>
 
 JinjaEngine::JinjaEngine(Sema* sema, std::filesystem::path output_folder, std::filesystem::path template_folder,
-                         const bool
-                         purge_output)
+                         const bool purge_output)
     : sema(sema), output_folder(std::move(output_folder)),
         template_folder(std::move(template_folder)), purge_output(purge_output)
 {
@@ -42,7 +41,7 @@ const
                                         function_graph.sorted_functions()};
         return python_export.process();
     }
-        default:
+    default:
         throw std::runtime_error("Unhandled language mode");
     }
 }

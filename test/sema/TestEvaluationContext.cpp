@@ -199,7 +199,7 @@ TEST_CASE_METHOD(EvaluationContextFixture, "Binding to concrete expression", "[e
     const auto callExp = CallExpression::create(sema_ptr, f, vec<s_ptr<Expression>>{stringExp});
     INFO("Created function call with string expression argument");
 
-    auto string = *sema->find_concept("String");
+    auto string = sema->builtin_concept<std::string>();
     INFO("Binding with String concept");
     const auto newCallExp =
         utils::dyn_ptr_cast<CallExpression>(EvaluationContext::bind_expression(callExp, {{p, string}}));
