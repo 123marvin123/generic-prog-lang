@@ -28,11 +28,24 @@ opt<Namespace*> Sema::create_namespace(const std::string& name, Sema* sema,
 
 void Sema::register_builtin_concepts()
 {
-    object_concept = create_concept(get_sema(), "Object").value();
-    boolean_concept = create_concept(get_sema(), "Boolean", std::set{object_concept}).value();
-    number_concept = create_concept(get_sema(), "Number", std::set{object_concept}).value();
-    real_concept = create_concept(get_sema(), "Real", std::set{number_concept}).value();
-    string_concept = create_concept(get_sema(), "String", std::set{object_concept}).value();
+    if (const auto& obj_ns = create_namespace("object", get_sema(), get_sema());
+        obj_ns.has_value())
+        object_concept = create_concept(*obj_ns, "Object").value();
+
+    if (const auto& bool_ns = create_namespace("boolean", get_sema(), get_sema());
+            bool_ns.has_value())
+        boolean_concept = create_concept(*bool_ns, "Boolean", std::set{object_concept}).value();
+
+    if (const auto& number_ns = create_namespace("number", get_sema(), get_sema());
+            number_ns.has_value())
+    {
+        number_concept = create_concept(*number_ns, "Number", std::set{object_concept}).value();
+        real_concept = create_concept(*number_ns, "Real", std::set{number_concept}).value();
+    }
+
+    if (const auto& string_ns = create_namespace("string", get_sema(), get_sema());
+            string_ns.has_value())
+        string_concept = create_concept(*string_ns, "String", std::set{object_concept}).value();
 }
 
 void Sema::register_builtin_functions()

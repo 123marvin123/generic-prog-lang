@@ -10,9 +10,9 @@ namespace cong::lang {
 	namespace local {
 		template <typename Native_, Native_ native_>
   		class BooleanStatic
-    		: public cong::lang::ObjectStatic<Native_, native_>
+    		: public lang::ObjectStatic<Native_, native_>
   		{
-    		using Base_ = cong::lang::ObjectStatic<Native_, native_>;
+    		using Base_ = lang::ObjectStatic<Native_, native_>;
   		public:
     		CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
   		};

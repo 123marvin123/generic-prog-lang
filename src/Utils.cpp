@@ -86,94 +86,200 @@ std::string_view utils::get_string_for_operator(const Operator op)
 
 template <>
 opt<Namespace*>
-utils::resolve_fully_qualified_identifier<Namespace>(const FQIInfo& fqi, Namespace* curr_ns)
+utils::resolve_fully_qualified_identifier<Namespace>(const FQIInfo& fqi, Namespace* curr_ns,
+                                                  bool search_parent)
 {
     if (!curr_ns) return std::nullopt;
 
     const auto& [namespaces, id, top_level] = fqi;
 
-    opt<Namespace*> it_ns = top_level ? curr_ns->get_sema() : curr_ns;
+    opt<Namespace*> current_search_ns = top_level ? curr_ns->get_sema() : curr_ns;
 
-    if (namespaces.empty()) {
-        // No namespaces to traverse, find identifier directly
-        if (it_ns && !id.empty())
-            return (*it_ns)->find_namespace(id);
-        return it_ns;
+    for (const auto& ns_name : namespaces)
+    {
+        if (!current_search_ns) return std::nullopt;
+        current_search_ns = (*current_search_ns)->find_namespace(ns_name);
     }
 
-    it_ns = (*it_ns)->find_namespace(*namespaces.begin()).value();
-    if (!it_ns) return std::nullopt;
-
-    for (auto it = namespaces.begin() + 1; it != namespaces.end(); ++it) {
-        it_ns = it_ns ? it_ns.value()->find_namespace(*it) : std::nullopt;
-        if (!it_ns) return std::nullopt;
+    if (current_search_ns && !id.empty())
+    {
+        if (const auto found_ns = (*current_search_ns)->find_namespace(id)) return found_ns;
+    }
+    else if (current_search_ns && id.empty())
+    {
+        return current_search_ns;
     }
 
-    // Find the final identifier
-    return (it_ns && !id.empty()) ? (*it_ns)->find_namespace(id) : it_ns;
+    if (!top_level && search_parent && curr_ns->get_parent())
+    {
+        return resolve_fully_qualified_identifier<Namespace>(fqi, curr_ns->get_parent(), search_parent);
+    }
+
+    return std::nullopt;
 }
 
 opt<Namespace*> resolve_namespace_for_identifier(const FQIInfo& fqi, Namespace* curr_ns)
 {
-    opt<Namespace*> target_namespace = curr_ns;
-
-    if (fqi.namespaces.size() == 1)
+    if (fqi.namespaces.empty())
     {
-        // Special case for exactly one element
-        target_namespace = fqi.topLevel
-            ? curr_ns->get_sema()->find_namespace(*fqi.namespaces.begin())
-            : curr_ns->find_namespace(*fqi.namespaces.begin());
-    }
-    else if (fqi.namespaces.size() > 1)
-    {
-        // Multiple namespaces - use recursive resolution
-        target_namespace = resolve_fully_qualified_identifier<Namespace>(
-            {vec<std::string>(fqi.namespaces.begin(), fqi.namespaces.end() - 1),
-             fqi.namespaces.back(),
-             fqi.topLevel},
-            curr_ns);
+        return curr_ns;
     }
 
+    Namespace* search_start_ns = fqi.topLevel ? curr_ns->get_sema() : curr_ns;
+
+    opt<Namespace*> target_namespace = search_start_ns;
+
+    for (const auto& ns_name : fqi.namespaces)
+    {
+        if (!target_namespace) return std::nullopt;
+        target_namespace = (*target_namespace)->find_namespace(ns_name);
+    }
     return target_namespace;
+}
+
+template <class T>
+opt<T*> resolve_identifier_in_namespace_or_parents(const std::string& identifier, Namespace* current_ns)
+{
+    if (!current_ns) return std::nullopt;
+
+    opt<T*> found_item = std::nullopt;
+    if constexpr (std::is_same_v<T, Concept>)
+    {
+        found_item = current_ns->find_concept(identifier);
+    }
+    else if constexpr (std::is_same_v<T, Function>)
+    {
+        found_item = current_ns->find_function(identifier);
+    }
+
+    if (found_item) return found_item;
+
+    if (current_ns->get_parent())
+    {
+        return resolve_identifier_in_namespace_or_parents<T>(identifier, current_ns->get_parent());
+    }
+
+    return std::nullopt;
 }
 
 template <>
 opt<Concept*>
-utils::resolve_fully_qualified_identifier<Concept>(const FQIInfo& fqi, Namespace* curr_ns)
+utils::resolve_fully_qualified_identifier<Concept>(const FQIInfo& fqi, Namespace* curr_ns, bool search_parent)
 {
     if (!curr_ns) return std::nullopt;
 
-    if (!fqi.namespaces.empty())
+    if (fqi.topLevel)
     {
-        if (const auto& target_namespace = resolve_namespace_for_identifier(fqi, curr_ns))
-            return (*target_namespace)->find_concept(fqi.identifier);
+        Namespace* global_ns = curr_ns->get_sema();
+        opt<Namespace*> target_ns = global_ns;
+        for (const auto& ns_name : fqi.namespaces)
+        {
+            if (!target_ns) return std::nullopt;
+            target_ns = (*target_ns)->find_namespace(ns_name);
+        }
+        if (target_ns)
+            return (*target_ns)->find_concept(fqi.identifier);
         return std::nullopt;
     }
 
-    if (auto c = curr_ns->find_concept(fqi.identifier); c.has_value())
-        return *c;
+    opt<Namespace*> target_namespace = curr_ns;
+    bool search_in_current_ns_first = true;
 
-    return curr_ns->get_parent() ?
-               utils::resolve_fully_qualified_identifier<Concept>(fqi, curr_ns->get_parent()) : std::nullopt;
+    if (!fqi.namespaces.empty())
+    {
+        opt<Namespace*> resolved_ns_from_current = curr_ns;
+        for (const auto& ns_name : fqi.namespaces)
+        {
+            if (!resolved_ns_from_current) break;
+            resolved_ns_from_current = (*resolved_ns_from_current)->find_namespace(ns_name);
+        }
+
+        if (resolved_ns_from_current)
+        {
+            target_namespace = resolved_ns_from_current;
+            search_in_current_ns_first = false;
+        }
+        else if (search_parent && curr_ns->get_parent())
+        {
+            return resolve_fully_qualified_identifier<Concept>(fqi, curr_ns->get_parent(), true);
+        }
+        else
+        {
+            return std::nullopt;
+        }
+    }
+
+    if (target_namespace)
+    {
+        if (search_in_current_ns_first)
+        {
+            return resolve_identifier_in_namespace_or_parents<Concept>(fqi.identifier, curr_ns);
+        }
+
+        return (*target_namespace)->find_concept(fqi.identifier);
+    }
+
+    return std::nullopt;
 }
 
-template <>
+
+template <> 
 opt<Function*>
-utils::resolve_fully_qualified_identifier<Function>(const FQIInfo& fqi, Namespace* curr_ns)
+utils::resolve_fully_qualified_identifier<Function>(const FQIInfo& fqi, Namespace* curr_ns, bool search_parent)
 {
     if (!curr_ns) return std::nullopt;
 
-    if (!fqi.namespaces.empty())
+    if (fqi.topLevel)
     {
-        if (const auto& target_namespace = resolve_namespace_for_identifier(fqi, curr_ns))
-            return (*target_namespace)->find_function(fqi.identifier);
+        Namespace* global_ns = curr_ns->get_sema();
+        opt<Namespace*> target_ns = global_ns;
+        for (const auto& ns_name : fqi.namespaces)
+        {
+            if (!target_ns) return std::nullopt;
+            target_ns = (*target_ns)->find_namespace(ns_name);
+        }
+        if (target_ns)
+            return (*target_ns)->find_function(fqi.identifier);
         return std::nullopt;
     }
 
-    if (auto f = curr_ns->find_function(fqi.identifier); f.has_value())
-        return *f;
+    opt<Namespace*> target_namespace = curr_ns;
+    bool search_in_current_ns_first = true;
 
-    return curr_ns->get_parent() ? utils::resolve_fully_qualified_identifier<Function>(fqi, curr_ns->get_parent()) : std::nullopt;
+    if (!fqi.namespaces.empty())
+    {
+        opt<Namespace*> resolved_ns_from_current = curr_ns;
+        for (const auto& ns_name : fqi.namespaces)
+        {
+            if (!resolved_ns_from_current) break;
+            resolved_ns_from_current = (*resolved_ns_from_current)->find_namespace(ns_name);
+        }
+
+        if (resolved_ns_from_current)
+        {
+            target_namespace = resolved_ns_from_current;
+            search_in_current_ns_first = false;
+        }
+        else if (search_parent && curr_ns->get_parent())
+        {
+            return resolve_fully_qualified_identifier<Function>(fqi, curr_ns->get_parent(), true);
+        }
+        else
+        {
+            return std::nullopt;
+        }
+    }
+
+    if (target_namespace)
+    {
+        if (search_in_current_ns_first)
+        {
+            return resolve_identifier_in_namespace_or_parents<Function>(fqi.identifier, curr_ns);
+        }
+
+        return (*target_namespace)->find_function(fqi.identifier);
+    }
+    return std::nullopt;
 }
 
 DirValidator::DirValidator(const bool& allow_overwrite) : Validator("DIR")

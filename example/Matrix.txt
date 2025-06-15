@@ -1,129 +1,134 @@
-concept Matrix (description: "");
+namespace matrix {
+    concept Matrix (description: "");
 
-fun matrixForIdentity(p1: Natural, p2: Natural) -> Matrix {
-    description { "identity matrix of p(1) rows and p(2) columns" }
-}
+    fun matrixForIdentity(p1: number::Natural, p2: number::Natural) -> Matrix {
+        description { "identity matrix of p(1) rows and p(2) columns" }
+    }
 
-fun matrixForSeqOfRow(p1: Seq) -> Matrix {
-    description { "matrix of rows as given by the items of p(1)" }
-    requires { isModelOf(item(p1), emptySeq()) }
-}
+    fun matrixForSeqOfRow(p1: seq::Seq) -> Matrix {
+        description { "matrix of rows as given by the items of p(1)" }
+        requires { object::isModelOf(seq::item(p1), seq::emptySeq()) }
+    }
 
-fun matrixForSeqOfCol(p1: Seq) -> Matrix {
-    description { "matrix of columns as given by the items of p(1)" }
-    requires { isModelOf(item(p1), emptySeq()) }
-}
+    fun matrixForSeqOfCol(p1: seq::Seq) -> Matrix {
+        description { "matrix of columns as given by the items of p(1)" }
+        requires { object::isModelOf(seq::item(p1), seq::emptySeq()) }
+    }
 
-fun matrixForGivens(p1: Natural, p2: Natural, p3: Natural, p4: Natural, p5: Real) -> Matrix {
-    description { "Givens matrix of p(1) rows and p(2) columns, rotating in p(3)/p(4) plane by angle p(5)" }
-}
+    fun matrixForGivens(
+        p1: number::Natural, p2: number::Natural,
+        p3: number::Natural, p4: number::Natural,
+        p5: number::Real) -> Matrix {
+        description { "Givens matrix of p(1) rows and p(2) columns, rotating in p(3)/p(4) plane by angle p(5)" }
+    }
 
-fun matrixForHouseholder(p1: Matrix) -> Matrix {
-    description { "Householder matrix reflecting about hyperplane orthogonal to p(1)" }
-    requires { isEqual(lengthOfRow(p1), 1) }
-}
+    fun matrixForHouseholder(p1: Matrix) -> Matrix {
+        description { "Householder matrix reflecting about hyperplane orthogonal to p(1)" }
+        requires { object::isEqual(lengthOfRow(p1), 1) }
+    }
 
-fun multiSetOfEntry(p1: Matrix) -> Set {
-    description { "multi set of entries of p(1)" }
-}
+    fun multiSetOfEntry(p1: Matrix) -> set::Set {
+        description { "multi set of entries of p(1)" }
+    }
 
-fun lengthOfRow(p1: Matrix) -> Natural {
-    description { "length of rows (\\enquote{width}) of p(1)" }
-    generic() { length(seqOfCol(p1)) }
-}
+    fun lengthOfRow(p1: Matrix) -> number::Natural {
+        description { "length of rows (\\enquote{width}) of p(1)" }
+        generic() { seq::length(seqOfCol(p1)) }
+    }
 
-fun lengthOfCol(p1: Matrix) -> Natural {
-    description { "length of columns (\\enquote{height}) of p(1)" }
-    generic() { length(seqOfRow(p1)) }
-}
+    fun lengthOfCol(p1: Matrix) -> number::Natural {
+        description { "length of columns (\\enquote{height}) of p(1)" }
+        generic() { seq::length(seqOfRow(p1)) }
+    }
 
-fun seqOfRow(p1: Matrix) -> Seq {
-    description { "sequence of rows of p(1)" }
-}
+    fun seqOfRow(p1: Matrix) -> seq::Seq {
+        description { "sequence of rows of p(1)" }
+    }
 
-fun seqOfCol(p1: Matrix) -> Seq {
-    description { "sequence of columns of p(1)" }
-}
+    fun seqOfCol(p1: Matrix) -> seq::Seq {
+        description { "sequence of columns of p(1)" }
+    }
 
-fun seqOfDiagAsc(p1: Matrix) -> Seq {
-    description { "sequence of ascending diagonals of p(1), from upper left corner to lower right" }
-}
+    fun seqOfDiagAsc(p1: Matrix) -> seq::Seq {
+        description { "sequence of ascending diagonals of p(1), from upper left corner to lower right" }
+    }
 
-fun seqOfDiagDesc(p1: Matrix) -> Seq {
-    description { "sequence of descending diagonals of p(1), from lower left corner to upper right" }
-}
+    fun seqOfDiagDesc(p1: Matrix) -> seq::Seq {
+        description { "sequence of descending diagonals of p(1), from lower left corner to upper right" }
+    }
 
-fun entryAt(p1: Matrix, p2: Natural, p3: Natural) -> Object {
-    description { "entry of p(1) in row p(2) and column p(3)" }
-}
+    fun entryAt(p1: Matrix, p2: number::Natural, p3: number::Natural) -> object::Object {
+        description { "entry of p(1) in row p(2) and column p(3)" }
+    }
 
-fun subMatrix(p1: Matrix, p2: Selection, p3: Selection) -> Matrix {
-    description { "sub-matrix of p(1) given by selections p(2) of row sequence and p(3) of column sequence" }
-}
+    fun subMatrix(p1: Matrix, p2: seq::Selection, p3: seq::Selection) -> Matrix {
+        description { "sub-matrix of p(1) given by selections p(2) of row sequence and p(3) of column sequence" }
+    }
 
-fun matrixAdd(p1: Matrix, p2: Matrix) -> Matrix {
-    description { "sum of p(1) and p(2)" }
-}
+    fun matrixAdd(p1: Matrix, p2: Matrix) -> Matrix {
+        description { "sum of p(1) and p(2)" }
+    }
 
-fun matrixMul(p1: Matrix, p2: Matrix) -> Matrix {
-    description { "product of p(1) and p(2)" }
-    requires { isEqual(lengthOfRow(p1), lengthOfCol(p2)) }
-}
+    fun matrixMul(p1: Matrix, p2: Matrix) -> Matrix {
+        description { "product of p(1) and p(2)" }
+        requires { object::isEqual(lengthOfRow(p1), lengthOfCol(p2)) }
+    }
 
-fun squareRoot(p1: Matrix) -> Matrix {
-    description { "square root of p(1)" }
-}
+    fun squareRoot(p1: Matrix) -> Matrix {
+        description { "square root of p(1)" }
+    }
 
-fun crossProduct(p1: Matrix, p2: Matrix) -> Matrix {
-    description { "cross product of p(1) and p(2)" }
-    requires { isEqual(lengthOfRow(p1), 1) }
-    requires { isEqual(lengthOfRow(p2), 1) }
-}
+    fun crossProduct(p1: Matrix, p2: Matrix) -> Matrix {
+        description { "cross product of p(1) and p(2)" }
+        requires { object::isEqual(lengthOfRow(p1), 1) }
+        requires { object::isEqual(lengthOfRow(p2), 1) }
+    }
 
-fun trace(p1: Matrix) -> Real {
-    description { "trace of p(1)" }
-}
+    fun trace(p1: Matrix) -> number::Real {
+        description { "trace of p(1)" }
+    }
 
-fun determinant(p1: Matrix) -> Real {
-    description { "determinant of p(1)" }
-}
+    fun determinant(p1: Matrix) -> number::Real {
+        description { "determinant of p(1)" }
+    }
 
-fun rank(p1: Matrix) -> Natural {
-    description { "rank of p(1)" }
-}
+    fun rank(p1: Matrix) -> number::Natural {
+        description { "rank of p(1)" }
+    }
 
-fun transpose(p1: Matrix) -> Matrix {
-    description { "(conjugate) transpose of p(1)" }
-}
+    fun transpose(p1: Matrix) -> Matrix {
+        description { "(conjugate) transpose of p(1)" }
+    }
 
-fun singularValueDecomp(p1: Matrix) -> Seq {
-    description { "singular value $U\\Sigma{}V^{*}$ decomposition of p(1)" }
-}
+    fun singularValueDecomp(p1: Matrix) -> seq::Seq {
+        description { "singular value $U\\Sigma{}V^{*}$ decomposition of p(1)" }
+    }
 
-fun seqOfSingularVal(p1: Matrix) -> Seq {
-    description { "sequence of singular values of p(1)" }
-}
+    fun seqOfSingularVal(p1: Matrix) -> seq::Seq {
+        description { "sequence of singular values of p(1)" }
+    }
 
-fun eigenValueDecomp(p1: Matrix) -> Seq {
-    description { "eigen value decomposition $Q\\Lambda{}Q^{-1}$ of p(1)" }
-}
+    fun eigenValueDecomp(p1: Matrix) -> seq::Seq {
+        description { "eigen value decomposition $Q\\Lambda{}Q^{-1}$ of p(1)" }
+    }
 
-fun seqOfEigenVal(p1: Matrix) -> Seq {
-    description { "sequence of eigen values of p(1)" }
-}
+    fun seqOfEigenVal(p1: Matrix) -> seq::Seq {
+        description { "sequence of eigen values of p(1)" }
+    }
 
-fun lUDecomp(p1: Matrix) -> Seq {
-    description { "lower-upper triangular decomposition $LU$ of p(1)" }
-}
+    fun lUDecomp(p1: Matrix) -> seq::Seq {
+        description { "lower-upper triangular decomposition $LU$ of p(1)" }
+    }
 
-fun choleskyDecomp(p1: Matrix) -> Matrix {
-    description { "matrix $L$ of Cholesky decomposition $LL^{T}$ of p(1)" }
-}
+    fun choleskyDecomp(p1: Matrix) -> Matrix {
+        description { "matrix $L$ of Cholesky decomposition $LL^{T}$ of p(1)" }
+    }
 
-fun qRDecomp(p1: Matrix) -> Seq {
-    description { "QR decomposition $QR$ of p(1)" }
-}
+    fun qRDecomp(p1: Matrix) -> seq::Seq {
+        description { "QR decomposition $QR$ of p(1)" }
+    }
 
-fun solve(p1: Matrix, p2: Matrix) -> Matrix {
-    description { "solution of $p(1) \\cdot{} x = p(2)$" }
+    fun solve(p1: Matrix, p2: Matrix) -> Matrix {
+        description { "solution of $p(1) \\cdot{} x = p(2)$" }
+    }
 }

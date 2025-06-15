@@ -1,41 +1,43 @@
-fun minMax(set: Set) -> Object {
-  description {
-    "minimal and maximal element of p(1)"
-  }
-}
+namespace statistics {
+    fun minMax(set: set::Set) -> object::Object {
+      description {
+        "minimal and maximal element of p(1)"
+      }
+    }
 
-fun min(set: Set) -> Object {
-  description {
-    "minimal element of p(1)"
-  }
-}
+    fun min(set: set::Set) -> object::Object {
+      description {
+        "minimal element of p(1)"
+      }
+    }
 
-fun max(set: Set) -> Object {
-  description {
-    "maximal element of p(1)"
-  }
-}
+    fun max(set: set::Set) -> object::Object {
+      description {
+        "maximal element of p(1)"
+      }
+    }
 
-fun mean(set: Set) -> Object {
-  description {
-    "arithmetic mean of elements of multi-set p(1)"
-  }
-}
+    fun mean(set: set::Set) -> object::Object {
+      description {
+        "arithmetic mean of elements of multi-set p(1)"
+      }
+    }
 
-fun median(set: Set) -> Object {
-  description {
-    "median of elements of multi-set p(1)"
-  }
-}
+    fun median(set: set::Set) -> object::Object {
+      description {
+        "median of elements of multi-set p(1)"
+      }
+    }
 
-fun variance(set: Set) -> Object {
-  description {
-    "variance of elements of multi-set p(1)"
-  }
-}
+    fun variance(set: set::Set) -> object::Object {
+      description {
+        "variance of elements of multi-set p(1)"
+      }
+    }
 
-fun deviation(set: Set) -> Object {
-  description {
-    "standard deviation of elements of multi-set p(1)"
-  }
+    fun deviation(set: set::Set) -> object::Object {
+      description {
+        "standard deviation of elements of multi-set p(1)"
+      }
+    }
 }

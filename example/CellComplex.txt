@@ -1,70 +1,73 @@
-concept CellComplex (description: "CW complex") : SpaceTopo;
-concept Cell (description: "cell") : Object;
-concept Shape (description: "shape of cell") : Object;
 
-fun mapToCell(p1: CellComplex, p2: Natural) -> Map {
-    description { "map to cells of topological dimension p(2) in p(1)" }
-    //requires { isLessEqual(p2, dim(p1)) }
-}
+namespace cellcomplex {
+    concept CellComplex (description: "CW complex") : spacetopo::SpaceTopo;
+    concept Cell (description: "cell") : object::Object;
+    concept Shape (description: "shape of cell") : object::Object;
 
-fun depth(p1: Set) -> Natural {
-    description { "depth of cell hierarchy" }
-}
+    fun mapToCell(p1: cellcomplex::CellComplex, p2: number::Natural) -> map::Map {
+        description { "map to cells of topological dimension p(2) in p(1)" }
+        //requires { ordered::isLessEqual(p2, dim(p1)) }
+    }
 
-fun setOfShape(p1: Set) -> Set {
-    description { "set of cell types in p(1)" }
-}
+    fun depth(p1: set::Set) -> number::Natural {
+        description { "depth of cell hierarchy" }
+    }
 
-fun shape(p1: Set, p2: Set) -> Shape {
-    description { "cell type of p(1)" }
-}
+    fun setOfShape(p1: set::Set) -> set::Set {
+        description { "set of cell types in p(1)" }
+    }
 
-fun setOfIncCell(p1: Set, p2: Set, p3: Natural) -> Set {
-    description { "set of cells of dimension p(3) incident to p(2) in p(1)" }
-    //requires { hasElement(setOfCell(p1, dim(p2)), p2) }
-}
+    fun shape(p1: set::Set, p2: set::Set) -> cellcomplex::Shape {
+        description { "cell type of p(1)" }
+    }
 
-fun enumOfCell0Key(p1: Cell) -> Seq {
-    description { "keys of the 0-cells incident to p(1)" }
-}
+    fun setOfIncCell(p1: set::Set, p2: set::Set, p3: number::Natural) -> set::Set {
+        description { "set of cells of dimension p(3) incident to p(2) in p(1)" }
+        //requires { set::hasElement(setOfCell(p1, dim(p2)), p2) }
+    }
 
-fun setOfAdjCell(p1: Set, p2: Set) -> Set {
-    description { "set of cells (of same dimension) adjacent to p(2) in p(1)" }
-}
+    fun enumOfCell0Key(p1: cellcomplex::Cell) -> seq::Seq {
+        description { "keys of the 0-cells incident to p(1)" }
+    }
 
-fun graphOfAdjCoDim0(p1: CellComplex) -> Graph {
-    description { "adjacency graph of cells of co-dimension 0 in p(1)" }
-}
+    fun setOfAdjCell(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "set of cells (of same dimension) adjacent to p(2) in p(1)" }
+    }
 
-fun graphOfAdjDim0(p1: CellComplex) -> Graph {
-    description { "adjacency graph of cells of dimension 0 in p(1)" }
-}
+    fun graphOfAdjCoDim0(p1: cellcomplex::CellComplex) -> graph::Graph {
+        description { "adjacency graph of cells of co-dimension 0 in p(1)" }
+    }
 
-fun mapToMapOfCellKeyToWeight(p1: CellComplex, p2: Natural) -> Map {
-    description { "map of weight key to map of cell key of topological dimension p(2) in p(1) to cell weight" }
-    //requires { isLessEqual(p2, dim(p1)) }
-}
+    fun graphOfAdjDim0(p1: cellcomplex::CellComplex) -> graph::Graph {
+        description { "adjacency graph of cells of dimension 0 in p(1)" }
+    }
 
-fun sphere() -> Shape {
-    description { "cell type 'sphere'" }
-}
+    fun mapToMapOfCellKeyToWeight(p1: cellcomplex::CellComplex, p2: number::Natural) -> map::Map {
+        description { "map of weight key to map of cell key of topological dimension p(2) in p(1) to cell weight" }
+        //requires { ordered::isLessEqual(p2, dim(p1)) }
+    }
 
-fun simplex() -> Shape {
-    description { "cell type 'simplex'" }
-}
+    fun sphere() -> Shape {
+        description { "cell type 'sphere'" }
+    }
 
-fun tetrahedron() -> Shape {
-    description { "cell type 'tetrahedron'" }
-}
+    fun simplex() -> Shape {
+        description { "cell type 'simplex'" }
+    }
 
-fun hexahedron() -> Shape {
-    description { "cell type 'hexaedron'" }
-}
+    fun tetrahedron() -> Shape {
+        description { "cell type 'tetrahedron'" }
+    }
 
-fun pyramid() -> Shape {
-    description { "cell type 'pyramid'" }
-}
+    fun hexahedron() -> Shape {
+        description { "cell type 'hexaedron'" }
+    }
 
-fun hypercube() -> Shape {
-    description { "cell type 'hypercube'" }
+    fun pyramid() -> Shape {
+        description { "cell type 'pyramid'" }
+    }
+
+    fun hypercube() -> Shape {
+        description { "cell type 'hypercube'" }
+    }
 }

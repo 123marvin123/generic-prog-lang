@@ -1,39 +1,41 @@
-//concept Number (description: "number") : Object;
-concept Natural (description: "natural number, possibly zero") : Number & Ordered;
-concept Cardinal (description: "cardinal number") : Number & Ordered;
-concept Integer (description: "integer number") : Number & Ordered;
-concept Rational (description: "rational number") : Number & Ordered;
-//concept Real (description: "real number") : Number;
-concept Complex (description: "complex number") : Number& Ordered;
+namespace number {
+    //concept Number (description: "number") : Object;
+    concept Natural (description: "natural number, possibly zero") : number::Number & ordered::Ordered;
+    concept Cardinal (description: "cardinal number") : number::Number & ordered::Ordered;
+    concept Integer (description: "integer number") : number::Number & ordered::Ordered;
+    concept Rational (description: "rational number") : number::Number & ordered::Ordered;
+    //concept Real (description: "real number") : number::Number;
+    concept Complex (description: "complex number") : number::Number& ordered::Ordered;
 
-fun succ(p1: <T>) -> T {
-    description { "successor of p(1)" }
-}
+    fun succ(p1: <T>) -> T {
+        description { "successor of p(1)" }
+    }
 
-fun pred(p1: <T>) -> T {
-    description { "predecessor of p(1)" }
-}
+    fun pred(p1: <T>) -> T {
+        description { "predecessor of p(1)" }
+    }
 
-fun add(p1: <T>, p2: <K>) -> T {
-    description { "sum of p(1) and p(2)" }
-}
+    fun add(p1: <T>, p2: <K>) -> T {
+        description { "sum of p(1) and p(2)" }
+    }
 
-fun sub(p1: <T>, p2: <K>) -> T {
-    description { "difference of p(1) and p(2)" }
-}
+    fun sub(p1: <T>, p2: <K>) -> T {
+        description { "difference of p(1) and p(2)" }
+    }
 
-fun mul(p1: <T>, p2: <K>) -> T {
-    description { "product of p(1) and p(2)" }
-}
+    fun mul(p1: <T>, p2: <K>) -> T {
+        description { "product of p(1) and p(2)" }
+    }
 
-fun div(p1: <T>, p2: <K>) -> Object {
-    description { "quotient of p(1) and p(2)" }
-}
+    fun div(p1: <T>, p2: <K>) -> T {
+        description { "quotient of p(1) and p(2)" }
+    }
 
-fun mod(p1: <T>, p2: <K>) -> Object {
-    description { "modulo of p(1) and p(2)" }
-}
+    fun mod(p1: <T>, p2: <K>) -> T {
+        description { "modulo of p(1) and p(2)" }
+    }
 
-fun pow(p1: <T>, p2: <K>) -> Object {
-    description { "p(2)-th power of p(1)" }
+    fun pow(p1: <T>, p2: <K>) -> T {
+        description { "p(2)-th power of p(1)" }
+    }
 }

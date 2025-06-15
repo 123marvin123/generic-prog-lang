@@ -43,7 +43,14 @@ std::any FinalizingFunctionVisitor::visitFunctionExpRequires(CongParser::Functio
         auto expr = std::any_cast<Expression*>(result);
         const opt<std::string> name = ctx->name ? opt<std::string>{ctx->name->getText()} : std::nullopt;
 
-        current_function->add_requirement(s_ptr<Expression>(expr), name);
+        try
+        {
+            current_function->add_requirement(s_ptr<Expression>(expr), name);
+        }
+        catch (const std::exception& e)
+        {
+            std::throw_with_nested(SemaError("Could not add requirement to function", ctx));
+        }
         return expr;
     }
 
@@ -157,7 +164,7 @@ std::any FinalizingFunctionVisitor::visitFunctionGenericImpl(CongParser::Functio
         }
         catch (const SemaError& e)
         {
-            throw SemaError(e.what(), ctx);
+            std::throw_with_nested(SemaError("Could not add generic implementation to function", ctx));
         }
 
         return expr;

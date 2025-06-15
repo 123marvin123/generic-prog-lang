@@ -68,15 +68,15 @@ int main(const int argc, char** argv)
     if (const std::string err_msg = validator(output_folder.string()); !err_msg.empty())
         return app.exit(CLI::ValidationError(err_msg));
 
-    try
-    {
+    /*try
+    {*/
         process(input_file, output_folder, template_folder, purge_output, language_mode);
-    }
+    /*}
     catch (const std::exception& e)
     {
         print_exception(e);
         return EXIT_FAILURE;
-    }
+    }*/
 
 
     return EXIT_SUCCESS;

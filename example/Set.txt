@@ -1,89 +1,91 @@
-concept Set (description: "set") : Object;
+namespace set {
+    concept Set (description: "set") : object::Object;
 
-fun emptySet() -> Set {
-    description { "set that has no elements" }
-}
-
-fun set(p1: Object) -> Set {
-    description { "set that contains p(1), once, as its only element" }
-}
-
-fun isEmptySet(p1: Set) -> Boolean {
-    description { "is p(1) (the) empty (set)?" }
-}
-
-fun hasElement(p1: Set, p2: Object) -> Boolean {
-    description { "$\\textcd{p(1)}\\ni\\textcd{p(2)}$: does p(1) have p(2) as element?" }
-}
-
-fun multiplicity(p1: Set, p2: Object) -> Cardinal {
-    description { "number of occurrences of p(2) in p(1)" }
-}
-
-fun isMultiSet(p1: Set) -> Boolean {
-    description { "is p(1) a multi-set, i.e. does some element have a multiplicity $>1$?" }
-}
-
-fun card(p1: Set) -> Cardinal {
-    description { "$\\|p(1)\\|$: cardinality of p(1) (\\enquote{number of elements of p(1)}, possibly transfinite)" }
-}
-
-fun element(p1: Set) -> Object {
-    description { "any (random) element of p(1)" }
-}
-
-fun choice(p1: Set) -> Object {
-    description { "arbitrary (possibly particular) element of p(1)" }
-    generic() { element(p1) }
-}
-
-fun support(p1: Set) -> Set {
-    description { "set of unique elements of p(1) (identical to p(1) if not a multi-set)" }
-}
-
-fun union_(p1: Set, p2: Set) -> Set {
-    description { "$\\textcd{p(1)}\\cup\\textcd{p(2)}$: union of p(1) and p(2)" }
-}
-
-fun sum(p1: Set, p2: Set) -> Set {
-    description { "$\\textcd{p(1)}\\oplus\\textcd{p(2)}$: sum (multi-set) of p(1) and p(2)" }
-}
-
-fun intersection(p1: Set, p2: Set) -> Set {
-    description { "$\\textcd{p(1)}\\cap\\textcd{p(2)}$: intersection of p(1) and p(2)" }
-}
-
-fun complement(p1: Set, p2: Set) -> Set {
-    description { "complement of p(2) in p(1) (set difference of p(1) and p(2))" }
-}
-
-fun difference(p1: Set, p2: Set) -> Set {
-    description { "$\\textcd{p(1)}\\setminus\\textcd{p(2)}$ or $\\textcd{p(1)}\\ominus\\textcd{p(2)}$: difference of p(1) and p(2)" }
-}
-
-fun symmetricDifference(p1: Set, p2: Set) -> Set {
-    description { "$\\textcd{p(1)}\\triangle\\textcd{p(2)}$: symmetric difference of p(1) and p(2) (elements of only one of the two (multi)sets)" }
-    /*generic() {
-        union(complement(p1, p2), complement(p2, p1))
-    }*/
-}
-
-fun hasSubSet(p1: Set, p2: Set) -> Boolean {
-    description { "$\\textcd{p(1)}\\supseteq\\textcd{p(2)}$: does p(1) contain p(2) as ubset?" }
-    generic() {
-        isEqual(intersection(p1, p2), p2)
+    fun emptySet() -> set::Set {
+        description { "set that has no elements" }
     }
-}
 
-fun isDisjoint(p1: Set, p2: Set) -> Boolean {
-    description { "are p(1) and p(2) disjoint?" }
-    generic() { isEmptySet(intersection(p1, p2)) }
-}
+    fun set(p1: object::Object) -> set::Set {
+        description { "set that contains p(1), once, as its only element" }
+    }
 
-fun cartesianProduct(p1: Set, p2: Set) -> Set {
-    description { "Cartesian product of p(1) and p(2)" }
-}
+    fun isEmptySet(p1: set::Set) -> boolean::Boolean {
+        description { "is p(1) (the) empty (set)?" }
+    }
 
-fun setOfSubSet(p1: Set) -> Set {
-    description { "power set (set of subSets) of p(1)" }
+    fun hasElement(p1: set::Set, p2: object::Object) -> boolean::Boolean {
+        description { "$\\textcd{p(1)}\\ni\\textcd{p(2)}$: does p(1) have p(2) as element?" }
+    }
+
+    fun multiplicity(p1: set::Set, p2: object::Object) -> number::Cardinal {
+        description { "number of occurrences of p(2) in p(1)" }
+    }
+
+    fun isMultiSet(p1: set::Set) -> boolean::Boolean {
+        description { "is p(1) a multi-set, i.e. does some element have a multiplicity $>1$?" }
+    }
+
+    fun card(p1: set::Set) -> number::Cardinal {
+        description { "$\\|p(1)\\|$: cardinality of p(1) (\\enquote{number of elements of p(1)}, possibly transfinite)" }
+    }
+
+    fun element(p1: set::Set) -> object::Object {
+        description { "any (random) element of p(1)" }
+    }
+
+    fun choice(p1: set::Set) -> object::Object {
+        description { "arbitrary (possibly particular) element of p(1)" }
+        generic() { element(p1) }
+    }
+
+    fun support(p1: set::Set) -> set::Set {
+        description { "set of unique elements of p(1) (identical to p(1) if not a multi-set)" }
+    }
+
+    fun union_(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "$\\textcd{p(1)}\\cup\\textcd{p(2)}$: union of p(1) and p(2)" }
+    }
+
+    fun sum(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "$\\textcd{p(1)}\\oplus\\textcd{p(2)}$: sum (multi-set) of p(1) and p(2)" }
+    }
+
+    fun intersection(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "$\\textcd{p(1)}\\cap\\textcd{p(2)}$: intersection of p(1) and p(2)" }
+    }
+
+    fun complement(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "complement of p(2) in p(1) (set difference of p(1) and p(2))" }
+    }
+
+    fun difference(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "$\\textcd{p(1)}\\setminus\\textcd{p(2)}$ or $\\textcd{p(1)}\\ominus\\textcd{p(2)}$: difference of p(1) and p(2)" }
+    }
+
+    fun symmetricDifference(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "$\\textcd{p(1)}\\triangle\\textcd{p(2)}$: symmetric difference of p(1) and p(2) (elements of only one of the two (multi)sets)" }
+        /*generic() {
+            union_(complement(p1, p2), complement(p2, p1))
+        }*/
+    }
+
+    fun hasSubSet(p1: set::Set, p2: set::Set) -> boolean::Boolean {
+        description { "$\\textcd{p(1)}\\supseteq\\textcd{p(2)}$: does p(1) contain p(2) as ubset?" }
+        generic() {
+            object::isEqual(intersection(p1, p2), p2)
+        }
+    }
+
+    fun isDisjoint(p1: set::Set, p2: set::Set) -> boolean::Boolean {
+        description { "are p(1) and p(2) disjoint?" }
+        generic() { isEmptySet(intersection(p1, p2)) }
+    }
+
+    fun cartesianProduct(p1: set::Set, p2: set::Set) -> set::Set {
+        description { "Cartesian product of p(1) and p(2)" }
+    }
+
+    fun setOfSubSet(p1: set::Set) -> set::Set {
+        description { "power set (set of subSets) of p(1)" }
+    }
 }

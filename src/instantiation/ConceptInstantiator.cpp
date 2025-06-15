@@ -10,7 +10,7 @@ Concept* ConceptInstantiator::instantiate(CongParser::ConceptDefinitionStmntCont
         result.has_value() && result.type() == typeid(Concept*))
         return std::any_cast<Concept*>(result);
 
-    throw std::runtime_error("Could not instantiate concept");
+    throw SemaError("Could not instantiate concept", ctx);
 }
 
 std::any ConceptInstantiator::Visitor::visitConceptDefinitionStmnt(CongParser::ConceptDefinitionStmntContext* ctx)
@@ -47,7 +47,7 @@ std::any ConceptInstantiator::Visitor::visitConceptDefinitionBases(CongParser::C
             c.has_value() && c.value())
             concepts.emplace(c.value());
         else
-            throw SemaError(std::format("Could not find concept {}", fqiContext->getText()), ctx);
+            throw SemaError(std::format("Could not find concept {}", fqiContext->getText()), fqiContext);
     }
 
     if (std::ranges::any_of(concepts, [this](const auto& i) { return current_concept == i; }))

@@ -30,11 +30,11 @@ Base__ \
 #define CONG_LANG_INTERN_APPLYMEMBER_LOCAL_TEMP_LIST2_0(ARITY_) \
   template <typename...>
 
-#define CONG_LANG_INTERN_APPLYMEMBER(PAREN_CLASS_, Name_, OFFSET_, ARITY_, PAREN_TYPE_, IMPL_) \
+#define CONG_LANG_INTERN_APPLYMEMBER(PAREN_CLASS_, Ns_, Name_, OFFSET_, ARITY_, PAREN_TYPE_, IMPL_) \
   template<> \
   struct CONG_LANG_CORE_INTERN_UNPAREN(PAREN_CLASS_)::ApplyMember \
   < \
-    CONG_LANG_CORE_INTERN_PASTE(Spec, Name_), \
+    Ns_ :: CONG_LANG_CORE_INTERN_PASTE(Spec, Name_), \
     ::cong::lang::core::NaturalStatic<OFFSET_> \
   > \
   { \

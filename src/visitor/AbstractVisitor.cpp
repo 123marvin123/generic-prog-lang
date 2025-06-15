@@ -9,23 +9,26 @@ AbstractVisitor::AbstractVisitor(Sema* sema, const bool createNamespaces) :
 std::any AbstractVisitor::visitNamespaceStmnt(CongParser::NamespaceStmntContext* context)
 {
     opt<Namespace*> ns;
-    if (createNamespaces)
+    if (const auto& the_ns = get_current_namespace()->find_namespace(context->IDENTIFIER()->getText());
+        the_ns.has_value())
+    {
+        ns = the_ns;
+    }
+    else if (createNamespaces)
     {
         if (const auto& res = Sema::create_namespace(context->IDENTIFIER()->getText(), sema, get_current_namespace());
             res.has_value())
+        {
             ns = res;
+        }
         else
             throw SemaError(
-                std::format("Could not create namespace {} because it already exist", context->IDENTIFIER()->getText()),
+                std::format("Could not create namespace {}", context->IDENTIFIER()->getText()),
                 context);
-    }
-    else
-    {
-        ns = get_current_namespace()->find_namespace(context->IDENTIFIER()->getText());
     }
 
     if (!ns)
-        throw SemaError("Could not find namespace", context);
+        throw SemaError(std::format("Could not find namespace {}", context->IDENTIFIER()->getText()), context);
 
     // Push the current namespace onto the stack
     namespaces.push(ns.value());

@@ -339,3 +339,68 @@ TEST_CASE_METHOD(UtilsFixture, "Top level namespace", "[utils]")
     REQUIRE(identifier.empty());
     REQUIRE(topLevel);
 }
+
+TEST_CASE_METHOD(UtilsFixture, "Resolve FQI: Absolute path from nested namespace", "[utils]")
+{
+    Sema::create_concept(sema_ptr, "GlobalConcept").value();
+    auto ns1 = Sema::create_namespace("NS1", sema_ptr, sema_ptr).value();
+    Sema::create_concept(ns1, "NestedConcept").value();
+
+    const auto fqi = utils::split_fully_qualified_identifier("::GlobalConcept");
+    const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqi, ns1);
+
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == "GlobalConcept");
+}
+
+TEST_CASE_METHOD(UtilsFixture, "Resolve FQI: Identifier in current namespace", "[utils]")
+{
+    auto ns1 = Sema::create_namespace("NS1", sema_ptr, sema_ptr).value();
+    Sema::create_concept(ns1, "CurrentNamespaceConcept").value();
+
+    const auto fqi = utils::split_fully_qualified_identifier("CurrentNamespaceConcept");
+    const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqi, ns1);
+
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == "CurrentNamespaceConcept");
+}
+
+TEST_CASE_METHOD(UtilsFixture, "Resolve FQI: Identifier in child namespace", "[utils]")
+{
+    auto ns1 = Sema::create_namespace("NS1", sema_ptr, sema_ptr).value();
+    auto child_ns = Sema::create_namespace("ChildNS", sema_ptr, ns1).value();
+    Sema::create_concept(child_ns, "ChildConcept").value();
+
+    const auto fqi = utils::split_fully_qualified_identifier("ChildNS::ChildConcept");
+    const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqi, ns1);
+
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == "ChildConcept");
+}
+
+TEST_CASE_METHOD(UtilsFixture, "Resolve FQI: Identifier in sibling namespace by traversing up", "[utils]")
+{
+    auto object_ns = Sema::create_namespace("ObjectNS", sema_ptr, sema_ptr).value();
+    const auto object_concept = Sema::create_concept(object_ns, "Object").value();
+    [[maybe_unused]] const auto func = Sema::create_function<ConcreteFunction>(object_ns, "id", object_ns, object_concept);
+
+    auto other_ns = Sema::create_namespace("OtherNS", sema_ptr, sema_ptr).value();
+
+    const auto fqi = utils::split_fully_qualified_identifier("ObjectNS::id");
+    const auto result = utils::resolve_fully_qualified_identifier<Function>(fqi, other_ns);
+
+    REQUIRE(result.has_value());
+    REQUIRE(std::string((*result)->get_identifier()) == "id");
+    REQUIRE((*result)->get_namespace() == object_ns);
+}
+
+TEST_CASE_METHOD(UtilsFixture, "Resolve FQI: Non-existent identifier, should traverse up and fail", "[utils]")
+{
+    auto ns1 = Sema::create_namespace("NS1", sema_ptr, sema_ptr).value();
+    auto ns2 = Sema::create_namespace("NS2", sema_ptr, ns1).value();
+
+    const auto fqi = utils::split_fully_qualified_identifier("NonExistentNS::NonExistentConcept");
+    const auto result = utils::resolve_fully_qualified_identifier<Concept>(fqi, ns2);
+
+    REQUIRE_FALSE(result.has_value());
+}

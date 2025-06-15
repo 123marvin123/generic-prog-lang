@@ -9,9 +9,14 @@
 #include "Seq/core/Tuple.hh"
 #include "Number/core/NaturalStatic.hh"
 
-{% set ConceptObject = get_concept("Object") %}
+{% set ConceptObject = get_concept("object::Object") %}
 
-#include "{{ConceptObject.name}}.hh"
+{% set ObjectPrefix = ConceptObject.ns | join('/') -%}
+{%- if ObjectPrefix | length > 0 -%}
+#include "{{ObjectPrefix}}/{{ ConceptObject.name }}.hh"
+{%- else -%}
+#include "{{ ConceptObject.name }}.hh"
+{%- endif -%}
 
 {% for param in needed_files %}
 

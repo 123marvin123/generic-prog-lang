@@ -40,7 +40,7 @@ std::any ExpressionVisitor::visitParameterReferenceExpression(CongParser::Parame
     }
     catch (const SemaError& e)
     {
-        throw SemaError(e.what(), ctx);
+        std::throw_with_nested(SemaError("Could not instantiate parameter expression", ctx));
     }
 }
 
@@ -75,7 +75,7 @@ std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContex
     }
     catch (const SemaError& e)
     {
-        throw SemaError(e.what(), ctx);
+        throw SemaError("Could not instantiate function call expression", ctx);
     }
 
 }
@@ -107,7 +107,7 @@ std::any ExpressionVisitor::visitArithmeticExpression(CongParser::ArithmeticExpr
     }
     catch (const SemaError& e)
     {
-        throw SemaError(e.what(), ctx);
+        throw SemaError("Could not instantiate arithmetic expression", ctx);
     }
 }
 
@@ -157,7 +157,7 @@ std::any ExpressionVisitor::visitLetExpression(CongParser::LetExpressionContext*
     }
     catch (const SemaError& e)
     {
-        throw SemaError(e.what(), ctx);
+        throw SemaError("Could not instantiate let expression", ctx);
     }
 }
 

@@ -18,9 +18,9 @@
 // Helper function to ensure a directory exists
 void ensure_directory_exists(const std::filesystem::path& dir_path)
 {
-    if (!std::filesystem::exists(dir_path))
+    if (!exists(dir_path))
     {
-        if (!std::filesystem::create_directories(dir_path))
+        if (!create_directories(dir_path))
         {
             const auto error_code = std::error_code(errno, std::generic_category());
             throw std::runtime_error(std::format("Failed to create directory {}: {}",
@@ -148,7 +148,7 @@ vec<std::filesystem::path> JinjaCppExport::process()
         if (std::holds_alternative<const Concept*>(f->get_result()))
             needed_files_set.emplace(std::get<const Concept*>(f->get_result()));
         else
-            needed_files_set.emplace(f->get_namespace()->get_sema()->find_concept("Object").value());
+            needed_files_set.emplace(f->get_namespace()->get_sema()->builtin_concept<Object>());
 
         for (FunctionParameter* param : f->get_parameters())
         {

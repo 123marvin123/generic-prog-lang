@@ -1,5 +1,6 @@
 
-    fun isModelOf(p1: <T>, p2: <K>) -> Boolean {
+namespace object {
+    fun isModelOf(p1: <T>, p2: <K>) -> boolean::Boolean {
         description { "does object p(1) model concept p(2)?" }
     }
 
@@ -12,18 +13,19 @@
         description { "p(2) (the second argument) - side effect: if p(1) is modifiable, it will also have the value of p(2)" }
     }
 
-    fun isEqual(p1: <T>, p2: T) -> Boolean {
+    fun isEqual(p1: <T>, p2: T) -> boolean::Boolean {
         description { "p(1) $=$ p(2) (is p(1) equal to p(2)?)" }
     }
 
-    fun isNotEqual(p1: <T>, p2: T) -> Boolean {
+    fun isNotEqual(p1: <T>, p2: T) -> boolean::Boolean {
         description { "p(1) $\\neq$ p(2) (is p(1) not equal to p(2)?)" }
-        requires { not(isEqual(p1, p2)) }
+        requires { boolean::not(isEqual(p1, p2)) }
     }
 
-    fun test(p1: Object) -> Boolean {
+    fun test(p1: object::Object) -> boolean::Boolean {
         description { "does p(1) pass the test?" }
-        generic(time: let len = ::length(p1) { len }, space: 0) {
+        generic(time: let len = seq::length(p1) { len }, space: 0) {
             true
         }
     }
+}

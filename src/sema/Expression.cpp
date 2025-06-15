@@ -64,7 +64,7 @@ std::variant<const Concept*, const PlaceholderFunctionParameter*> FunctionParame
     if (const auto cast = utils::dyn_cast<PlaceholderFunctionParameter>(param))
         return cast;
 
-    throw std::runtime_error("Unhandled case");
+    std::throw_with_nested(std::runtime_error("Unhandled case"));
 }
 
 s_ptr<BoundFunctionParameterExpression> FunctionParameterExpression::bind(const Concept* c) const

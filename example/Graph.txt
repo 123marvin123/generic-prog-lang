@@ -1,155 +1,160 @@
-concept Graph (description: "graph") : Object;
+namespace graph {
+    concept Graph (description: "graph") : object::Object;
 
-fun setOfVertexKey(p1: Graph, p2: Boolean, p3: Boolean) -> Set {
-    description { "set of all vertices of p(1), constrained to sources if p(2) is true and to targets if p(3) is true" }
-}
+    fun setOfVertexKey(p1: Graph, p2: boolean::Boolean, p3: boolean::Boolean) -> set::Set {
+        description { "set of all vertices of p(1), constrained to sources if p(2) is true and to targets if p(3) is true" }
+    }
 
-fun setOfEdgeKey(p1: Graph) -> Set {
-    description { "set of all edges of p(1)" }
-}
+    fun setOfEdgeKey(p1: Graph) -> set::Set {
+        description { "set of all edges of p(1)" }
+    }
 
-fun setOfEdgeKeyBetween(p1: Graph, p2: Object, p3: Object, p4: Boolean, p5: Boolean) -> Set {
-    description { "set of edges of p(1) between p(2) and p(3), constrained to edges from p(2) to p(3) if p(4) is true, and to edges from p(3) to p(2) if p(5) is true" }
-    requires { hasElement(setOfVertexKey(p1, false, false), p2) }
-    requires { hasElement(setOfVertexKey(p1, false, false), p3) }
-}
+    fun setOfEdgeKeyBetween(
+        p1: Graph, p2: object::Object,
+        p3: object::Object, p4: boolean::Boolean,
+        p5: boolean::Boolean) -> set::Set {
+        description { "set of edges of p(1) between p(2) and p(3), constrained to edges from p(2) to p(3) if p(4) is true, and to edges from p(3) to p(2) if p(5) is true" }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p2) }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p3) }
+    }
 
-fun setOfEdgeKeyInc(p1: Graph, p2: Object, p3: Boolean, p4: Boolean) -> Set {
-    description { "set of edges of graph p(1) incident to vertex p(2), constrained to edges from p(2) if p(3) is true, and to edges to p(2) if p(4) is true" }
-    requires { hasElement(setOfVertexKey(p1, false, false), p2) }
-}
+    fun setOfEdgeKeyInc(p1: Graph, p2: object::Object, p3: boolean::Boolean, p4: boolean::Boolean) -> set::Set {
+        description { "set of edges of graph p(1) incident to vertex p(2), constrained to edges from p(2) if p(3) is true, and to edges to p(2) if p(4) is true" }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p2) }
+    }
 
-fun setOfVertexKeyInc(p1: Graph, p2: Object, p3: Boolean, p4: Boolean) -> Set {
-    description { "set of vertices incident to edge p(2) of graph p(1), constrained to sources if p(3) is true and to targets if p(4) is true" }
-    requires { hasElement(setOfEdgeKey(p1), p2) }
-}
+    fun setOfVertexKeyInc(p1: Graph, p2: object::Object, p3: boolean::Boolean, p4: boolean::Boolean) -> set::Set {
+        description { "set of vertices incident to edge p(2) of graph p(1), constrained to sources if p(3) is true and to targets if p(4) is true" }
+        requires { set::hasElement(setOfEdgeKey(p1), p2) }
+    }
 
-fun setOfVertexKeyAdj(p1: Graph, p2: Object, p3: Boolean, p4: Boolean) -> Set {
-    description { "set of vertices of graph p(1) adjacent to vertex p(2), constrained to targets of edges from p(2) if p(3) is true, and to sources of edges to p(2) if p(4) is true" }
-    requires { hasElement(setOfVertexKey(p1, false, false), p2) }
-}
+    fun setOfVertexKeyAdj(p1: Graph, p2: object::Object, p3: boolean::Boolean, p4: boolean::Boolean) -> set::Set {
+        description { "set of vertices of graph p(1) adjacent to vertex p(2), constrained to targets of edges from p(2) if p(3) is true, and to sources of edges to p(2) if p(4) is true" }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p2) }
+    }
 
-fun degree(p1: Graph, p2: Object, p3: Boolean, p4: Boolean) -> Natural {
-    description { "degree (number of incident edges) of vertex p(2) of graph p(1), considering undirect edges, and directed edges from p(2) if p(3) is true, and directed edges to p(2) if p(4) is true" }
-    requires { hasElement(setOfVertexKey(p1, false, false), p2) }
-    //generic() { card(setOfEdgeKeyInc(p1, p2, p3, p4)) }
-}
+    fun degree(p1: Graph, p2: object::Object, p3: boolean::Boolean, p4: boolean::Boolean) -> number::Natural {
+        description { "degree (number of incident edges) of vertex p(2) of graph p(1), considering undirect edges, and directed edges from p(2) if p(3) is true, and directed edges to p(2) if p(4) is true" }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p2) }
+        //generic() { set::card(setOfEdgeKeyInc(p1, p2, p3, p4)) }
+    }
 
-fun isDirected(p1: Graph, p2: Object) -> Boolean {
-    description { "is edge p(2) of graph p(1) directed?" }
-    requires { hasElement(setOfEdgeKey(p1), p2) }
-}
+    fun isDirected(p1: Graph, p2: object::Object) -> boolean::Boolean {
+        description { "is edge p(2) of graph p(1) directed?" }
+        requires { set::hasElement(setOfEdgeKey(p1), p2) }
+    }
 
-fun isUndirected(p1: Graph, p2: Object) -> Boolean {
-    description { "is edge p(2) of graph p(1) undirected?" }
-    requires { hasElement(setOfEdgeKey(p1), p2) }
-    generic() { not(isDirected(p1, p2)) }
-}
+    fun isUndirected(p1: Graph, p2: object::Object) -> boolean::Boolean {
+        description { "is edge p(2) of graph p(1) undirected?" }
+        requires { set::hasElement(setOfEdgeKey(p1), p2) }
+        generic() { boolean::not(isDirected(p1, p2)) }
+    }
 
-fun isAllDirected(p1: Graph) -> Boolean {
-    description { "are all edges of graph p(1) directed?" }
-}
+    fun isAllDirected(p1: Graph) -> boolean::Boolean {
+        description { "are all edges of graph p(1) directed?" }
+    }
 
-fun isAllUndirected(p1: Graph) -> Boolean {
-    description { "are all edges of graph p(1) undirected?" }
-}
+    fun isAllUndirected(p1: Graph) -> boolean::Boolean {
+        description { "are all edges of graph p(1) undirected?" }
+    }
 
-fun isLoop(p1: Graph, p2: Object) -> Boolean {
-    description { "is edge p(2) of graph p(1) a loop?" }
-    requires { hasElement(setOfEdgeKey(p1), p2) }
-}
+    fun isLoop(p1: Graph, p2: object::Object) -> boolean::Boolean {
+        description { "is edge p(2) of graph p(1) a loop?" }
+        requires { set::hasElement(setOfEdgeKey(p1), p2) }
+    }
 
-fun hasLoop(p1: Graph) -> Boolean {
-    description { "is any edge of graph p(1) a loop?" }
-}
+    fun hasLoop(p1: Graph) -> boolean::Boolean {
+        description { "is any edge of graph p(1) a loop?" }
+    }
 
-fun isSymmetric(p1: Graph, p2: Object) -> Boolean {
-    description { "is edge p(2) of graph p(1) symmetric?" }
-    requires { hasElement(setOfEdgeKey(p1), p2) }
-}
+    fun isSymmetric(p1: Graph, p2: object::Object) -> boolean::Boolean {
+        description { "is edge p(2) of graph p(1) symmetric?" }
+        requires { set::hasElement(setOfEdgeKey(p1), p2) }
+    }
 
-fun isAllSymmetric(p1: Graph) -> Boolean {
-    description { "are all edges of graph p(1) symmetric?" }
-}
+    fun isAllSymmetric(p1: Graph) -> boolean::Boolean {
+        description { "are all edges of graph p(1) symmetric?" }
+    }
 
-fun hasMultiEdge(p1: Graph) -> Boolean {
-    description { "are there different edges with the same source and target in graph p(1)?" }
-}
+    fun hasMultiEdge(p1: Graph) -> boolean::Boolean {
+        description { "are there different edges with the same source and target in graph p(1)?" }
+    }
 
-fun isReflexive(p1: Graph, p2: Object) -> Boolean {
-    description { "is edge p(2) of graph p(1) reflexive?" }
-    requires { hasElement(setOfEdgeKey(p1), p2) }
-}
+    fun isReflexive(p1: Graph, p2: object::Object) -> boolean::Boolean {
+        description { "is edge p(2) of graph p(1) reflexive?" }
+        requires { set::hasElement(setOfEdgeKey(p1), p2) }
+    }
 
-fun isSimple(p1: Graph) -> Boolean {
-    description { "is any edge of graph p(1) a loop or multiEdge?" }
-}
+    fun isSimple(p1: Graph) -> boolean::Boolean {
+        description { "is any edge of graph p(1) a loop or multiEdge?" }
+    }
 
-fun insertVertex(p1: Graph, p2: Map) -> Graph {
-    description { "graph formed by extending p(1) by new vertex with weights as specified by p(2)" }
-}
+    fun insertVertex(p1: Graph, p2: map::Map) -> Graph {
+        description { "graph formed by extending p(1) by new vertex with weights as specified by p(2)" }
+    }
 
-fun deleteVertex(p1: Graph, p2: Object) -> Graph {
-    description { "graph formed by deleting vertex p(2) from graph p(1)" }
-    requires { hasElement(setOfVertexKey(p1, false, false), p2) }
-}
+    fun deleteVertex(p1: Graph, p2: object::Object) -> Graph {
+        description { "graph formed by deleting vertex p(2) from graph p(1)" }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p2) }
+    }
 
-fun insertEdge(p1: Graph, p2: Object, p3: Object, p4: Map) -> Graph {
-    description { "graph formed by extending p(1) by new edge between vertices p(2) and p(3) in graph p(1), with weights as specified by p(4)" }
-    requires { hasElement(setOfVertexKey(p1, false, false), p2) }
-    requires { hasElement(setOfVertexKey(p1, false, false), p3) }
-}
+    fun insertEdge(p1: Graph, p2: object::Object, p3: object::Object, p4: map::Map) -> Graph {
+        description { "graph formed by extending p(1) by new edge between vertices p(2) and p(3) in graph p(1), with weights as specified by p(4)" }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p2) }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p3) }
+    }
 
-fun deleteEdge(p1: Graph, p2: Object) -> Graph {
-    description { "graph formed by deleting edge p(2) from graph p(1)" }
-    requires { hasElement(setOfEdgeKey(p1), p2) }
-}
+    fun deleteEdge(p1: Graph, p2: object::Object) -> Graph {
+        description { "graph formed by deleting edge p(2) from graph p(1)" }
+        requires { set::hasElement(setOfEdgeKey(p1), p2) }
+    }
 
-fun mapToMapOfVertexKey(p1: Graph) -> Map {
-    description { "" }
-}
+    fun mapToMapOfVertexKey(p1: Graph) -> map::Map {
+        description { "" }
+    }
 
-fun mapToMapOfEdgeKey(p1: Graph) -> Map {
-    description { "" }
-}
+    fun mapToMapOfEdgeKey(p1: Graph) -> map::Map {
+        description { "" }
+    }
 
-fun mapToApplyForMapOfVertexKey(p1: Graph, p2: Object, p3: Map) -> Graph {
-    description { "apply p(3) on map of vertex weight p(2) in p(1)" }
-}
+    fun mapToApplyForMapOfVertexKey(p1: Graph, p2: object::Object, p3: map::Map) -> Graph {
+        description { "apply p(3) on map of vertex weight p(2) in p(1)" }
+    }
 
-fun mapToApplyForMapOfEdgeKey(p1: Graph, p2: Object, p3: Map) -> Graph {
-    description { "apply p(3) on map of edge weight p(2) in p(1)" }
-}
+    fun mapToApplyForMapOfEdgeKey(p1: Graph, p2: object::Object, p3: map::Map) -> Graph {
+        description { "apply p(3) on map of edge weight p(2) in p(1)" }
+    }
 
-fun insertMapOfVertexKey(p1: Graph, p2: Map) -> Graph {
-    description { "graph formed by extending p(1) by new weight with values per vertex as specified by p(2)" }
-}
+    fun insertMapOfVertexKey(p1: Graph, p2: map::Map) -> Graph {
+        description { "graph formed by extending p(1) by new weight with values per vertex as specified by p(2)" }
+    }
 
-fun insertMapOfEdgeKey(p1: Graph, p2: Map) -> Graph {
-    description { "graph formed by extending p(1) by new weight with values per Edge as specified by p(2)" }
-}
+    fun insertMapOfEdgeKey(p1: Graph, p2: map::Map) -> Graph {
+        description { "graph formed by extending p(1) by new weight with values per Edge as specified by p(2)" }
+    }
 
-fun isPath(p1: Graph, p2: Seq) -> Boolean {
-    description { "checks if sequence p(2) is a path in graph p(1)" }
-}
+    fun isPath(p1: Graph, p2: seq::Seq) -> boolean::Boolean {
+        description { "checks if sequence p(2) is a path in graph p(1)" }
+    }
 
-fun setOfPathShortest(p1: Graph, p2: Object, p3: Object, p4: Object) -> Set {
-    description { "" }
-    requires { hasElement(domain(mapToMapOfEdgeKey(p1)), p2) }
-    requires { hasElement(setOfVertexKey(p1, false, false), p3) }
-    requires { hasElement(setOfVertexKey(p1, false, false), p4) }
-}
+    fun setOfPathShortest(p1: Graph, p2: object::Object, p3: object::Object, p4: object::Object) -> set::Set {
+        description { "" }
+        requires { set::hasElement(map::domain(mapToMapOfEdgeKey(p1)), p2) }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p3) }
+        requires { set::hasElement(setOfVertexKey(p1, false, false), p4) }
+    }
 
-fun mapOfSourceKeyAndTargetKeyToSetOfPathShortest(p1: Graph, p2: Object) -> Map {
-    description { "\\enquote{all shortest paths}" }
-    requires { hasElement(domain(mapToMapOfEdgeKey(p1)), p2) }
-}
+    fun mapOfSourceKeyAndTargetKeyToSetOfPathShortest(p1: Graph, p2: object::Object) -> map::Map {
+        description { "\\enquote{all shortest paths}" }
+        requires { set::hasElement(map::domain(mapToMapOfEdgeKey(p1)), p2) }
+    }
 
-fun minSpanningTree(p1: Graph) -> Tree {
-    description { "minimal spanning tree of p(1)" }
-}
+    fun minSpanningTree(p1: Graph) -> tree::Tree {
+        description { "minimal spanning tree of p(1)" }
+    }
 
-fun isPartite(p1: Graph) -> Boolean {
-    description { "" }
-    generic() { isDisjoint(setOfVertexKey(p1, true, false), setOfVertexKey(p1, false, true)) }
+    fun isPartite(p1: Graph) -> boolean::Boolean {
+        description { "" }
+        generic() { set::isDisjoint(setOfVertexKey(p1, true, false), setOfVertexKey(p1, false, true)) }
+    }
 }

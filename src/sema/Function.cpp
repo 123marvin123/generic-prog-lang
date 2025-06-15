@@ -13,8 +13,8 @@
 Function::Function(std::string name, const Namespace* parent)
     : SemaIdentifier(std::move(name), parent)
     {
-        if (get_identifier().empty()) throw SemaError("Function name must not be empty");
-        if (!parent) throw SemaError("Parent namespace must not be empty");
+        if (get_identifier().empty()) std::throw_with_nested(SemaError("Function name must not be empty"));
+        if (!parent) std::throw_with_nested(SemaError("Parent namespace must not be empty"));
     }
 
 Function::~Function() = default;
@@ -30,7 +30,7 @@ opt<FunctionParameter*> Function::find_function_parameter(std::string_view ident
 FunctionParameter* Function::register_function_parameter(u_ptr<FunctionParameter> fp)
 {
     if (find_function_parameter(fp->get_identifier()))
-        throw SemaError(std::format("Function parameter {} already registered", fp->get_identifier()));
+        std::throw_with_nested(SemaError(std::format("Function parameter {} already registered", fp->get_identifier())));
 
     fp->set_function(this);
     auto* ptr = fp.get();
@@ -63,8 +63,11 @@ void Function::add_generic_implementation(const GenericImplementation& exp)
             {
                 if (const auto& target_concept = std::get<const Concept*>(fun_result);
                     !c->matches_concept(target_concept))
-                    throw SemaError(std::format("Generic implementation ({}) does not match function return type ({})",
-                        c->get_identifier(), target_concept->get_identifier()));
+                    std::throw_with_nested(
+                        SemaError(
+                            std::format("Generic implementation ({}) does not match function return type ({})",
+                        c->get_identifier(), target_concept->get_identifier())
+                        ));
             }
         }
     }
@@ -74,7 +77,7 @@ void Function::add_generic_implementation(const GenericImplementation& exp)
 
 void Function::add_requirement(s_ptr<Expression> exp, opt<std::string> name)
 {
-    static const auto boolean = *get_namespace()->get_sema()->find_concept("Boolean");
+    static const auto boolean = get_namespace()->get_sema()->builtin_concept<bool>();
 
     if (!std::holds_alternative<const Concept*>(exp->get_result()))
         throw SemaError("Expression must return a concrete concept");
@@ -184,7 +187,7 @@ jinja2::TypeReflection<FunctionView>::GetAccessors()
                 return Reflect(*std::get<const Concept*>(f.func->get_result()));
             }
 
-            return Reflect(*f.func->get_namespace()->get_sema()->find_concept("Object").value());
+            return Reflect(*f.func->get_namespace()->get_sema()->builtin_concept<Object>());
         }},
         {"ns", [](const FunctionView& f)
         {

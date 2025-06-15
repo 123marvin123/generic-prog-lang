@@ -21,7 +21,7 @@ std::string Preprocessor::process_recursive(const std::filesystem::path& input_f
 
     std::ifstream file(input_file);
     if (!file.is_open()) {
-        throw std::runtime_error(std::format("Failed to open file: {}", input_file.string()));
+        std::throw_with_nested(std::runtime_error(std::format("Failed to open file: {}", input_file.string())));
     }
 
     std::stringstream result;

@@ -90,5 +90,5 @@ s_ptr<Expression> EvaluationContext::bind_expression(s_ptr<Expression> expr,
         return arithExp;
     }
 
-    throw std::runtime_error("Unhandled case.");
+    std::throw_with_nested(std::runtime_error("Unhandled case."));
 }

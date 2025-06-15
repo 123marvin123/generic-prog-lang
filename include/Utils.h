@@ -32,7 +32,7 @@ namespace utils
 
     template <class T>
     opt<std::add_pointer_t<T>> resolve_fully_qualified_identifier(const FQIInfo&,
-        Namespace*);
+        Namespace*, bool search_parent = true);
 
     template <class T>
     [[nodiscard]]

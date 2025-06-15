@@ -6,6 +6,7 @@
 #include "../Number/core/NaturalStatic.hh"
 #include "../Val.hh"
 
+
 namespace cong::lang
 {
     struct StaticTag {};
@@ -35,5 +36,4 @@ namespace cong::lang
         static constexpr bool value = std::is_base_of<StaticTag, std::remove_cv_t<T>>::value;
         using Type = core::BooleanStatic<value>;
     };
-
 } // namespace cong::lang

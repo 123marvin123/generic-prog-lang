@@ -1,81 +1,83 @@
-concept SpaceTopo (description: "topological space") : Object;
+namespace spacetopo {
+    concept SpaceTopo (description: "topological space") : object::Object;
 
-fun isTopological(space_: Set) -> Boolean {
-  description {
-    "is p(1) a topological space_?"
-  }
-}
+    fun isTopological(space_: set::Set) -> boolean::Boolean {
+      description {
+        "is p(1) a topological space_?"
+      }
+    }
 
-fun dimension(space_: Set, container: Set) -> Natural {
-  description {
-    "dimension of p(1) in p(2)"
-  }
-}
+    fun dimension(space_: set::Set, container: set::Set) -> number::Natural {
+      description {
+        "dimension of p(1) in p(2)"
+      }
+    }
 
-fun isOpen(subset: Set, space_: Set) -> Boolean {
-  description {
-    "is p(1) open in p(2)?"
-  }
-}
+    fun isOpen(subset: set::Set, space_: set::Set) -> boolean::Boolean {
+      description {
+        "is p(1) open in p(2)?"
+      }
+    }
 
-fun isClosed(subset: Set, space_: Set) -> Boolean {
-  description {
-    "is p(1) closed in p(2)?"
-  }
-}
+    fun isClosed(subset: set::Set, space_: set::Set) -> boolean::Boolean {
+      description {
+        "is p(1) closed in p(2)?"
+      }
+    }
 
-fun isCompact(subset: Set, space_: Set) -> Boolean {
-  description { "is p(1) compact in p(2)?" }
-  requires { isTopological(space_) }
-  requires { hasSubSet(space_, subset) }
-}
+    fun isCompact(subset: set::Set, space_: set::Set) -> boolean::Boolean {
+      description { "is p(1) compact in p(2)?" }
+      requires { isTopological(space_) }
+      requires { set::hasSubSet(space_, subset) }
+    }
 
-fun closure(subset: Set, space_: Set) -> Set {
-  description {
-    "closure of p(1) in p(2)"
-  }
-  requires { isTopological(space_) }
-  requires { hasSubSet(space_, subset) }
-}
+    fun closure(subset: set::Set, space_: set::Set) -> set::Set {
+      description {
+        "closure of p(1) in p(2)"
+      }
+      requires { isTopological(space_) }
+      requires { set::hasSubSet(space_, subset) }
+    }
 
-fun interior(subset: Set, space_: Set) -> Set {
-  description {
-    "interior of p(1) in p(2)"
-  }
-  requires { isTopological(space_) }
-  requires { hasSubSet(space_, subset) }
-}
+    fun interior(subset: set::Set, space_: set::Set) -> set::Set {
+      description {
+        "interior of p(1) in p(2)"
+      }
+      requires { isTopological(space_) }
+      requires { set::hasSubSet(space_, subset) }
+    }
 
-fun exterior(subset: Set, space_: Set) -> Set {
-  description {
-    "exterior of subset in space_"
-  }
-  requires { isTopological(space_) }
-  requires { hasSubSet(space_, subset) }
-}
+    fun exterior(subset: set::Set, space_: set::Set) -> set::Set {
+      description {
+        "exterior of subset in space_"
+      }
+      requires { isTopological(space_) }
+      requires { set::hasSubSet(space_, subset) }
+    }
 
-fun boundary(subset: Set, space_: Set) -> Set {
-  description {
-    "boundary of p(1) in p(2)"
-  }
-  requires { isTopological(space_) }
-  requires { hasSubSet(space_, subset) }
-}
+    fun boundary(subset: set::Set, space_: set::Set) -> set::Set {
+      description {
+        "boundary of p(1) in p(2)"
+      }
+      requires { isTopological(space_) }
+      requires { set::hasSubSet(space_, subset) }
+    }
 
-fun isPathConnected(subset: Set, space_: Set) -> Boolean {
-  description {
-    "is p(1) path-connected in p(2) (not partitioned)?"
-  }
-}
+    fun isPathConnected(subset: set::Set, space_: set::Set) -> boolean::Boolean {
+      description {
+        "is p(1) path-connected in p(2) (not partitioned)?"
+      }
+    }
 
-fun setOfPathConnected(subset: Set, space_: Set) -> Set {
-  description {
-    "minimal set of path-connected subSets of p(1) in p(2)"
-  }
-}
+    fun setOfPathConnected(subset: set::Set, space_: set::Set) -> set::Set {
+      description {
+        "minimal set of path-connected subSets of p(1) in p(2)"
+      }
+    }
 
-fun isSimplyConnected(subset: Set, space_: Set) -> Boolean {
-  description {
-    "is p(1) simply connected in p(2) (without holes)?"
-  }
+    fun isSimplyConnected(subset: set::Set, space_: set::Set) -> boolean::Boolean {
+      description {
+        "is p(1) simply connected in p(2) (without holes)?"
+      }
+    }
 }
