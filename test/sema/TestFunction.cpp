@@ -11,13 +11,13 @@ struct FunctionFixture {
     Sema* sema_ptr;
     DependentFunction* id;
     ConcreteFunction* id2;
-    Concept* object;
+    const Concept* object;
 
     FunctionFixture() {
         sema = std::make_unique<Sema>();
         sema_ptr = sema.get();
 
-        object = *sema->find_concept("Object");
+        object = sema->builtin_concept<Object>();
 
         id = *Sema::create_function<DependentFunction>(sema_ptr, "id", sema_ptr);
         id->set_dependency(id->register_function_parameter<PlaceholderFunctionParameter>("a", "T"));

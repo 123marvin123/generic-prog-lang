@@ -29,7 +29,7 @@ TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating constant expression", "[e
 
 TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating concrete function call", "[evaluation_context]")
 {
-    auto c_bool = *sema->find_concept("Boolean");
+    auto c_bool = sema->builtin_concept<bool>();
     const auto sema_ptr = sema.get();
     auto f = Sema::create_function<ConcreteFunction>(sema.get(), "f", sema_ptr, c_bool);
     INFO(sema->to_string());

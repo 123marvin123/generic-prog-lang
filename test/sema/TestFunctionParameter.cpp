@@ -10,13 +10,13 @@ struct FunctionParamFixture
     std::unique_ptr<Sema> sema;
     Sema* sema_ptr;
     Function *id, *id2;
-    Concept* object;
+    const Concept* object;
 
     FunctionParamFixture()
     {
         sema = std::make_unique<Sema>();
         sema_ptr = sema.get();
-        object = *sema->find_concept("Object");
+        object = sema->builtin_concept<Object>();
         id = *Sema::create_function<ConcreteFunction>(sema_ptr, "id", sema_ptr, object);
         id2 = *Sema::create_function<ConcreteFunction>(sema_ptr, "id2", sema_ptr, object);
     }
