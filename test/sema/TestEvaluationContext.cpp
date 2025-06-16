@@ -69,7 +69,7 @@ TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating dependent function call",
 
     const auto some_arg = std::make_shared<StringExpression>(sema_ptr, "hello");
     const auto callExp = std::make_shared<CallExpression>(sema_ptr, f, vec<s_ptr<Expression>>{some_dependency});
-    const auto c_number = *sema->find_concept("Number");
+    const auto c_number = sema->builtin_concept<long>();
 
     INFO("Binding dependent function call with Number concept");
     const auto newCallExp =
@@ -86,7 +86,7 @@ TEST_CASE_METHOD(EvaluationContextFixture, "Evaluating nested dependent function
     const auto f = *Sema::create_function<DependentFunction>(sema_ptr, "f", sema_ptr);
     auto p = f->set_dependency(f->register_function_parameter<PlaceholderFunctionParameter>("param", "T"));
 
-    auto boolean = *sema->find_concept("Boolean");
+    auto boolean = sema->builtin_concept<bool>();
     auto f2 = *Sema::create_function<ConcreteFunction>(sema_ptr, "f2", sema_ptr, boolean);
     auto p2 = f2->register_function_parameter<PlaceholderFunctionParameter>("param", "T");
     INFO(sema->to_string());
@@ -121,8 +121,8 @@ TEST_CASE_METHOD(EvaluationContextFixture, "Binding multiple placeholders", "[ev
                                                       FunctionParameterExpression::create(sema_ptr, p2)});
     INFO("Created function call with two placeholder parameters");
 
-    auto boolean = *sema->find_concept("Boolean");
-    auto number = *sema->find_concept("Number");
+    auto boolean = sema->builtin_concept<bool>();
+    auto number = sema->builtin_concept<long>();
 
     INFO("Binding both placeholders with Boolean and Number concepts");
     const auto newCallExp = EvaluationContext::bind_expression(callExp, {{p1, boolean}, {p2, number}});
@@ -150,7 +150,7 @@ TEST_CASE_METHOD(EvaluationContextFixture, "Partial binding", "[evaluation_conte
                                                       FunctionParameterExpression::create(sema_ptr, p2)});
     INFO("Created function call with two placeholder parameters");
 
-    auto number = *sema->find_concept("Number");
+    auto number = sema->builtin_concept<long>();
 
     INFO("Binding only first parameter with Number concept");
     const auto newCallExp = EvaluationContext::bind_expression(callExp, {{p1, number}});
@@ -173,7 +173,7 @@ TEST_CASE_METHOD(EvaluationContextFixture, "Cyclic dependency", "[evaluation_con
             sema_ptr, f, vec<s_ptr<Expression>>{FunctionParameterExpression::create(sema_ptr, p)})});
     INFO("Created function call with cyclic dependency");
 
-    auto boolean = *sema->find_concept("Boolean");
+    auto boolean = sema->builtin_concept<bool>();
 
     INFO("Binding cyclic dependency with Boolean concept");
     const auto newCallExp =

@@ -33,7 +33,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Constant expression invalid construction", 
 
 TEST_CASE_METHOD(ExpressionFixture, "Constant expression evaluates to value", "[expression]")
 {
-    const auto c_str = *sema->find_concept("string::String");
+    const auto c_str = sema->builtin_concept<std::string>();
     const std::string val = "hello";
     INFO(sema->to_string());
 
@@ -45,7 +45,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Constant expression evaluates to value", "[
 
 TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression concrete construction", "[expression]")
 {
-    const auto* object = *sema->find_concept("object::Object");
+    const auto* object = sema->builtin_concept<Object>();
     const auto* f = *Sema::create_function<ConcreteFunction>(sema_ptr, "test", sema_ptr, object);
     const auto p = std::make_shared<ConcreteFunctionParameter>("param", object);
     p->set_function(f);
@@ -59,7 +59,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression concrete cons
 
 TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression placeholder construction", "[expression]")
 {
-    const auto* object = *sema->find_concept("object::Object");
+    const auto* object = sema->builtin_concept<Object>();
     auto* f = *Sema::create_function<ConcreteFunction>(sema_ptr, "test", sema_ptr, object);
     const auto* p = f->register_function_parameter(std::make_unique<PlaceholderFunctionParameter>("param", "T"));
     INFO(sema->to_string());
@@ -72,7 +72,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Function parameter expression placeholder c
 
 TEST_CASE_METHOD(ExpressionFixture, "Bound function parameter expression construction", "[expression]")
 {
-    const auto* object = *sema->find_concept("object::Object");
+    const auto* object = sema->builtin_concept<Object>();
     auto* f = *Sema::create_function<ConcreteFunction>(sema_ptr, "test", sema_ptr, object);
     const auto* p = f->register_function_parameter(std::make_unique<PlaceholderFunctionParameter>("param", "T"));
     INFO(sema->to_string());

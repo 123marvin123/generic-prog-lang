@@ -51,11 +51,11 @@ void Sema::register_builtin_concepts()
 void Sema::register_builtin_functions()
 {
     const auto& number_ns = find_namespace("number");
-    add_function = create_function<ConcreteFunction>(*number_ns, "add", this, object_concept).value();
-    sub_function = create_function<ConcreteFunction>(*number_ns, "sub", this, object_concept).value();
-    mul_function = create_function<ConcreteFunction>(*number_ns, "mul", this, object_concept).value();
-    div_function = create_function<ConcreteFunction>(*number_ns, "div", this, object_concept).value();
-    mod_function = create_function<ConcreteFunction>(*number_ns, "mod", this, object_concept).value();
+    add_function = create_function<ConcreteFunction>(*number_ns, "add", *number_ns, object_concept).value();
+    sub_function = create_function<ConcreteFunction>(*number_ns, "sub", *number_ns, object_concept).value();
+    mul_function = create_function<ConcreteFunction>(*number_ns, "mul", *number_ns, object_concept).value();
+    div_function = create_function<ConcreteFunction>(*number_ns, "div", *number_ns, object_concept).value();
+    mod_function = create_function<ConcreteFunction>(*number_ns, "mod", *number_ns, object_concept).value();
 }
 
 void Sema::register_builtin_operators()
