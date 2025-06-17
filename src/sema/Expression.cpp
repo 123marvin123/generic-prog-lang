@@ -35,26 +35,27 @@ std::set<const Function*> Expression::get_depending_functions() const
 }
 
 StringExpression::StringExpression(Sema* sema, const std::string& value) :
-    ConstantExpression(sema, sema->builtin_concept<std::string>(), value)
+    ConstantExpression(sema, sema->builtin_concept<std::string>(), value, false)
 {
 }
 
-RealExpression::RealExpression(Sema* sema, const double value) :
-    ConstantExpression(sema, sema->builtin_concept<double>(), value)
+RealExpression::RealExpression(Sema* sema, const double value, bool is_dynamic) :
+    ConstantExpression(sema, sema->builtin_concept<double>(), value, is_dynamic)
 {
 }
 
-NumberExpression::NumberExpression(Sema* sema, const long value) :
-    ConstantExpression(sema, sema->builtin_concept<long>(), value)
+NumberExpression::NumberExpression(Sema* sema, const long value, bool is_dynamic) :
+    ConstantExpression(sema, sema->builtin_concept<long>(), value, is_dynamic)
 {
 }
 
-BooleanExpression::BooleanExpression(Sema* sema, const bool value) :
-    ConstantExpression(sema, sema->builtin_concept<bool>(), value)
+BooleanExpression::BooleanExpression(Sema* sema, const bool value, bool is_dynamic) :
+    ConstantExpression(sema, sema->builtin_concept<bool>(), value, is_dynamic)
 {
 }
 
-std::variant<const Concept*, const PlaceholderFunctionParameter*> FunctionParameterExpression::get_result() const
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+FunctionParameterExpression::get_result() const
 {
     const auto param = get_param();
     if (const auto cast = utils::dyn_cast<ConcreteFunctionParameter>(param))
@@ -101,7 +102,8 @@ CallExpression::CallExpression(Sema* sema, const Function* fun, vec<s_ptr<Expres
     }
 }
 
-std::variant<const Concept*, const PlaceholderFunctionParameter*> CallExpression::get_result() const
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+CallExpression::get_result() const
 {
     const auto& result = get_function()->get_result();
     if (std::holds_alternative<const Concept*>(result))
@@ -178,10 +180,11 @@ ArithmeticExpression::ArithmeticExpression(Sema* sema, s_ptr<Expression> left, s
     }
 }
 
-std::variant<const Concept*, const PlaceholderFunctionParameter*> ArithmeticExpression::get_result() const
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+ArithmeticExpression::get_result() const
 {
-    auto left_result = left->get_result();
-    auto right_result = right->get_result();
+    const auto left_result = left->get_result();
+    const auto right_result = right->get_result();
 
     if (std::holds_alternative<const Concept*>(left_result) && std::holds_alternative<const Concept*>(right_result))
     {
@@ -210,7 +213,8 @@ LetExpression::LetExpression(Sema* sema, const std::string& identifier, s_ptr<Ex
         throw SemaError("Let expression identifier must not be empty");
 }
 
-std::variant<const Concept*, const PlaceholderFunctionParameter*> LetExpression::get_result() const
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+LetExpression::get_result() const
 {
     if (!body.empty())
     {
@@ -274,7 +278,8 @@ LetVariableReferenceExpression::LetVariableReferenceExpression(Sema* sema, const
         throw SemaError("Let variable reference bound value must not be empty");
 }
 
-std::variant<const Concept*, const PlaceholderFunctionParameter*> LetVariableReferenceExpression::get_result() const
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+LetVariableReferenceExpression::get_result() const
 {
     return bound_value->get_result();
 }
@@ -288,6 +293,22 @@ std::string LetVariableReferenceExpression::to_python() const noexcept
 {
     return utils::sanitize_python_identifier(identifier);
 }
+
+OpenBindingExpression::OpenBindingExpression(Sema* sema, unsigned int N) : Expression(sema), N(N) {}
+
+OpenBindingExpression::OpenBindingExpression(const OpenBindingExpression& other) : Expression(other), N(other.N) {}
+
+std::string OpenBindingExpression::to_cpp() const noexcept
+{
+    return std::format("cong::lang::Proj<{}>{{}}", N);
+}
+
+std::string OpenBindingExpression::to_python() const noexcept
+{
+    // TODO
+    throw std::runtime_error("not implemented");
+}
+
 
 void Expression::DebugVisitor::visitExpression(const Expression& e)
 {
@@ -407,4 +428,11 @@ void LetVariableReferenceExpression::DebugVisitor::visitExpression(const Express
 
     ss << spaces() << termcolor::cyan << "let_var(" << termcolor::reset << termcolor::blue
        << let_var_ref.get_identifier() << termcolor::reset << termcolor::cyan << ")" << termcolor::reset;
+}
+
+void OpenBindingExpression::DebugVisitor::visitExpression(const Expression& e)
+{
+    const auto& exp = dynamic_cast<const OpenBindingExpression&>(e);
+
+    ss << spaces() << termcolor::blue << "_" << exp.N << termcolor::reset;
 }

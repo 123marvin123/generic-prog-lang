@@ -8,7 +8,7 @@
 #include "Utils.h"
 #include <format>
 #include "SemaError.h"
-
+#include "OpenBinding.h"
 struct Expression : SemaElement, Introspection<Expression> {
   explicit Expression(Sema *sema) : sema(sema) {}
 
@@ -22,7 +22,10 @@ struct Expression : SemaElement, Introspection<Expression> {
   }
 
   [[nodiscard]]
-  virtual std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  virtual std::variant<
+    const Concept *,
+    const PlaceholderFunctionParameter *,
+    OpenBinding>
   get_result() const = 0;
 
   [[nodiscard]]
@@ -60,7 +63,7 @@ struct BaseConstantExpression : Expression,
       : Expression(other), resulting_concept(other.resulting_concept) {}
 
   [[nodiscard]]
-  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
   get_result() const override {
     return resulting_concept;
   }
@@ -74,9 +77,9 @@ private:
 };
 
 template <class T> struct ConstantExpression : BaseConstantExpression {
-  ConstantExpression(Sema *sema, const Concept *resulting_concept, T value)
+  ConstantExpression(Sema *sema, const Concept *resulting_concept, T value, bool is_dynamic)
       : BaseConstantExpression(sema, resulting_concept),
-        value(std::move(value)) {
+        value(std::move(value)), is_dynamic_(is_dynamic) {
     if (!resulting_concept)
       throw SemaError("Resulting concept must not be empty");
   }
@@ -84,7 +87,7 @@ template <class T> struct ConstantExpression : BaseConstantExpression {
   using value_type = T;
 
   ConstantExpression(const ConstantExpression &other)
-      : BaseConstantExpression(other), value(other.value) {}
+      : BaseConstantExpression(other), value(other.value), is_dynamic_(other.is_dynamic) {}
 
   [[nodiscard]]
   const T &eval() const {
@@ -94,6 +97,12 @@ template <class T> struct ConstantExpression : BaseConstantExpression {
   [[nodiscard]]
   T &eval() {
     return value;
+  }
+
+  [[nodiscard]]
+  bool is_dynamic() const
+  {
+    return is_dynamic_;
   }
 
   [[nodiscard]] 
@@ -112,6 +121,7 @@ template <class T> struct ConstantExpression : BaseConstantExpression {
 
 private:
   T value;
+  bool is_dynamic_;
 };
 
 struct StringExpression final : ConstantExpression<std::string> {
@@ -123,13 +133,15 @@ struct StringExpression final : ConstantExpression<std::string> {
 };
 
 struct RealExpression final : ConstantExpression<double> {
-  RealExpression(Sema *sema, double value);
+  RealExpression(Sema *sema, double value, bool is_dynamic);
 
-  static s_ptr<RealExpression> create(Sema *sema, double value) {
-    return Expression::create<RealExpression>(sema, value);
+  static s_ptr<RealExpression> create(Sema *sema, double value, bool is_dynamic) {
+    return Expression::create<RealExpression>(sema, value, is_dynamic);
   }
 
   [[nodiscard]] std::string to_cpp() const noexcept override {
+    if (is_dynamic())
+      return std::format("::cong::lang::RealDynamic{{{}}}", eval());
     return std::format("::cong::lang::RealStatic<{}>{{}}", eval());
   }
 
@@ -141,13 +153,15 @@ struct RealExpression final : ConstantExpression<double> {
 };
 
 struct NumberExpression final : ConstantExpression<long> {
-  NumberExpression(Sema *sema, long value);
+  NumberExpression(Sema *sema, long value, bool is_dynamic);
 
-  static s_ptr<NumberExpression> create(Sema *sema, long value) {
-    return Expression::create<NumberExpression>(sema, value);
+  static s_ptr<NumberExpression> create(Sema *sema, long value, bool is_dynamic) {
+    return Expression::create<NumberExpression>(sema, value, is_dynamic);
   }
 
   [[nodiscard]] std::string to_cpp() const noexcept override {
+    if (is_dynamic())
+      return std::format("::cong::lang::NaturalDynamic{{{}ul}}", eval());
     return std::format("::cong::lang::NaturalStatic<{}>{{}}", eval());
   }
 
@@ -159,15 +173,17 @@ struct NumberExpression final : ConstantExpression<long> {
 };
 
 struct BooleanExpression final : ConstantExpression<bool> {
-  BooleanExpression(Sema *sema, bool value);
+  BooleanExpression(Sema *sema, bool value, bool is_dynamic);
 
-  static s_ptr<BooleanExpression> create(Sema *sema, bool value) {
-    return Expression::create<BooleanExpression>(sema, value);
+  static s_ptr<BooleanExpression> create(Sema *sema, bool value, bool is_dynamic) {
+    return Expression::create<BooleanExpression>(sema, value, is_dynamic);
   }
 
   [[nodiscard]] std::string to_cpp() const noexcept override {
-    return std::format("::cong::lang::BooleanStatic<{}>{{}}",
-                       eval() ? "true" : "false");
+    const auto val_ = eval() ? "true" : "false";
+    if (is_dynamic())
+      return std::format("::cong::lang::BooleanDynamic{{{}}}", val_);
+    return std::format("::cong::lang::BooleanStatic<{}>{{}}", val_);
   }
 
   [[nodiscard]]
@@ -189,7 +205,7 @@ struct FunctionParameterExpression
       : Expression(other), param(other.param) {}
 
   [[nodiscard]]
-  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
   get_result() const override;
 
   [[nodiscard]]
@@ -238,7 +254,7 @@ public:
         c(other.c) {}
 
   [[nodiscard]]
-  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
   get_result() const override {
     return get_concept();
   }
@@ -271,7 +287,7 @@ struct CallExpression final : Expression, Introspection<CallExpression> {
   }
 
   [[nodiscard]]
-  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
   get_result() const override;
 
   static s_ptr<CallExpression> create(Sema *sema, const Function *fun,
@@ -302,7 +318,7 @@ struct ArithmeticExpression final : Expression,
     return Expression::create<ArithmeticExpression>(sema, left, right, op);
   }
 
-  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
   get_result() const override;
 
   [[nodiscard]]
@@ -367,7 +383,7 @@ struct LetExpression final : Expression, Introspection<LetExpression> {
   }
 
   [[nodiscard]]
-  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
   get_result() const override;
 
   static s_ptr<LetExpression> create(Sema *sema, const std::string &identifier,
@@ -409,7 +425,7 @@ struct LetVariableReferenceExpression final : Expression, Introspection<LetVaria
   }
 
   [[nodiscard]]
-  std::variant<const Concept *, const PlaceholderFunctionParameter *>
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
   get_result() const override;
 
   static s_ptr<LetVariableReferenceExpression> create(Sema *sema, const std::string &identifier,
@@ -426,6 +442,35 @@ struct LetVariableReferenceExpression final : Expression, Introspection<LetVaria
 private:
   std::string identifier;
   s_ptr<Expression> bound_value;
+};
+
+struct OpenBindingExpression final : Expression, Introspection<OpenBindingExpression>
+{
+  OpenBindingExpression(Sema *sema, unsigned int N);
+  OpenBindingExpression(const OpenBindingExpression &other);
+
+  static s_ptr<OpenBindingExpression> create(Sema *sema, int N) {
+    return Expression::create<OpenBindingExpression>(sema, N);
+  }
+
+  [[nodiscard]] std::string to_cpp() const noexcept override;
+
+  [[nodiscard]] std::string to_python() const noexcept override;
+
+  [[nodiscard]]
+  bool is_constant() const override { return true; }
+
+  [[nodiscard]]
+  std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+  get_result() const override
+  {
+    return OpenBinding{N};
+  };
+
+  struct DebugVisitor;
+
+private:
+  const unsigned int N;
 };
 
 //@section DebugVisitor
@@ -508,6 +553,14 @@ struct LetExpression::DebugVisitor final : BaseDebugVisitor {
 };
 
 struct LetVariableReferenceExpression::DebugVisitor final : BaseDebugVisitor {
+  explicit DebugVisitor(const int tabsize) : BaseDebugVisitor(tabsize) {}
+
+  void visit(const Expression &e) { visitExpression(e); }
+
+  void visitExpression(const Expression &e) override;
+};
+
+struct OpenBindingExpression::DebugVisitor final : BaseDebugVisitor {
   explicit DebugVisitor(const int tabsize) : BaseDebugVisitor(tabsize) {}
 
   void visit(const Expression &e) { visitExpression(e); }

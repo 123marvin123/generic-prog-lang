@@ -4,15 +4,35 @@ std::any ExpressionVisitor::visitLiteralExpression(CongParser::LiteralExpression
 {
     Expression* exp = nullptr;
     if (ctx->literal()->REAL())
-        exp = new RealExpression(ns->get_sema(), std::stod(ctx->literal()->REAL()->getText()));
+    {
+        exp = new RealExpression(
+            ns->get_sema(),
+            std::stod(ctx->literal()->REAL()->getText()),
+            ctx->literal()->DYNAMIC_ANNOTATOR() ? true : false);
+    }
     else if (ctx->literal()->NUMBER())
-        exp = new NumberExpression(ns->get_sema(), std::stol(ctx->literal()->NUMBER()->getText()));
+    {
+        exp = new NumberExpression(
+            ns->get_sema(),
+            std::stol(ctx->literal()->NUMBER()->getText()),
+            ctx->literal()->DYNAMIC_ANNOTATOR() ? true : false);
+    }
     else if (ctx->literal()->STRING())
-        exp = new StringExpression(ns->get_sema(), utils::cleanup_string_literal(ctx->literal()->STRING()->getText()));
+    {
+        exp = new StringExpression(
+            ns->get_sema(),
+            utils::cleanup_string_literal(ctx->literal()->STRING()->getText()));
+    }
     else if (ctx->literal()->BOOL())
-        exp = new BooleanExpression(ns->get_sema(), ctx->literal()->BOOL()->getText() == "true");
+    {
+        exp = new BooleanExpression(
+            ns->get_sema(),
+            ctx->literal()->BOOL()->getText() == "true",
+            ctx->literal()->DYNAMIC_ANNOTATOR() ? true : false);
+    }
 
-    if (exp) return utils::dyn_cast<Expression>(exp);
+    if (exp)
+        return utils::dyn_cast<Expression>(exp);
 
     throw std::runtime_error(std::format("Unknown literal type {}", ctx->getText()));
 }
@@ -116,14 +136,14 @@ std::any ExpressionVisitor::visitLetExpression(CongParser::LetExpressionContext*
     const std::string identifier = ctx->name->getText();
 
     checkNameCollision(identifier, ctx);
-    
+
     Expression* value_exp = nullptr;
-    if (const std::any value_result = visit(ctx->value); 
+    if (const std::any value_result = visit(ctx->value);
         value_result.has_value() && value_result.type() == typeid(Expression*))
         value_exp = std::any_cast<Expression*>(value_result);
     else
         throw SemaError(std::format("Could not parse let value expression for {}", identifier), ctx);
-    
+
     s_ptr<Expression> value_ptr(value_exp);
 
     vec<LetBinding> current_scope;
@@ -133,20 +153,25 @@ std::any ExpressionVisitor::visitLetExpression(CongParser::LetExpressionContext*
     vec<s_ptr<Expression>> body_expressions;
 
     auto* expr_block = ctx->body;
-    for (auto* expr_ctx : expr_block->expression()) {
+    for (auto* expr_ctx : expr_block->expression())
+    {
         if (const std::any body_result = visit(expr_ctx);
-            body_result.has_value() && body_result.type() == typeid(Expression*)) {
+            body_result.has_value() && body_result.type() == typeid(Expression*))
+        {
             auto* body_exp = std::any_cast<Expression*>(body_result);
             body_expressions.push_back(s_ptr<Expression>(body_exp));
-        } else {
+        }
+        else
+        {
             let_binding_stack.pop();
             throw SemaError(std::format("Could not parse body expression in let block for {}", identifier), expr_ctx);
         }
     }
 
     let_binding_stack.pop();
-    
-    if (body_expressions.empty()) {
+
+    if (body_expressions.empty())
+    {
         throw SemaError(std::format("Let expression body for {} cannot be empty", identifier), ctx);
     }
 
@@ -159,6 +184,17 @@ std::any ExpressionVisitor::visitLetExpression(CongParser::LetExpressionContext*
     {
         throw SemaError("Could not instantiate let expression", ctx);
     }
+}
+
+std::any ExpressionVisitor::visitOpenBindingExpression(CongParser::OpenBindingExpressionContext* context)
+{
+    // get the placeholder name from the context
+    const std::string& placeholder = context->OPEN_BINDING()->getText().substr(1);
+    const unsigned int N = std::stoul(placeholder);
+
+    return utils::dyn_cast<Expression>(
+        new OpenBindingExpression(ns->get_sema(), N)
+    );
 }
 
 void ExpressionVisitor::checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx)
@@ -203,3 +239,4 @@ opt<LetBinding> ExpressionVisitor::findLetBinding(const std::string& identifier)
     
     return std::nullopt;
 }
+

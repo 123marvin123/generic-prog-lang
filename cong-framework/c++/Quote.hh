@@ -59,4 +59,8 @@ namespace cong::lang
         };
 
     };
+
+    template <typename Exp_>
+    using Quote = intern::Exp<local::Quote<Exp_>>;
+
 };

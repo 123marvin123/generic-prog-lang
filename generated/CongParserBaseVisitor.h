@@ -86,6 +86,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitOpenBindingExpression(CongParser::OpenBindingExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitLetExpression(CongParser::LetExpressionContext *ctx) override {
     return visitChildren(ctx);
   }

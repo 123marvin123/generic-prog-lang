@@ -55,7 +55,7 @@ namespace cong::lang
             typename core::ToNonRValRef::Call<Arg_>::Type arg_;
 
         public:
-            constexpr
+            explicit constexpr
             BindArg(Arg_ arg)
                 : arg_{arg}
             {

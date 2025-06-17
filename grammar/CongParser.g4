@@ -93,6 +93,7 @@ expression
     | fun=qualifiedIdentifier LPAREN (expression (COMMA expression)*)? RPAREN # callExpression
     | param=IDENTIFIER # parameterReferenceExpression
     | LET name=IDENTIFIER ASSIGN value=expression LBRACE body=expressionBlock RBRACE # letExpression
+    | OPEN_BINDING # openBindingExpression
     ;
 
 expressionBlock
@@ -111,8 +112,8 @@ placeholder
 qualifiedIdentifier: (DOUBLE_COLON)? IDENTIFIER (DOUBLE_COLON IDENTIFIER)*;
 
 literal
-    : REAL
-    | NUMBER
+    : REAL DYNAMIC_ANNOTATOR?
+    | NUMBER DYNAMIC_ANNOTATOR?
     | STRING
-    | BOOL
+    | BOOL DYNAMIC_ANNOTATOR?
     ;

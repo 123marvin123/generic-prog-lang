@@ -36,6 +36,8 @@ LT: '<'; // For placeholders
 GT: '>'; // For placeholders
 DOUBLE_COLON: '::';
 
+OPEN_BINDING: '_' [1-9][0-9]*; // Matches _1, _2, etc. for open bindings
+DYNAMIC_ANNOTATOR: '_d';
 
 REAL
     : '0' '.' [0-9]+

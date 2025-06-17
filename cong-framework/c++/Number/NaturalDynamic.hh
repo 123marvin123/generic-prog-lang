@@ -15,7 +15,7 @@ namespace cong::lang {
             using typename Base_::Native;
         public:
 
-            explicit constexpr
+            constexpr
             NaturalDynamic(Native native = 0)
             : Base_{native}
             {}

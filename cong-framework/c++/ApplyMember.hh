@@ -10,7 +10,7 @@
 #define CONG_LANG_INTERN_APPLYMEMBER_DEFAULT \
 CONG_LANG_CORE_FUN_PROPAGATE \
 (ApplyMember, \
-(Spec__,Offset_),(), \
+(Spec__,Offset_,Dummy_ = void),(), \
 ( \
 (Base__, (typename Base_::template ApplyMember<Spec__, Offset_>)) \
 ), \
@@ -31,11 +31,12 @@ Base__ \
   template <typename...>
 
 #define CONG_LANG_INTERN_APPLYMEMBER(PAREN_CLASS_, Ns_, Name_, OFFSET_, ARITY_, PAREN_TYPE_, IMPL_) \
-  template<> \
+  template<typename Dummy_> \
   struct CONG_LANG_CORE_INTERN_UNPAREN(PAREN_CLASS_)::ApplyMember \
   < \
     Ns_ :: CONG_LANG_CORE_INTERN_PASTE(Spec, Name_), \
-    ::cong::lang::core::NaturalStatic<OFFSET_> \
+    ::cong::lang::core::NaturalStatic<OFFSET_>, \
+    Dummy_ \
   > \
   { \
   private: \

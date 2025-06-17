@@ -35,6 +35,8 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitLetExpression(CongParser::LetExpressionContext* ctx) override;
 
+    std::any visitOpenBindingExpression(CongParser::OpenBindingExpressionContext *context) override;
+
 private:
     Namespace* ns;
     Function* fun;

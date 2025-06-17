@@ -19,9 +19,9 @@ public:
     GENERICIMPL = 6, REQUIRES = 7, TIME = 8, SPACE = 9, LANG = 10, LBRACE = 11, 
     RBRACE = 12, VARARGS = 13, LPAREN = 14, RPAREN = 15, COLON = 16, SEMI = 17, 
     AMP = 18, ARROW = 19, COMMA = 20, ASSIGN = 21, PLUS = 22, MINUS = 23, 
-    MUL = 24, DIV = 25, MOD = 26, LT = 27, GT = 28, DOUBLE_COLON = 29, REAL = 30, 
-    BOOL = 31, NUMBER = 32, STRING = 33, IDENTIFIER = 34, WHITESPACE = 35, 
-    COMMENT = 36, LINE_COMMENT = 37, OTHER = 38
+    MUL = 24, DIV = 25, MOD = 26, LT = 27, GT = 28, DOUBLE_COLON = 29, OPEN_BINDING = 30, 
+    DYNAMIC_ANNOTATOR = 31, REAL = 32, BOOL = 33, NUMBER = 34, STRING = 35, 
+    IDENTIFIER = 36, WHITESPACE = 37, COMMENT = 38, LINE_COMMENT = 39, OTHER = 40
   };
 
   enum {
@@ -389,6 +389,15 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  OpenBindingExpressionContext : public ExpressionContext {
+  public:
+    OpenBindingExpressionContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *OPEN_BINDING();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  LetExpressionContext : public ExpressionContext {
   public:
     LetExpressionContext(ExpressionContext *ctx);
@@ -514,6 +523,7 @@ public:
     LiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *REAL();
+    antlr4::tree::TerminalNode *DYNAMIC_ANNOTATOR();
     antlr4::tree::TerminalNode *NUMBER();
     antlr4::tree::TerminalNode *STRING();
     antlr4::tree::TerminalNode *BOOL();

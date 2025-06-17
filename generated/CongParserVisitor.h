@@ -56,6 +56,8 @@ public:
 
     virtual std::any visitCallExpression(CongParser::CallExpressionContext *context) = 0;
 
+    virtual std::any visitOpenBindingExpression(CongParser::OpenBindingExpressionContext *context) = 0;
+
     virtual std::any visitLetExpression(CongParser::LetExpressionContext *context) = 0;
 
     virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *context) = 0;
