@@ -23,8 +23,8 @@ struct Concept final : SemaIdentifier, Introspection<Concept>
 
     using OperationTable = std::map<Operator, std::map<const Concept*, std::map<const Concept*, OperationResult>>>;
 
-    Concept(std::string, const Namespace*);
-    Concept(std::string, Namespace*, const std::set<const Concept*>&);
+    Concept(std::string, const Namespace*, bool export_ = true);
+    Concept(std::string, Namespace*, const std::set<const Concept*>&, bool export_ = true);
 
     void extend_bases(const std::set<const Concept*>&);
 
@@ -42,6 +42,9 @@ struct Concept final : SemaIdentifier, Introspection<Concept>
     {
         this->description = std::move(desc);
     }
+
+    [[nodiscard]]
+    bool export_enabled() const { return export_; }
 
     [[nodiscard]]
     opt<std::string_view> get_description() const
@@ -62,6 +65,7 @@ protected:
     std::set<const Concept*> bases;
     opt<std::string> description = std::nullopt;
     static OperationTable operation_table;
+    bool export_ = true;
 };
 
 struct Concept::DebugVisitor final : BaseDebugVisitor

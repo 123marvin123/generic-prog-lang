@@ -9,13 +9,13 @@ struct Dec{{ Name_ }} {
     using Params = ::cong::lang::core::Tuple<
     {%- for param in def.params -%}
         {%- if param.type == "placeholder_function_parameter" or param.type == "dependent_function_parameter" %}
-{{ ConceptObject.ns | join('::') }}::Concept{{ ConceptObject.name }}
+{{ prefix_concept(ConceptObject.full_name, "Concept") }}
         {%- else %}
-{{ param.concept.ns | join('::') }}::Concept{{ param.concept.name }}
+{{ prefix_concept(param.concept.full_name, "Concept") }}
         {%- endif %}{{', ' if loop.nextitem is defined }}
     {%- endfor -%}>;
 
-    using ReturnConcept = {{ def.result.ns | join('::') }}::Concept{{ def.result.name }};
+    using ReturnConcept = {{ prefix_concept(def.result.full_name, "Concept") }};
 
 };
 

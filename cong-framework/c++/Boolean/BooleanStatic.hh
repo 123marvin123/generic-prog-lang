@@ -5,6 +5,13 @@
 #include "../Exp.hh"
 
 #include "core/Boolean.hh"
+#include "core/BooleanStatic.hh"
+#include "../Number/core/NaturalStatic.hh"
+
+#include "not__dec.hh"
+#include "or__dec.hh"
+#include "and__dec.hh"
+#include "xor__dec.hh"
 
 namespace cong::lang {
 	namespace local {
@@ -16,7 +23,12 @@ namespace cong::lang {
   		public:
     		CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
   		};
-	};
+
+#define CONCEPT_ Boolean
+#define STAGE_ Static
+#define DIR_ Boolean
+#include "../ApplyMember_operator.hh"
+	}
 
 	template <core::Boolean value_>
 	using BooleanStatic = intern::Exp<local::BooleanStatic<core::Boolean, value_>>;

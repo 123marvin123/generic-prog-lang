@@ -95,7 +95,7 @@ std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContex
     }
     catch (const SemaError& e)
     {
-        throw SemaError("Could not instantiate function call expression", ctx);
+        throw SemaError(std::format("Could not instantiate function call expression: {}", e.what()), ctx);
     }
 
 }
@@ -192,9 +192,29 @@ std::any ExpressionVisitor::visitOpenBindingExpression(CongParser::OpenBindingEx
     const std::string& placeholder = context->OPEN_BINDING()->getText().substr(1);
     const unsigned int N = std::stoul(placeholder);
 
-    return utils::dyn_cast<Expression>(
-        new OpenBindingExpression(ns->get_sema(), N)
-    );
+    return utils::dyn_cast<Expression>(new OpenBindingExpression(ns->get_sema(), N));
+}
+
+std::any ExpressionVisitor::visitQuoteExpression(CongParser::QuoteExpressionContext* context)
+{
+    if (const std::any result = visit(context->expression()); result.has_value() && result.type() == typeid(Expression*))
+    {
+        auto* value_exp = std::any_cast<Expression*>(result);
+        return utils::dyn_cast<Expression>(new QuoteExpression(sema, s_ptr<Expression>(value_exp)));
+    }
+
+    throw SemaError("Could not instantiate inner quote expression");
+}
+
+std::any ExpressionVisitor::visitEvalExpression(CongParser::EvalExpressionContext* context)
+{
+    if (const std::any result = visit(context->expression()); result.has_value() && result.type() == typeid(Expression*))
+    {
+        auto* value_exp = std::any_cast<Expression*>(result);
+        return utils::dyn_cast<Expression>(new EvalExpression(sema, s_ptr<Expression>(value_exp)));
+    }
+
+    throw SemaError("Could not instantiate inner eval expression");
 }
 
 void ExpressionVisitor::checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx)

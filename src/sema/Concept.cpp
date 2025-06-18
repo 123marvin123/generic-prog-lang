@@ -3,14 +3,15 @@
 #include <utility>
 #include "sema/Namespace.h"
 
-Concept::Concept(std::string name, const Namespace* ns) :
-    SemaIdentifier(std::move(name), ns)
+Concept::Concept(std::string name, const Namespace* ns, bool export_) :
+    SemaIdentifier(std::move(name), ns), export_(export_)
 {
     if (get_identifier().empty()) throw SemaError("Name must not be empty");
 }
 
-Concept::Concept(std::string name, Namespace* ns, const std::set<const Concept*>& bases) :
-    Concept(std::move(name), ns)
+Concept::Concept(std::string name, Namespace* ns, const std::set<const Concept*>& bases, 
+                bool export_) :
+    Concept(std::move(name), ns, export_)
 {
     this->bases = bases;
 }

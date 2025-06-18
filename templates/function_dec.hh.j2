@@ -7,9 +7,8 @@
 #include "Traits.hh"
 #include "Decls.hh"
 #include "Seq/core/Tuple.hh"
-#include "Number/core/NaturalStatic.hh"
 
-{% set ConceptObject = get_concept("object::Object") %}
+{% set ConceptObject = get_concept("Object::Object") %}
 
 {% set ObjectPrefix = ConceptObject.ns | join('/') -%}
 {%- if ObjectPrefix | length > 0 -%}

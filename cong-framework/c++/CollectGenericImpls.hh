@@ -3,12 +3,8 @@
 #include <limits>
 #include <stdexcept>
 #include <tuple>
-#include <type_traits>
-#include <utility>
 #include <variant>
 #include "Boolean/core/Boolean.hh"
-#include "Object/ObjectStatic.hh"
-#include "Object/ObjectDynamic.hh"
 #include "Seq/core/Tuple.hh"
 #include "Undefined.hh"
 
@@ -214,15 +210,15 @@ namespace cong::lang::intern
                 Exp_, TupleOfExp_>::Type;
 
             static_assert(
-                core::Truthy::Call<typename IsStatic<typename ImplA_::template Call<
+                core::Truthy::Call<typename core::IsStatic<typename ImplA_::template Call<
                     Exp_, TupleOfExp_>::Type>::Type>::call(), "Impl_ must return a static result");
-            static_assert(core::Truthy::Call<typename IsStatic<ATime_>::Type>::call(),
+            static_assert(core::Truthy::Call<typename core::IsStatic<ATime_>::Type>::call(),
                           "Impl_ must return a static time complexity");
 
             static_assert(
-                core::Truthy::Call<typename IsStatic<typename ImplB_::template Call<
+                core::Truthy::Call<typename core::IsStatic<typename ImplB_::template Call<
                     Exp_, TupleOfExp_>::Type>::Type>::call(), "Other_ must return a static result");
-            static_assert(core::Truthy::Call<typename IsStatic<BTime_>::Type>::call(),
+            static_assert(core::Truthy::Call<typename core::IsStatic<BTime_>::Type>::call(),
                           "Other_ must return a static time complexity");
 
         public:
@@ -270,7 +266,7 @@ namespace cong::lang::intern
         {
         private:
             using NextTuple_ = std::conditional_t<
-                core::Truthy::Call<typename IsStatic<typename Impl_::template Call<
+                core::Truthy::Call<typename core::IsStatic<typename Impl_::template Call<
                     Exp_, TupleOfExp_>::Type>::Type>::call(),
                 typename PrependElement<Impl_, CurrentTuple_>::Type,
                 CurrentTuple_
@@ -315,7 +311,7 @@ namespace cong::lang::intern
         private:
             using Impl_ = typename std::tuple_element<0, TupleRemainingImpls_>::type;
             using Remaining_ = std::conditional_t<
-                core::Falsy::Call<typename IsStatic<typename Impl_::template Call<
+                core::Falsy::Call<typename core::IsStatic<typename Impl_::template Call<
                     Exp_, TupleOfExp_>::Type>::Type>::call(),
                 typename PrependElement<Impl_, TupleDynamicImpls_>::Type,
                 TupleDynamicImpls_

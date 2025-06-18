@@ -24,7 +24,10 @@ struct PlaceholderFunctionParameter;
 struct ConcreteFunctionParameter;
 struct Function;
 struct Sema;
+
 struct Object;
+struct Map;
+
 struct Expression;
 
 struct GenericImplementation;
@@ -35,5 +38,6 @@ enum class Operator
     MUL,
     DIV,
     SUB,
-    MOD
+    MOD,
+    POW
 };

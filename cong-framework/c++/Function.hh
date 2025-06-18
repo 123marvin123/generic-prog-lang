@@ -6,7 +6,7 @@
 #include "Seq/core/Tuple.hh"
 #include "Number/core/NaturalIntervalStatic.hh"
 #include "Number/core/NaturalStatic.hh"
-#include "Boolean/BooleanStatic.hh"
+#include "Boolean/core/BooleanStatic.hh"
 
 #include "CollectGenericImpls.hh"
 #include "Fun.hh"
@@ -46,7 +46,7 @@ namespace cong::lang
 
                     using SuccIsStatic_ = std::conditional_t<
                         std::is_same_v<typename SuccReq_::Present, core::True>,
-                        typename IsStatic<typename SuccReq_::template Call<Args...>::Type >::Type,
+                        typename core::IsStatic<typename SuccReq_::template Call<Args...>::Type >::Type,
                         core::False
                     >;
 
@@ -74,7 +74,7 @@ namespace cong::lang
 
                     using SuccIsStatic_ = std::conditional_t<
                         std::is_same_v<typename SuccReq_::Present, core::True>,
-                        typename IsStatic<typename SuccReq_::template Call<Args...>::Type >::Type,
+                        typename core::IsStatic<typename SuccReq_::template Call<Args...>::Type >::Type,
                         core::False
                     >;
 
@@ -98,7 +98,8 @@ namespace cong::lang
                 typename Dec_::template Requirement<core::Zero>::Present,
                 std::conditional_t<
                     std::is_same_v<typename Dec_::template Requirement<core::Zero>::Present, core::True>,
-                    typename IsStatic<typename Dec_::template Requirement<core::Zero>::template Call<Args...>::Type >::Type,
+                    typename core::IsStatic<typename Dec_::template Requirement<core::Zero>::template Call<Args...>::Type
+                     >::Type,
                     core::False
                 >,
                 Dec_, Args...>

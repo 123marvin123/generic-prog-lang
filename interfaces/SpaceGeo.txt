@@ -1,0 +1,167 @@
+namespace SpaceGeo {
+    concept SpaceGeo (description: "geometric = Cartesian space") : Object::Object;
+    concept Ray : Object::Object;
+
+    fun isLinear(space_: Set::Set) -> Boolean::Boolean {
+        description { "is space_ a linear space?" }
+    }
+
+    fun scalar(space_: Set::Set) -> Object::Object {
+      description {
+        "scalar field of space_"
+      }
+      requires { isLinear(space_) }
+    }
+
+    fun dim(space_: Set::Set) -> Number::Natural {
+      description {
+        "dimension of space_"
+      }
+      requires { isLinear(space_) }
+    }
+
+    fun mulScalar(s: Object::Object, v: Object::Object, space_: Set::Set) -> Object::Object {
+      description {
+        "linear product of scalar p(1) and vector p(2) in space_"
+      }
+      //requires { Set::hasElement(scalar(space_), s) }
+      requires { Set::hasElement(space_, v) }
+      requires { isLinear(space_) }
+    }
+
+    fun isBasis(seq: Seq::Seq, space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a basis of space_"
+      }
+      requires { isLinear(space_) }
+      requires { Set::hasElement(space_, Seq::item(seq)) }
+    }
+
+    fun vectorForLinComb(coords: Seq::Seq, basis: Seq::Seq, space_: Set::Set) -> Object::Object {
+      description {
+        "vector given by linear combination of sequence of coordinates p(1) and basis p(2) in space_"
+      }
+      requires { isLinear(space_) }
+      //requires { Set::hasElement(scalar(space_), Seq::item(coords)) }
+      requires { isBasis(basis, space_) }
+    }
+
+    fun vector(point: Set::Set) -> Matrix::Matrix {
+      description {
+        "vector from origin to p(1)"
+      }
+    }
+
+    fun seqOfCoord(vector: Object::Object, p2: Seq::Seq, p3: Set::Set) -> Seq::Seq {
+      description {
+        "sequence of coordinates of vector p(1) with respect to basis p(2) in p(3)"
+      }
+    }
+
+    fun isLinearTopological(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a linear topological space?"
+      }
+    }
+
+    fun isMetric(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a metric space?"
+      }
+    }
+
+    fun distance(p1: Object::Object, p2: Object::Object, space_: Set::Set) -> Number::Real {
+      description {
+        "distance of p(1) and p(2) in p(3)"
+      }
+      requires { Set::hasElement(space_, p1) }
+      requires { Set::hasElement(space_, p2) }
+      requires { isMetric(space_) }
+    }
+
+    fun isComplete(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a complete space?"
+      }
+    }
+
+    fun isNormed(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a normed space?"
+      }
+    }
+
+    fun norm(vector: Object::Object, space_: Set::Set) -> Number::Real {
+      description {
+        "norm of p(1) in p(2)"
+      }
+      requires { Set::hasElement(space_, vector) }
+      requires { isNormed(space_) }
+    }
+
+    fun isBanachian(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a Banach space (normed and complete)?"
+      }
+    }
+
+    fun isPreHilbertian(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a pre-Hilbert space (having an inner product)?"
+      }
+    }
+
+    fun mulInner(v1: Object::Object, v2: Object::Object, space_: Set::Set) -> Object::Object {
+      description {
+        "inner product of p(1) and p(2) in p(3)"
+      }
+      requires { Set::hasElement(space_, v1) }
+      requires { Set::hasElement(space_, v2) }
+      requires { isPreHilbertian(space_) }
+    }
+
+    fun isOrthogonal(v1: Object::Object, v2: Object::Object, space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) orthogonal to p(2) in p(3)?"
+      }
+      requires { Set::hasElement(space_, v1) }
+      requires { Set::hasElement(space_, v2) }
+      requires { isPreHilbertian(space_) }
+    }
+
+    fun isHilbertian(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a Hilbert space (inner product and complete)?"
+      }
+    }
+
+    fun isEuclidean(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a Euclidean space?"
+      }
+    }
+
+    fun isCartesian(space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a Cartesian space?"
+      }
+    }
+
+    fun isPoly(poly: Set::Set, space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) a polytope (boundary piecewise linear)?"
+      }
+    }
+
+    fun isConvex(set: Set::Set, space_: Set::Set) -> Boolean::Boolean {
+      description {
+        "is p(1) convex?"
+      }
+    }
+
+    fun center(set: Set::Set) -> Object::Object {
+      description {
+        "point at which the barycenter of p(1) is located"
+      }
+    }
+}

@@ -68,6 +68,8 @@ vec<std::filesystem::path> JinjaPythonExport::process()
     // Konzepte exportieren
     for (const Concept* c : get_concepts())
     {
+        if(!c->export_enabled()) continue;
+
         std::filesystem::path current_path = base_output_folder;
         // Namespace-Ordner erstellen
         for (const auto& ns_part : c->get_namespace()->namespace_chain())
@@ -104,6 +106,8 @@ vec<std::filesystem::path> JinjaPythonExport::process()
     // Funktionen exportieren
     for (const Function* f : get_functions())
     {
+        if(!f->export_enabled()) continue;
+
         std::filesystem::path current_path = base_output_folder;
         // Namespace-Ordner erstellen
         for (const auto& ns_part : f->get_namespace()->namespace_chain())

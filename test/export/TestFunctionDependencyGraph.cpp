@@ -32,7 +32,7 @@ TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Linear dependencies are sorted
     const auto B = *Sema::create_function<ConcreteFunction>(sema_ptr, "B", sema_ptr, boolean);
     const auto C = *Sema::create_function<ConcreteFunction>(sema_ptr, "C", sema_ptr, boolean);
 
-    A->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true)));
+    A->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true, false)));
     B->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, A, {})));
     C->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, B, {})));
     INFO("Created linear dependency chain: C -> B -> A");
@@ -75,8 +75,8 @@ TEST_CASE_METHOD(FunctionDependencyGraphFixture, "Complex dependencies are sorte
     auto* D = *Sema::create_function<ConcreteFunction>(sema_ptr, "D", sema_ptr, boolean);
     auto* E = *Sema::create_function<ConcreteFunction>(sema_ptr, "E", sema_ptr, boolean);
 
-    X->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true)));
-    Y->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true)));
+    X->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true, false)));
+    Y->add_generic_implementation(GenericImplementation(BooleanExpression::create(sema_ptr, true, false)));
 
     A->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, X, {})));
     B->add_generic_implementation(GenericImplementation(CallExpression::create(sema_ptr, Y, {})));

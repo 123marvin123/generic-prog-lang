@@ -106,4 +106,8 @@ namespace cong::lang {
         };
     };
     }
+
+    struct StaticTag {};
+
+
 }

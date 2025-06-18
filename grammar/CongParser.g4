@@ -88,12 +88,14 @@ parameter
     ;
 
 expression
-    : left=expression op=(PLUS | MINUS | MUL | DIV | MOD) right=expression # arithmeticExpression
+    : left=expression op=(PLUS | MINUS | MUL | DIV | MOD | POW) right=expression # arithmeticExpression
     | val=literal # literalExpression
     | fun=qualifiedIdentifier LPAREN (expression (COMMA expression)*)? RPAREN # callExpression
     | param=IDENTIFIER # parameterReferenceExpression
     | LET name=IDENTIFIER ASSIGN value=expression LBRACE body=expressionBlock RBRACE # letExpression
     | OPEN_BINDING # openBindingExpression
+    | QUOTE LPAREN expression RPAREN # quoteExpression
+    | EVAL LPAREN expression RPAREN # evalExpression
     ;
 
 expressionBlock

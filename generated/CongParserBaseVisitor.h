@@ -94,6 +94,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitQuoteExpression(CongParser::QuoteExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitEvalExpression(CongParser::EvalExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -1,0 +1,11 @@
+
+namespace Object {
+    fun isModelOf(p1: <T>, p2: <K>) -> Boolean::Boolean {
+        description { "does object p(1) model concept p(2)?" }
+    }
+
+    fun assign(p1: <T>, p2: T) -> T {
+        description { "p(2) (the second argument) - side effect: if p(1) is modifiable, it will also have the value of p(2)" }
+    }
+
+}

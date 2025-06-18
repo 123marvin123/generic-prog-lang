@@ -67,7 +67,7 @@ namespace utils
 
     std::string_view get_string_for_operator(Operator op);
 
-    std::string_view get_function_for_operator(const Sema* sema, Operator op);
+    const Function* get_function_for_operator(const Sema* sema, Operator op);
 
     void print_jinja2_error(const jinja2::ErrorInfo& info, const std::string& msg = "");
 

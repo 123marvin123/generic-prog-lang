@@ -58,4 +58,30 @@ void LangExport::setup_environment()
                       },
                       jinja2::ArgInfo{"str1", true},
                       jinja2::ArgInfo{"str2", true}));
+
+    env.AddGlobal("prefix_concept", jinja2::MakeCallable(
+        [this](const std::string& fqi, const std::string& prefix)
+        {
+            auto fqi_info = utils::split_fully_qualified_identifier(fqi);
+            if (const auto& res = utils::resolve_fully_qualified_identifier<Concept>(fqi_info, get_sema()); res.has_value())
+            {
+                std::stringstream ss;
+                ss << "";
+                std::string separator;
+                for (const auto& ns : (*res)->get_namespace()->namespace_chain())
+                {
+                    ss << separator << ns->get_identifier();
+                    separator = "::";
+                }
+
+                if (!(*res)->get_namespace()->namespace_chain().empty())
+                    ss << "::";
+                ss << prefix << (*res)->get_identifier();
+                return ss.str();
+            }
+
+            throw std::runtime_error(std::format("FQI {} not found", fqi));
+        },
+        jinja2::ArgInfo{"fqi", true},
+        jinja2::ArgInfo{"prefix", true}));
 }

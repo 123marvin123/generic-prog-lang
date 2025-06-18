@@ -30,7 +30,8 @@ opt<Operator> utils::get_operator_for_string(std::string_view s)
         {"-", Operator::SUB},
         {"*", Operator::MUL},
         {"/", Operator::DIV},
-        {"%", Operator::MOD}
+        {"%", Operator::MOD},
+        {"^", Operator::POW}
     };
 
     if (op_map.contains(s))
@@ -38,20 +39,22 @@ opt<Operator> utils::get_operator_for_string(std::string_view s)
     return std::nullopt;
 }
 
-std::string_view utils::get_function_for_operator(const Sema* sema, const Operator op)
+const Function* utils::get_function_for_operator(const Sema* sema, const Operator op)
 {
     switch (op)
     {
     case Operator::ADD:
-        return sema->builtin_function<Operator::ADD>()->get_identifier();
+        return sema->builtin_function<Operator::ADD>();
     case Operator::SUB:
-        return sema->builtin_function<Operator::SUB>()->get_identifier();
+        return sema->builtin_function<Operator::SUB>();
     case Operator::MUL:
-        return sema->builtin_function<Operator::MUL>()->get_identifier();
+        return sema->builtin_function<Operator::MUL>();
     case Operator::DIV:
-        return sema->builtin_function<Operator::DIV>()->get_identifier();
+        return sema->builtin_function<Operator::DIV>();
     case Operator::MOD:
-        return sema->builtin_function<Operator::MOD>()->get_identifier();
+        return sema->builtin_function<Operator::MOD>();
+    case Operator::POW:
+        return sema->builtin_function<Operator::POW>();
     default:
         throw std::runtime_error("Invalid operator");
     }
@@ -80,6 +83,7 @@ std::string_view utils::get_string_for_operator(const Operator op)
     case Operator::MUL: return "*";
     case Operator::DIV: return "/";
     case Operator::MOD: return "%";
+    case Operator::POW: return "^";
     default: throw std::runtime_error("Invalid operator");
     }
 }

@@ -23,7 +23,8 @@ struct Sema final : DefaultNamespace
     opt<Concept*> create_concept(
         Namespace* ns,
         const std::string& name,
-        opt<std::set<const Concept*>> bases = std::nullopt);
+        opt<std::set<const Concept*>> bases = std::nullopt,
+        bool export_ = true);
 
     [[nodiscard]]
     static
@@ -55,15 +56,36 @@ private:
     void register_builtin_functions();
     void register_builtin_operators();
 
-    const Concept* object_concept;
-    const Concept* string_concept;
-    const Concept* boolean_concept;
-    const Concept* real_concept;
-    const Concept* number_concept;
+    Concept* object_concept;
+    Concept* string_concept;
+    Concept* boolean_concept;
+    Concept* map_concept;
 
-    const Function* add_function;
-    const Function* sub_function;
-    const Function* mod_function;
-    const Function* mul_function;
-    const Function* div_function;
+    Concept* ordered_concept;
+
+    Concept* number_concept;
+    Concept* natural_concept;
+    Concept* cardinal_concept;
+    Concept* integer_concept;
+    Concept* rational_concept;
+    Concept* real_concept;
+    Concept* complex_concept;
+
+    Function* add_function;
+    Function* sub_function;
+    Function* mod_function;
+    Function* mul_function;
+    Function* div_function;
+    Function* succ_function;
+    Function* pred_function;
+    Function* pow_function;
+
+    Function* not_function;
+    Function* or_function;
+    Function* xor_function;
+    Function* and_function;
+
+    Function* isEqual_function;
+    Function* isNotEqual_function;
+    Function* id_function;
 };

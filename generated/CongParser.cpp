@@ -64,21 +64,23 @@ void congparserParserInitialize() {
     },
     std::vector<std::string>{
       "", "'concept'", "'fun'", "'namespace'", "'let'", "'description'", 
-      "'generic'", "'requires'", "'time'", "'space'", "'lang'", "'{'", "'}'", 
-      "'...'", "'('", "')'", "':'", "';'", "'&'", "'->'", "','", "'='", 
-      "'+'", "'-'", "'*'", "'/'", "'%'", "'<'", "'>'", "'::'", "", "'_d'"
+      "'generic'", "'requires'", "'time'", "'space'", "'lang'", "'quote'", 
+      "'eval'", "'{'", "'}'", "'...'", "'('", "')'", "':'", "';'", "'&'", 
+      "'->'", "','", "'='", "'+'", "'-'", "'*'", "'/'", "'%'", "'^'", "'<'", 
+      "'>'", "'::'", "", "'_d'"
     },
     std::vector<std::string>{
       "", "CONCEPT", "FUNCTION", "NAMESPACE", "LET", "DESCRIPTION", "GENERICIMPL", 
-      "REQUIRES", "TIME", "SPACE", "LANG", "LBRACE", "RBRACE", "VARARGS", 
-      "LPAREN", "RPAREN", "COLON", "SEMI", "AMP", "ARROW", "COMMA", "ASSIGN", 
-      "PLUS", "MINUS", "MUL", "DIV", "MOD", "LT", "GT", "DOUBLE_COLON", 
-      "OPEN_BINDING", "DYNAMIC_ANNOTATOR", "REAL", "BOOL", "NUMBER", "STRING", 
-      "IDENTIFIER", "WHITESPACE", "COMMENT", "LINE_COMMENT", "OTHER"
+      "REQUIRES", "TIME", "SPACE", "LANG", "QUOTE", "EVAL", "LBRACE", "RBRACE", 
+      "VARARGS", "LPAREN", "RPAREN", "COLON", "SEMI", "AMP", "ARROW", "COMMA", 
+      "ASSIGN", "PLUS", "MINUS", "MUL", "DIV", "MOD", "POW", "LT", "GT", 
+      "DOUBLE_COLON", "OPEN_BINDING", "DYNAMIC_ANNOTATOR", "REAL", "BOOL", 
+      "NUMBER", "STRING", "IDENTIFIER", "WHITESPACE", "COMMENT", "LINE_COMMENT", 
+      "OTHER"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,40,275,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,43,285,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,
   	14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,1,0,5,0,42,8,0,10,
   	0,12,0,45,9,0,1,0,1,0,1,1,1,1,1,1,3,1,52,8,1,1,2,1,2,1,2,1,2,1,2,1,2,
@@ -93,81 +95,84 @@ void congparserParserInitialize() {
   	11,1,12,1,12,1,12,1,12,1,12,1,12,1,12,1,12,5,12,182,8,12,10,12,12,12,
   	185,9,12,3,12,187,8,12,1,12,1,12,1,13,1,13,1,13,1,13,1,14,1,14,1,14,1,
   	14,1,14,1,14,1,14,5,14,202,8,14,10,14,12,14,205,9,14,3,14,207,8,14,1,
-  	14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,3,14,221,8,
-  	14,1,14,1,14,1,14,5,14,226,8,14,10,14,12,14,229,9,14,1,15,1,15,1,15,5,
-  	15,234,8,15,10,15,12,15,237,9,15,1,15,1,15,1,16,1,16,3,16,243,8,16,1,
-  	17,1,17,1,17,1,17,1,18,3,18,250,8,18,1,18,1,18,1,18,5,18,255,8,18,10,
-  	18,12,18,258,9,18,1,19,1,19,3,19,262,8,19,1,19,1,19,3,19,266,8,19,1,19,
-  	1,19,1,19,3,19,271,8,19,3,19,273,8,19,1,19,0,1,28,20,0,2,4,6,8,10,12,
-  	14,16,18,20,22,24,26,28,30,32,34,36,38,0,2,1,0,11,12,1,0,22,26,291,0,
-  	43,1,0,0,0,2,51,1,0,0,0,4,53,1,0,0,0,6,67,1,0,0,0,8,76,1,0,0,0,10,87,
-  	1,0,0,0,12,94,1,0,0,0,14,129,1,0,0,0,16,134,1,0,0,0,18,142,1,0,0,0,20,
-  	144,1,0,0,0,22,171,1,0,0,0,24,173,1,0,0,0,26,190,1,0,0,0,28,220,1,0,0,
-  	0,30,235,1,0,0,0,32,242,1,0,0,0,34,244,1,0,0,0,36,249,1,0,0,0,38,272,
-  	1,0,0,0,40,42,3,2,1,0,41,40,1,0,0,0,42,45,1,0,0,0,43,41,1,0,0,0,43,44,
-  	1,0,0,0,44,46,1,0,0,0,45,43,1,0,0,0,46,47,5,0,0,1,47,1,1,0,0,0,48,52,
-  	3,4,2,0,49,52,3,8,4,0,50,52,3,10,5,0,51,48,1,0,0,0,51,49,1,0,0,0,51,50,
-  	1,0,0,0,52,3,1,0,0,0,53,54,5,1,0,0,54,60,5,36,0,0,55,56,5,14,0,0,56,57,
-  	5,5,0,0,57,58,5,16,0,0,58,59,5,35,0,0,59,61,5,15,0,0,60,55,1,0,0,0,60,
-  	61,1,0,0,0,61,63,1,0,0,0,62,64,3,6,3,0,63,62,1,0,0,0,63,64,1,0,0,0,64,
-  	65,1,0,0,0,65,66,5,17,0,0,66,5,1,0,0,0,67,68,5,16,0,0,68,73,3,36,18,0,
-  	69,70,5,18,0,0,70,72,3,36,18,0,71,69,1,0,0,0,72,75,1,0,0,0,73,71,1,0,
-  	0,0,73,74,1,0,0,0,74,7,1,0,0,0,75,73,1,0,0,0,76,77,5,3,0,0,77,78,5,36,
-  	0,0,78,82,5,11,0,0,79,81,3,2,1,0,80,79,1,0,0,0,81,84,1,0,0,0,82,80,1,
-  	0,0,0,82,83,1,0,0,0,83,85,1,0,0,0,84,82,1,0,0,0,85,86,5,12,0,0,86,9,1,
-  	0,0,0,87,88,5,2,0,0,88,89,5,36,0,0,89,90,3,20,10,0,90,91,5,19,0,0,91,
-  	92,3,36,18,0,92,93,3,12,6,0,93,11,1,0,0,0,94,98,5,11,0,0,95,97,3,14,7,
-  	0,96,95,1,0,0,0,97,100,1,0,0,0,98,96,1,0,0,0,98,99,1,0,0,0,99,101,1,0,
-  	0,0,100,98,1,0,0,0,101,102,5,12,0,0,102,13,1,0,0,0,103,104,5,5,0,0,104,
-  	105,5,11,0,0,105,106,3,38,19,0,106,107,5,12,0,0,107,130,1,0,0,0,108,109,
-  	5,6,0,0,109,119,3,24,12,0,110,111,4,7,0,1,111,112,5,11,0,0,112,113,3,
-  	16,8,0,113,114,5,12,0,0,114,120,1,0,0,0,115,116,5,11,0,0,116,117,3,28,
-  	14,0,117,118,5,12,0,0,118,120,1,0,0,0,119,110,1,0,0,0,119,115,1,0,0,0,
-  	120,130,1,0,0,0,121,123,5,7,0,0,122,124,5,36,0,0,123,122,1,0,0,0,123,
-  	124,1,0,0,0,124,125,1,0,0,0,125,126,5,11,0,0,126,127,3,28,14,0,127,128,
-  	5,12,0,0,128,130,1,0,0,0,129,103,1,0,0,0,129,108,1,0,0,0,129,121,1,0,
-  	0,0,130,15,1,0,0,0,131,133,3,18,9,0,132,131,1,0,0,0,133,136,1,0,0,0,134,
-  	132,1,0,0,0,134,135,1,0,0,0,135,17,1,0,0,0,136,134,1,0,0,0,137,138,5,
-  	11,0,0,138,139,3,16,8,0,139,140,5,12,0,0,140,143,1,0,0,0,141,143,8,0,
-  	0,0,142,137,1,0,0,0,142,141,1,0,0,0,143,19,1,0,0,0,144,153,5,14,0,0,145,
-  	150,3,26,13,0,146,147,5,20,0,0,147,149,3,26,13,0,148,146,1,0,0,0,149,
-  	152,1,0,0,0,150,148,1,0,0,0,150,151,1,0,0,0,151,154,1,0,0,0,152,150,1,
-  	0,0,0,153,145,1,0,0,0,153,154,1,0,0,0,154,155,1,0,0,0,155,156,5,15,0,
-  	0,156,21,1,0,0,0,157,158,5,8,0,0,158,159,5,16,0,0,159,160,3,28,14,0,160,
-  	161,6,11,-1,0,161,172,1,0,0,0,162,163,5,9,0,0,163,164,5,16,0,0,164,165,
-  	3,28,14,0,165,166,6,11,-1,0,166,172,1,0,0,0,167,168,5,10,0,0,168,169,
-  	5,16,0,0,169,170,5,35,0,0,170,172,6,11,-1,0,171,157,1,0,0,0,171,162,1,
-  	0,0,0,171,167,1,0,0,0,172,23,1,0,0,0,173,174,6,12,-1,0,174,186,5,14,0,
-  	0,175,176,3,22,11,0,176,183,6,12,-1,0,177,178,5,20,0,0,178,179,3,22,11,
-  	0,179,180,6,12,-1,0,180,182,1,0,0,0,181,177,1,0,0,0,182,185,1,0,0,0,183,
-  	181,1,0,0,0,183,184,1,0,0,0,184,187,1,0,0,0,185,183,1,0,0,0,186,175,1,
-  	0,0,0,186,187,1,0,0,0,187,188,1,0,0,0,188,189,5,15,0,0,189,25,1,0,0,0,
-  	190,191,5,36,0,0,191,192,5,16,0,0,192,193,3,32,16,0,193,27,1,0,0,0,194,
-  	195,6,14,-1,0,195,221,3,38,19,0,196,197,3,36,18,0,197,206,5,14,0,0,198,
-  	203,3,28,14,0,199,200,5,20,0,0,200,202,3,28,14,0,201,199,1,0,0,0,202,
-  	205,1,0,0,0,203,201,1,0,0,0,203,204,1,0,0,0,204,207,1,0,0,0,205,203,1,
-  	0,0,0,206,198,1,0,0,0,206,207,1,0,0,0,207,208,1,0,0,0,208,209,5,15,0,
-  	0,209,221,1,0,0,0,210,221,5,36,0,0,211,212,5,4,0,0,212,213,5,36,0,0,213,
-  	214,5,21,0,0,214,215,3,28,14,0,215,216,5,11,0,0,216,217,3,30,15,0,217,
-  	218,5,12,0,0,218,221,1,0,0,0,219,221,5,30,0,0,220,194,1,0,0,0,220,196,
-  	1,0,0,0,220,210,1,0,0,0,220,211,1,0,0,0,220,219,1,0,0,0,221,227,1,0,0,
-  	0,222,223,10,6,0,0,223,224,7,1,0,0,224,226,3,28,14,7,225,222,1,0,0,0,
-  	226,229,1,0,0,0,227,225,1,0,0,0,227,228,1,0,0,0,228,29,1,0,0,0,229,227,
-  	1,0,0,0,230,231,3,28,14,0,231,232,5,17,0,0,232,234,1,0,0,0,233,230,1,
-  	0,0,0,234,237,1,0,0,0,235,233,1,0,0,0,235,236,1,0,0,0,236,238,1,0,0,0,
-  	237,235,1,0,0,0,238,239,3,28,14,0,239,31,1,0,0,0,240,243,3,36,18,0,241,
-  	243,3,34,17,0,242,240,1,0,0,0,242,241,1,0,0,0,243,33,1,0,0,0,244,245,
-  	5,27,0,0,245,246,5,36,0,0,246,247,5,28,0,0,247,35,1,0,0,0,248,250,5,29,
-  	0,0,249,248,1,0,0,0,249,250,1,0,0,0,250,251,1,0,0,0,251,256,5,36,0,0,
-  	252,253,5,29,0,0,253,255,5,36,0,0,254,252,1,0,0,0,255,258,1,0,0,0,256,
-  	254,1,0,0,0,256,257,1,0,0,0,257,37,1,0,0,0,258,256,1,0,0,0,259,261,5,
-  	32,0,0,260,262,5,31,0,0,261,260,1,0,0,0,261,262,1,0,0,0,262,273,1,0,0,
-  	0,263,265,5,34,0,0,264,266,5,31,0,0,265,264,1,0,0,0,265,266,1,0,0,0,266,
-  	273,1,0,0,0,267,273,5,35,0,0,268,270,5,33,0,0,269,271,5,31,0,0,270,269,
-  	1,0,0,0,270,271,1,0,0,0,271,273,1,0,0,0,272,259,1,0,0,0,272,263,1,0,0,
-  	0,272,267,1,0,0,0,272,268,1,0,0,0,273,39,1,0,0,0,29,43,51,60,63,73,82,
-  	98,119,123,129,134,142,150,153,171,183,186,203,206,220,227,235,242,249,
-  	256,261,265,270,272
+  	14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,1,
+  	14,1,14,1,14,1,14,1,14,1,14,1,14,1,14,3,14,231,8,14,1,14,1,14,1,14,5,
+  	14,236,8,14,10,14,12,14,239,9,14,1,15,1,15,1,15,5,15,244,8,15,10,15,12,
+  	15,247,9,15,1,15,1,15,1,16,1,16,3,16,253,8,16,1,17,1,17,1,17,1,17,1,18,
+  	3,18,260,8,18,1,18,1,18,1,18,5,18,265,8,18,10,18,12,18,268,9,18,1,19,
+  	1,19,3,19,272,8,19,1,19,1,19,3,19,276,8,19,1,19,1,19,1,19,3,19,281,8,
+  	19,3,19,283,8,19,1,19,0,1,28,20,0,2,4,6,8,10,12,14,16,18,20,22,24,26,
+  	28,30,32,34,36,38,0,2,1,0,13,14,1,0,24,29,303,0,43,1,0,0,0,2,51,1,0,0,
+  	0,4,53,1,0,0,0,6,67,1,0,0,0,8,76,1,0,0,0,10,87,1,0,0,0,12,94,1,0,0,0,
+  	14,129,1,0,0,0,16,134,1,0,0,0,18,142,1,0,0,0,20,144,1,0,0,0,22,171,1,
+  	0,0,0,24,173,1,0,0,0,26,190,1,0,0,0,28,230,1,0,0,0,30,245,1,0,0,0,32,
+  	252,1,0,0,0,34,254,1,0,0,0,36,259,1,0,0,0,38,282,1,0,0,0,40,42,3,2,1,
+  	0,41,40,1,0,0,0,42,45,1,0,0,0,43,41,1,0,0,0,43,44,1,0,0,0,44,46,1,0,0,
+  	0,45,43,1,0,0,0,46,47,5,0,0,1,47,1,1,0,0,0,48,52,3,4,2,0,49,52,3,8,4,
+  	0,50,52,3,10,5,0,51,48,1,0,0,0,51,49,1,0,0,0,51,50,1,0,0,0,52,3,1,0,0,
+  	0,53,54,5,1,0,0,54,60,5,39,0,0,55,56,5,16,0,0,56,57,5,5,0,0,57,58,5,18,
+  	0,0,58,59,5,38,0,0,59,61,5,17,0,0,60,55,1,0,0,0,60,61,1,0,0,0,61,63,1,
+  	0,0,0,62,64,3,6,3,0,63,62,1,0,0,0,63,64,1,0,0,0,64,65,1,0,0,0,65,66,5,
+  	19,0,0,66,5,1,0,0,0,67,68,5,18,0,0,68,73,3,36,18,0,69,70,5,20,0,0,70,
+  	72,3,36,18,0,71,69,1,0,0,0,72,75,1,0,0,0,73,71,1,0,0,0,73,74,1,0,0,0,
+  	74,7,1,0,0,0,75,73,1,0,0,0,76,77,5,3,0,0,77,78,5,39,0,0,78,82,5,13,0,
+  	0,79,81,3,2,1,0,80,79,1,0,0,0,81,84,1,0,0,0,82,80,1,0,0,0,82,83,1,0,0,
+  	0,83,85,1,0,0,0,84,82,1,0,0,0,85,86,5,14,0,0,86,9,1,0,0,0,87,88,5,2,0,
+  	0,88,89,5,39,0,0,89,90,3,20,10,0,90,91,5,21,0,0,91,92,3,36,18,0,92,93,
+  	3,12,6,0,93,11,1,0,0,0,94,98,5,13,0,0,95,97,3,14,7,0,96,95,1,0,0,0,97,
+  	100,1,0,0,0,98,96,1,0,0,0,98,99,1,0,0,0,99,101,1,0,0,0,100,98,1,0,0,0,
+  	101,102,5,14,0,0,102,13,1,0,0,0,103,104,5,5,0,0,104,105,5,13,0,0,105,
+  	106,3,38,19,0,106,107,5,14,0,0,107,130,1,0,0,0,108,109,5,6,0,0,109,119,
+  	3,24,12,0,110,111,4,7,0,1,111,112,5,13,0,0,112,113,3,16,8,0,113,114,5,
+  	14,0,0,114,120,1,0,0,0,115,116,5,13,0,0,116,117,3,28,14,0,117,118,5,14,
+  	0,0,118,120,1,0,0,0,119,110,1,0,0,0,119,115,1,0,0,0,120,130,1,0,0,0,121,
+  	123,5,7,0,0,122,124,5,39,0,0,123,122,1,0,0,0,123,124,1,0,0,0,124,125,
+  	1,0,0,0,125,126,5,13,0,0,126,127,3,28,14,0,127,128,5,14,0,0,128,130,1,
+  	0,0,0,129,103,1,0,0,0,129,108,1,0,0,0,129,121,1,0,0,0,130,15,1,0,0,0,
+  	131,133,3,18,9,0,132,131,1,0,0,0,133,136,1,0,0,0,134,132,1,0,0,0,134,
+  	135,1,0,0,0,135,17,1,0,0,0,136,134,1,0,0,0,137,138,5,13,0,0,138,139,3,
+  	16,8,0,139,140,5,14,0,0,140,143,1,0,0,0,141,143,8,0,0,0,142,137,1,0,0,
+  	0,142,141,1,0,0,0,143,19,1,0,0,0,144,153,5,16,0,0,145,150,3,26,13,0,146,
+  	147,5,22,0,0,147,149,3,26,13,0,148,146,1,0,0,0,149,152,1,0,0,0,150,148,
+  	1,0,0,0,150,151,1,0,0,0,151,154,1,0,0,0,152,150,1,0,0,0,153,145,1,0,0,
+  	0,153,154,1,0,0,0,154,155,1,0,0,0,155,156,5,17,0,0,156,21,1,0,0,0,157,
+  	158,5,8,0,0,158,159,5,18,0,0,159,160,3,28,14,0,160,161,6,11,-1,0,161,
+  	172,1,0,0,0,162,163,5,9,0,0,163,164,5,18,0,0,164,165,3,28,14,0,165,166,
+  	6,11,-1,0,166,172,1,0,0,0,167,168,5,10,0,0,168,169,5,18,0,0,169,170,5,
+  	38,0,0,170,172,6,11,-1,0,171,157,1,0,0,0,171,162,1,0,0,0,171,167,1,0,
+  	0,0,172,23,1,0,0,0,173,174,6,12,-1,0,174,186,5,16,0,0,175,176,3,22,11,
+  	0,176,183,6,12,-1,0,177,178,5,22,0,0,178,179,3,22,11,0,179,180,6,12,-1,
+  	0,180,182,1,0,0,0,181,177,1,0,0,0,182,185,1,0,0,0,183,181,1,0,0,0,183,
+  	184,1,0,0,0,184,187,1,0,0,0,185,183,1,0,0,0,186,175,1,0,0,0,186,187,1,
+  	0,0,0,187,188,1,0,0,0,188,189,5,17,0,0,189,25,1,0,0,0,190,191,5,39,0,
+  	0,191,192,5,18,0,0,192,193,3,32,16,0,193,27,1,0,0,0,194,195,6,14,-1,0,
+  	195,231,3,38,19,0,196,197,3,36,18,0,197,206,5,16,0,0,198,203,3,28,14,
+  	0,199,200,5,22,0,0,200,202,3,28,14,0,201,199,1,0,0,0,202,205,1,0,0,0,
+  	203,201,1,0,0,0,203,204,1,0,0,0,204,207,1,0,0,0,205,203,1,0,0,0,206,198,
+  	1,0,0,0,206,207,1,0,0,0,207,208,1,0,0,0,208,209,5,17,0,0,209,231,1,0,
+  	0,0,210,231,5,39,0,0,211,212,5,4,0,0,212,213,5,39,0,0,213,214,5,23,0,
+  	0,214,215,3,28,14,0,215,216,5,13,0,0,216,217,3,30,15,0,217,218,5,14,0,
+  	0,218,231,1,0,0,0,219,231,5,33,0,0,220,221,5,11,0,0,221,222,5,16,0,0,
+  	222,223,3,28,14,0,223,224,5,17,0,0,224,231,1,0,0,0,225,226,5,12,0,0,226,
+  	227,5,16,0,0,227,228,3,28,14,0,228,229,5,17,0,0,229,231,1,0,0,0,230,194,
+  	1,0,0,0,230,196,1,0,0,0,230,210,1,0,0,0,230,211,1,0,0,0,230,219,1,0,0,
+  	0,230,220,1,0,0,0,230,225,1,0,0,0,231,237,1,0,0,0,232,233,10,8,0,0,233,
+  	234,7,1,0,0,234,236,3,28,14,9,235,232,1,0,0,0,236,239,1,0,0,0,237,235,
+  	1,0,0,0,237,238,1,0,0,0,238,29,1,0,0,0,239,237,1,0,0,0,240,241,3,28,14,
+  	0,241,242,5,19,0,0,242,244,1,0,0,0,243,240,1,0,0,0,244,247,1,0,0,0,245,
+  	243,1,0,0,0,245,246,1,0,0,0,246,248,1,0,0,0,247,245,1,0,0,0,248,249,3,
+  	28,14,0,249,31,1,0,0,0,250,253,3,36,18,0,251,253,3,34,17,0,252,250,1,
+  	0,0,0,252,251,1,0,0,0,253,33,1,0,0,0,254,255,5,30,0,0,255,256,5,39,0,
+  	0,256,257,5,31,0,0,257,35,1,0,0,0,258,260,5,32,0,0,259,258,1,0,0,0,259,
+  	260,1,0,0,0,260,261,1,0,0,0,261,266,5,39,0,0,262,263,5,32,0,0,263,265,
+  	5,39,0,0,264,262,1,0,0,0,265,268,1,0,0,0,266,264,1,0,0,0,266,267,1,0,
+  	0,0,267,37,1,0,0,0,268,266,1,0,0,0,269,271,5,35,0,0,270,272,5,34,0,0,
+  	271,270,1,0,0,0,271,272,1,0,0,0,272,283,1,0,0,0,273,275,5,37,0,0,274,
+  	276,5,34,0,0,275,274,1,0,0,0,275,276,1,0,0,0,276,283,1,0,0,0,277,283,
+  	5,38,0,0,278,280,5,36,0,0,279,281,5,34,0,0,280,279,1,0,0,0,280,281,1,
+  	0,0,0,281,283,1,0,0,0,282,269,1,0,0,0,282,273,1,0,0,0,282,277,1,0,0,0,
+  	282,278,1,0,0,0,283,39,1,0,0,0,29,43,51,60,63,73,82,98,119,123,129,134,
+  	142,150,153,171,183,186,203,206,230,237,245,252,259,266,271,275,280,282
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -1055,7 +1060,7 @@ CongParser::RawTextContentContext* CongParser::rawTextContent() {
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 2199023251454) != 0)) {
+      ((1ULL << _la) & 17592186028030) != 0)) {
       setState(131);
       element();
       setState(136);
@@ -1141,6 +1146,8 @@ CongParser::ElementContext* CongParser::element() {
       case CongParser::TIME:
       case CongParser::SPACE:
       case CongParser::LANG:
+      case CongParser::QUOTE:
+      case CongParser::EVAL:
       case CongParser::VARARGS:
       case CongParser::LPAREN:
       case CongParser::RPAREN:
@@ -1155,6 +1162,7 @@ CongParser::ElementContext* CongParser::element() {
       case CongParser::MUL:
       case CongParser::DIV:
       case CongParser::MOD:
+      case CongParser::POW:
       case CongParser::LT:
       case CongParser::GT:
       case CongParser::DOUBLE_COLON:
@@ -1663,6 +1671,60 @@ std::any CongParser::LetExpressionContext::accept(tree::ParseTreeVisitor *visito
   else
     return visitor->visitChildren(this);
 }
+//----------------- QuoteExpressionContext ------------------------------------------------------------------
+
+tree::TerminalNode* CongParser::QuoteExpressionContext::QUOTE() {
+  return getToken(CongParser::QUOTE, 0);
+}
+
+tree::TerminalNode* CongParser::QuoteExpressionContext::LPAREN() {
+  return getToken(CongParser::LPAREN, 0);
+}
+
+CongParser::ExpressionContext* CongParser::QuoteExpressionContext::expression() {
+  return getRuleContext<CongParser::ExpressionContext>(0);
+}
+
+tree::TerminalNode* CongParser::QuoteExpressionContext::RPAREN() {
+  return getToken(CongParser::RPAREN, 0);
+}
+
+CongParser::QuoteExpressionContext::QuoteExpressionContext(ExpressionContext *ctx) { copyFrom(ctx); }
+
+
+std::any CongParser::QuoteExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CongParserVisitor*>(visitor))
+    return parserVisitor->visitQuoteExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
+//----------------- EvalExpressionContext ------------------------------------------------------------------
+
+tree::TerminalNode* CongParser::EvalExpressionContext::EVAL() {
+  return getToken(CongParser::EVAL, 0);
+}
+
+tree::TerminalNode* CongParser::EvalExpressionContext::LPAREN() {
+  return getToken(CongParser::LPAREN, 0);
+}
+
+CongParser::ExpressionContext* CongParser::EvalExpressionContext::expression() {
+  return getRuleContext<CongParser::ExpressionContext>(0);
+}
+
+tree::TerminalNode* CongParser::EvalExpressionContext::RPAREN() {
+  return getToken(CongParser::RPAREN, 0);
+}
+
+CongParser::EvalExpressionContext::EvalExpressionContext(ExpressionContext *ctx) { copyFrom(ctx); }
+
+
+std::any CongParser::EvalExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<CongParserVisitor*>(visitor))
+    return parserVisitor->visitEvalExpression(this);
+  else
+    return visitor->visitChildren(this);
+}
 //----------------- ArithmeticExpressionContext ------------------------------------------------------------------
 
 std::vector<CongParser::ExpressionContext *> CongParser::ArithmeticExpressionContext::expression() {
@@ -1691,6 +1753,10 @@ tree::TerminalNode* CongParser::ArithmeticExpressionContext::DIV() {
 
 tree::TerminalNode* CongParser::ArithmeticExpressionContext::MOD() {
   return getToken(CongParser::MOD, 0);
+}
+
+tree::TerminalNode* CongParser::ArithmeticExpressionContext::POW() {
+  return getToken(CongParser::POW, 0);
 }
 
 CongParser::ArithmeticExpressionContext::ArithmeticExpressionContext(ExpressionContext *ctx) { copyFrom(ctx); }
@@ -1758,7 +1824,7 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(220);
+    setState(230);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 19, _ctx)) {
     case 1: {
@@ -1784,7 +1850,7 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
 
       _la = _input->LA(1);
       if ((((_la & ~ 0x3fULL) == 0) &&
-        ((1ULL << _la) & 134754598928) != 0)) {
+        ((1ULL << _la) & 1078036797456) != 0)) {
         setState(198);
         expression(0);
         setState(203);
@@ -1844,11 +1910,41 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
       break;
     }
 
+    case 6: {
+      _localctx = _tracker.createInstance<QuoteExpressionContext>(_localctx);
+      _ctx = _localctx;
+      previousContext = _localctx;
+      setState(220);
+      match(CongParser::QUOTE);
+      setState(221);
+      match(CongParser::LPAREN);
+      setState(222);
+      expression(0);
+      setState(223);
+      match(CongParser::RPAREN);
+      break;
+    }
+
+    case 7: {
+      _localctx = _tracker.createInstance<EvalExpressionContext>(_localctx);
+      _ctx = _localctx;
+      previousContext = _localctx;
+      setState(225);
+      match(CongParser::EVAL);
+      setState(226);
+      match(CongParser::LPAREN);
+      setState(227);
+      expression(0);
+      setState(228);
+      match(CongParser::RPAREN);
+      break;
+    }
+
     default:
       break;
     }
     _ctx->stop = _input->LT(-1);
-    setState(227);
+    setState(237);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 20, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -1860,24 +1956,24 @@ CongParser::ExpressionContext* CongParser::expression(int precedence) {
         _localctx = newContext;
         newContext->left = previousContext;
         pushNewRecursionContext(newContext, startState, RuleExpression);
-        setState(222);
+        setState(232);
 
-        if (!(precpred(_ctx, 6))) throw FailedPredicateException(this, "precpred(_ctx, 6)");
-        setState(223);
+        if (!(precpred(_ctx, 8))) throw FailedPredicateException(this, "precpred(_ctx, 8)");
+        setState(233);
         antlrcpp::downCast<ArithmeticExpressionContext *>(_localctx)->op = _input->LT(1);
         _la = _input->LA(1);
         if (!((((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 130023424) != 0))) {
+          ((1ULL << _la) & 1056964608) != 0))) {
           antlrcpp::downCast<ArithmeticExpressionContext *>(_localctx)->op = _errHandler->recoverInline(this);
         }
         else {
           _errHandler->reportMatch(this);
           consume();
         }
-        setState(224);
-        antlrcpp::downCast<ArithmeticExpressionContext *>(_localctx)->right = expression(7); 
+        setState(234);
+        antlrcpp::downCast<ArithmeticExpressionContext *>(_localctx)->right = expression(9); 
       }
-      setState(229);
+      setState(239);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 20, _ctx);
     }
@@ -1939,21 +2035,21 @@ CongParser::ExpressionBlockContext* CongParser::expressionBlock() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(235);
+    setState(245);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 21, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
-        setState(230);
+        setState(240);
         expression(0);
-        setState(231);
+        setState(241);
         match(CongParser::SEMI); 
       }
-      setState(237);
+      setState(247);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 21, _ctx);
     }
-    setState(238);
+    setState(248);
     expression(0);
    
   }
@@ -2005,20 +2101,20 @@ CongParser::PlaceholderOrQualifiedIdContext* CongParser::placeholderOrQualifiedI
     exitRule();
   });
   try {
-    setState(242);
+    setState(252);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case CongParser::DOUBLE_COLON:
       case CongParser::IDENTIFIER: {
         enterOuterAlt(_localctx, 1);
-        setState(240);
+        setState(250);
         qualifiedIdentifier();
         break;
       }
 
       case CongParser::LT: {
         enterOuterAlt(_localctx, 2);
-        setState(241);
+        setState(251);
         placeholder();
         break;
       }
@@ -2081,11 +2177,11 @@ CongParser::PlaceholderContext* CongParser::placeholder() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(244);
+    setState(254);
     match(CongParser::LT);
-    setState(245);
+    setState(255);
     antlrcpp::downCast<PlaceholderContext *>(_localctx)->name = match(CongParser::IDENTIFIER);
-    setState(246);
+    setState(256);
     match(CongParser::GT);
    
   }
@@ -2147,25 +2243,25 @@ CongParser::QualifiedIdentifierContext* CongParser::qualifiedIdentifier() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(249);
+    setState(259);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
     if (_la == CongParser::DOUBLE_COLON) {
-      setState(248);
+      setState(258);
       match(CongParser::DOUBLE_COLON);
     }
-    setState(251);
+    setState(261);
     match(CongParser::IDENTIFIER);
-    setState(256);
+    setState(266);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == CongParser::DOUBLE_COLON) {
-      setState(252);
+      setState(262);
       match(CongParser::DOUBLE_COLON);
-      setState(253);
+      setState(263);
       match(CongParser::IDENTIFIER);
-      setState(258);
+      setState(268);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
@@ -2231,19 +2327,19 @@ CongParser::LiteralContext* CongParser::literal() {
     exitRule();
   });
   try {
-    setState(272);
+    setState(282);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case CongParser::REAL: {
         enterOuterAlt(_localctx, 1);
-        setState(259);
+        setState(269);
         match(CongParser::REAL);
-        setState(261);
+        setState(271);
         _errHandler->sync(this);
 
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 25, _ctx)) {
         case 1: {
-          setState(260);
+          setState(270);
           match(CongParser::DYNAMIC_ANNOTATOR);
           break;
         }
@@ -2256,14 +2352,14 @@ CongParser::LiteralContext* CongParser::literal() {
 
       case CongParser::NUMBER: {
         enterOuterAlt(_localctx, 2);
-        setState(263);
+        setState(273);
         match(CongParser::NUMBER);
-        setState(265);
+        setState(275);
         _errHandler->sync(this);
 
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 26, _ctx)) {
         case 1: {
-          setState(264);
+          setState(274);
           match(CongParser::DYNAMIC_ANNOTATOR);
           break;
         }
@@ -2276,21 +2372,21 @@ CongParser::LiteralContext* CongParser::literal() {
 
       case CongParser::STRING: {
         enterOuterAlt(_localctx, 3);
-        setState(267);
+        setState(277);
         match(CongParser::STRING);
         break;
       }
 
       case CongParser::BOOL: {
         enterOuterAlt(_localctx, 4);
-        setState(268);
+        setState(278);
         match(CongParser::BOOL);
-        setState(270);
+        setState(280);
         _errHandler->sync(this);
 
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 27, _ctx)) {
         case 1: {
-          setState(269);
+          setState(279);
           match(CongParser::DYNAMIC_ANNOTATOR);
           break;
         }
@@ -2338,7 +2434,7 @@ bool CongParser::functionBodyStmntSempred(FunctionBodyStmntContext *_localctx, s
 
 bool CongParser::expressionSempred(ExpressionContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
-    case 1: return precpred(_ctx, 6);
+    case 1: return precpred(_ctx, 8);
 
   default:
     break;

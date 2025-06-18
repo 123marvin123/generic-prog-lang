@@ -60,6 +60,10 @@ public:
 
     virtual std::any visitLetExpression(CongParser::LetExpressionContext *context) = 0;
 
+    virtual std::any visitQuoteExpression(CongParser::QuoteExpressionContext *context) = 0;
+
+    virtual std::any visitEvalExpression(CongParser::EvalExpressionContext *context) = 0;
+
     virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *context) = 0;
 
     virtual std::any visitLiteralExpression(CongParser::LiteralExpressionContext *context) = 0;

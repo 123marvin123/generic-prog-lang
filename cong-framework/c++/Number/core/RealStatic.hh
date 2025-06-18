@@ -16,93 +16,12 @@ namespace cong::lang::core
    }
 
   template <Real native_>
-  using NaturalStatic = intern::RealStatic<Real, native_>;
+  using RealStatic = intern::RealStatic<Real, native_>;
 
-  struct Add
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
+#define CLASS_ intern::RealStatic
+#include "../../core/Operator.hh"
+#include "operator.hh"
+#include "../../core/Operator_foot.hh"
+#undef CLASS_
 
-        template <typename Native_,
-                  Native_ native1_,
-                  Native_ native2_>
-        struct Dispatch_<intern::RealStatic<Native_, native1_>, intern::RealStatic<Native_, native2_>>
-        {
-            using Type = intern::RealStatic<Native_, native1_ + native2_>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call
-            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-
-    struct Sub
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-
-        template <typename Native_,
-                  Native_ native1_,
-                  Native_ native2_>
-        struct Dispatch_<intern::RealStatic<Native_, native1_>, intern::RealStatic<Native_, native2_>>
-        {
-            using Type = intern::RealStatic<Native_, native1_ - native2_>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call
-            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-
-    struct Mul
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-
-        template <typename Native_,
-                  Native_ native1_,
-                  Native_ native2_>
-        struct Dispatch_<intern::RealStatic<Native_, native1_>, intern::RealStatic<Native_, native2_>>
-        {
-            using Type = intern::RealStatic<Native_, native1_ * native2_>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call
-            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-
-    struct Div
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-
-        template <typename Native_,
-                  Native_ native1_,
-                  Native_ native2_>
-        struct Dispatch_<intern::RealStatic<Native_, native1_>, intern::RealStatic<Native_, native2_>>
-        {
-            using Type = intern::RealStatic<Native_, native1_ / native2_>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call
-            : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
 }

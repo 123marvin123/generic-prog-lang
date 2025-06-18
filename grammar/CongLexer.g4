@@ -14,6 +14,9 @@ TIME: 'time';
 SPACE: 'space';
 LANG: 'lang';
 
+QUOTE: 'quote';
+EVAL: 'eval';
+
 LBRACE: '{';
 RBRACE: '}';
 VARARGS: '...';
@@ -32,6 +35,7 @@ MINUS: '-'; // For arithmetic operator, distinct from negative numbers
 MUL: '*';
 DIV: '/';
 MOD: '%';
+POW: '^';
 LT: '<'; // For placeholders
 GT: '>'; // For placeholders
 DOUBLE_COLON: '::';

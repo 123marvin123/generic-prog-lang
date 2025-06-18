@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 13.03.25.
-//
-
-#ifndef EXPRESSIONVISITOR_H
-#define EXPRESSIONVISITOR_H
+#pragma once
 
 #include "AbstractVisitor.h"
 #include "sema/Expression.h"
@@ -37,6 +32,10 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitOpenBindingExpression(CongParser::OpenBindingExpressionContext *context) override;
 
+    std::any visitQuoteExpression(CongParser::QuoteExpressionContext *context) override;
+
+    std::any visitEvalExpression(CongParser::EvalExpressionContext *context) override;
+
 private:
     Namespace* ns;
     Function* fun;
@@ -49,5 +48,3 @@ private:
     [[nodiscard]]
     opt<LetBinding> findLetBinding(const std::string& identifier) const;
 };
-
-#endif //EXPRESSIONVISITOR_H

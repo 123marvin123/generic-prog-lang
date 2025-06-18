@@ -1,8 +1,6 @@
 #pragma once
 
-#include <utility>
 #include "../Val.hh"
-#include "../Traits.hh"
 #include "../Number/core/NaturalStatic.hh"
 #include "../ApplyMember.hh"
 
@@ -50,5 +48,4 @@ namespace cong::lang {
 
     template <typename Native_>
     using ObjectDynamic = intern::Exp<local::ObjectDynamic<Native_>>;
-
 };

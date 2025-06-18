@@ -118,76 +118,6 @@ namespace cong::lang::core
         {};
     };
 
-    struct Not_
-    {
-    private:
-        template <typename Arg_>
-        struct Dispatch_;
-        template <typename Native_, Native_ native_>
-        struct Dispatch_<intern::BooleanStatic<Native_, native_>>
-        {
-            using Type = intern::BooleanStatic<Native_, ((!native_))>;
-        };
-
-    public:
-        template <typename Arg_>
-        struct Call : Dispatch_<typename Plain::Call<Arg_>::Type>
-        {
-        };
-    };
-
-    struct Or_
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-        template <typename Native_, Native_ native1_, Native_ native2_>
-        struct Dispatch_<intern::BooleanStatic<Native_, native1_>, intern::BooleanStatic<Native_, native2_>>
-        {
-            using Type = intern::BooleanStatic<Native_, ((native1_ || native2_))>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-    struct And_
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-        template <typename Native_, Native_ native1_, Native_ native2_>
-        struct Dispatch_<intern::BooleanStatic<Native_, native1_>, intern::BooleanStatic<Native_, native2_>>
-        {
-            using Type = intern::BooleanStatic<Native_, ((native1_ && native2_))>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-    struct Xor_
-    {
-    private:
-        template <typename Arg1_, typename Arg2_>
-        struct Dispatch_;
-        template <typename Native_, Native_ native1_, Native_ native2_>
-        struct Dispatch_<intern::BooleanStatic<Native_, native1_>, intern::BooleanStatic<Native_, native2_>>
-        {
-            using Type = intern::BooleanStatic<Native_, ((native1_ ^ native2_))>;
-        };
-
-    public:
-        template <typename Arg1_, typename Arg2_>
-        struct Call : Dispatch_<typename Plain::Call<Arg1_>::Type, typename Plain::Call<Arg2_>::Type>
-        {
-        };
-    };
-
     struct IsSame
     {
         template <typename T1, typename T2>
@@ -202,4 +132,11 @@ namespace cong::lang::core
             using Type = True;
         };
     };
+
+#define CLASS_ intern::BooleanStatic
+#include "../../core/Operator.hh"
+#include "operator.hh"
+#include "../../core/Operator_foot.hh"
+#undef CLASS_
+
 }; // namespace cong::lang::core

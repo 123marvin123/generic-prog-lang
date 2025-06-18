@@ -109,6 +109,8 @@ vec<std::filesystem::path> JinjaCppExport::process()
 
     for (const Concept* c : get_concepts())
     {
+        if(!c->export_enabled()) continue;
+
         std::filesystem::path current_path = get_output_folder();
         // Namespace-Ordner erstellen
         for (const auto& ns_part : c->get_namespace()->namespace_chain())
@@ -143,6 +145,8 @@ vec<std::filesystem::path> JinjaCppExport::process()
 
     for (const Function* f : get_functions())
     {
+        if(!f->export_enabled()) continue;
+        
         std::unordered_set<std::variant<const Concept*, const Function*>> needed_files_set = {};
 
         if (std::holds_alternative<const Concept*>(f->get_result()))

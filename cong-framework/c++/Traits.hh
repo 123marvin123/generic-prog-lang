@@ -14,6 +14,7 @@
 
 namespace cong::lang::core
 {
+    using namespace ::cong::lang::core;
     namespace intern
     {
         // @todo rename?
@@ -236,7 +237,7 @@ namespace cong::lang::core
     {
         using IsChar = True;
 
-        typedef Cond::Call<BooleanStatic<(CHAR_MAX < INT_MAX)>, signed int, unsigned int>
+        typedef Cond::Call<core::BooleanStatic<(CHAR_MAX < INT_MAX)>, signed int, unsigned int>
         ::Type
         ToPromoted;
     };
@@ -247,13 +248,14 @@ namespace cong::lang::core
     {
         using IsWChar = True;
 
-        typedef Cond::Call<BooleanStatic<(INT_MIN <= WCHAR_MIN && WCHAR_MAX <= INT_MAX)>,
+        typedef Cond::Call<core::BooleanStatic<(INT_MIN <= WCHAR_MIN && WCHAR_MAX <= INT_MAX)>,
                            signed int,
-                           Cond::Call<BooleanStatic<(0 <= WCHAR_MIN && WCHAR_MAX <= UINT_MAX)>,
+                           Cond::Call<core::BooleanStatic<(0 <= WCHAR_MIN && WCHAR_MAX <= UINT_MAX)>,
                                       unsigned int,
-                                      Cond::Call<BooleanStatic<(LONG_MIN <= WCHAR_MIN && WCHAR_MAX <= LONG_MAX)>,
+                                      Cond::Call<core::BooleanStatic<(LONG_MIN <= WCHAR_MIN && WCHAR_MAX <= LONG_MAX)>,
                                                  signed long,
-                                                 Cond::Call<BooleanStatic<(0 <= WCHAR_MIN && WCHAR_MAX <= ULONG_MAX)>,
+                                                 Cond::Call<core::BooleanStatic<(0 <= WCHAR_MIN && WCHAR_MAX <=
+                                                 ULONG_MAX)>,
                                                             unsigned long,
                                                             Invalid>::Type>::Type>::Type>::Type
         ToPromoted;
@@ -276,7 +278,7 @@ namespace cong::lang::core
         using IsUnsigned = True;
         using IsUnsignedChar = True;
 
-        typedef Cond::Call<BooleanStatic<(UCHAR_MAX <= INT_MAX)>, signed int, unsigned int>::Type
+        typedef Cond::Call<core::BooleanStatic<(UCHAR_MAX <= INT_MAX)>, signed int, unsigned int>::Type
         ToPromoted;
     };
 
@@ -304,7 +306,7 @@ namespace cong::lang::core
         using IsUnsigned = True;
         using IsUnsignedShort = True;
 
-        typedef Cond::Call<BooleanStatic<(USHRT_MAX <= INT_MAX)>, signed int, unsigned int>::Type
+        typedef Cond::Call<core::BooleanStatic<(USHRT_MAX <= INT_MAX)>, signed int, unsigned int>::Type
         ToPromoted;
     };
 
@@ -411,13 +413,13 @@ namespace cong::lang::core
     private:
         typedef typename Cond::Call
         <
-            BooleanStatic<(sizeof(Type_) <= sizeof(signed int))>,
-            typename Cond::Call<BooleanStatic<((Type_)-1 < (Type_)0)>,
+            core::BooleanStatic<(sizeof(Type_) <= sizeof(signed int))>,
+            typename Cond::Call<core::BooleanStatic<((Type_)-1 < (Type_)0)>,
                                 signed int,
                                 unsigned int>::Type,
-            typename Cond::Call<BooleanStatic<(sizeof(Type_) <= sizeof(signed long))>,
+            typename Cond::Call<core::BooleanStatic<(sizeof(Type_) <= sizeof(signed long))>,
                                 typename Cond::Call<
-                                    BooleanStatic<((Type_)-1 < (Type_)0)>, signed long, unsigned long>::Type,
+                                    core::BooleanStatic<((Type_)-1 < (Type_)0)>, signed long, unsigned long>::Type,
                                 Invalid>::Type
         >::Type ToUnderlying_;
 
@@ -998,5 +1000,12 @@ namespace cong::lang::core
         {
             using Type = Qual<True, True, True>;
         };
+    };
+
+    template <typename T>
+    struct IsStatic
+    {
+        static constexpr bool value = std::is_base_of<StaticTag, std::remove_cv_t<T>>::value;
+        using Type = core::BooleanStatic<value>;
     };
 };

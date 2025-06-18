@@ -6,7 +6,7 @@
 #define CONG_LANG_CORE_INTERN_FUN_AUTO(CLASS__, EXP_) \
   CLASS__<Native_, (EXP_)>
 
-#define CONG_LANG_CORE_FUN_1(CLASS__, Name_, name_, MODE_, EXP_) \
+#define CONG_LANG_CORE_FUN_1(CLASS__, NS_, Name_, name_, MODE_, EXP_) \
   struct Name_ \
   { \
   private: \
@@ -26,7 +26,7 @@
     {}; \
   }
 
-#define CONG_LANG_CORE_FUN_2(CLASS__, Name_, name_, MODE_, EXP_) \
+#define CONG_LANG_CORE_FUN_2(CLASS__, NS_, Name_, name_, MODE_, EXP_) \
   struct Name_ \
   { \
   private: \

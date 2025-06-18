@@ -1,7 +1,18 @@
 #pragma once
 
-#include "../Object/ObjectDynamic.hh"
+#include "../ApplyMember.hh"
+#include "../Exp.hh"
+
+#include "add_dec.hh"
+#include "sub_dec.hh"
+#include "mul_dec.hh"
+#include "div_dec.hh"
+#include "mod_dec.hh"
+#include "succ_dec.hh"
+#include "pred_dec.hh"
+
 #include "NaturalStatic.hh"
+#include "../Object/ObjectDynamic.hh"
 
 namespace cong::lang {
 
@@ -27,6 +38,12 @@ namespace cong::lang {
 
             CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
         };
+
+#define CONCEPT_ Natural
+#define STAGE_ Dynamic
+#define DIR_ Number
+#include "../ApplyMember_operator.hh"
+
     }
 
     using NaturalDynamic = intern::Exp<local::NaturalDynamic<>>;

@@ -1,0 +1,24 @@
+
+namespace Boolean {
+    fun imply(p1: Boolean::Boolean, p2: Boolean::Boolean) -> Boolean::Boolean {
+        description { "p(1) $\\implies$ p(2) (logical implication)" }
+        requires { or(not(p1), p2) }
+    }
+
+    fun cond(p1: Boolean::Boolean, p2: <T>, p3: <K>) -> Object::Object {
+        description { "p(2) if p(1), else p(3)" }
+        generic(time: 0, space: 0, lang: "c++") {
+            using PlainP2 = std::decay_t<decltype(p2)>;
+            using PlainP3 = std::decay_t<decltype(p3)>;
+
+            using IsSame_ = std::is_same<PlainP2, PlainP3>;
+
+            if constexpr (IsSame_::value) {
+                return p1.native() ? p2 : p3;
+            } else {
+                return p1.native() ? std::variant<PlainP2, PlainP3>{std::in_place_index<0>, p2}
+                                           : std::variant<PlainP2, PlainP3>{std::in_place_index<1>, p3};
+            }
+        }
+    }
+}

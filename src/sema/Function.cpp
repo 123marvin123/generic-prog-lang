@@ -10,8 +10,8 @@
 #include <sema/FunctionParameter.h>
 #include <sema/GenericImplementation.h>
 
-Function::Function(std::string name, const Namespace* parent)
-    : SemaIdentifier(std::move(name), parent)
+Function::Function(std::string name, const Namespace* parent, bool export_)
+    : SemaIdentifier(std::move(name), parent), export_(export_)
     {
         if (get_identifier().empty()) std::throw_with_nested(SemaError("Function name must not be empty"));
         if (!parent) std::throw_with_nested(SemaError("Parent namespace must not be empty"));

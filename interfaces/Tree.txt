@@ -1,0 +1,35 @@
+namespace Tree {
+    concept Tree (description: "") : Object::Object;
+
+    fun height(tree: Tree) -> Number::Natural {
+      description {
+        "height of p(1)"
+      }
+    }
+
+    fun setOfNode(tree: Tree) -> Set::Set {
+      description {
+        "set of nodes of p(1)"
+      }
+    }
+
+    fun root(tree: Tree) -> Set::Set {
+      description {
+        "set containing root node of p(1) (if not empty)"
+      }
+    }
+
+    fun setOfChild(tree: Tree, node: Object::Object) -> Set::Set {
+      description {
+        "set of children of p(2) in p(1)"
+      }
+      requires { Set::hasElement(setOfNode(tree), node) }
+    }
+
+    fun isLeaf(tree: Tree, node: Object::Object) -> Boolean::Boolean {
+      description {
+        "is p(2) a leaf of p(1)?"
+      }
+      requires { Set::hasElement(setOfNode(tree), node) }
+    }
+}

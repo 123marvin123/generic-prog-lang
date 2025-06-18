@@ -31,6 +31,12 @@ std::set<const Function*> Expression::get_depending_functions() const
         }
     }
 
+    if (const auto& self = utils::dyn_cast<CallMetafunExpression>(this))
+    {
+        const auto inner_req = self->get_inner()->get_depending_functions();
+        depending_functions.insert(inner_req.begin(), inner_req.end());
+    }
+
     return depending_functions;
 }
 
@@ -105,6 +111,15 @@ CallExpression::CallExpression(Sema* sema, const Function* fun, vec<s_ptr<Expres
 std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
 CallExpression::get_result() const
 {
+    for (const auto& arg : this->get_arguments())
+    {
+        if (const auto bindingExp = utils::dyn_ptr_cast<OpenBindingExpression>(arg); bindingExp)
+        {
+            // If we have an unbound argument in the argument list, we return a map
+            return get_sema()->builtin_concept<Map>();
+        }
+    }
+
     const auto& result = get_function()->get_result();
     if (std::holds_alternative<const Concept*>(result))
         return std::get<const Concept*>(result);
@@ -180,8 +195,7 @@ ArithmeticExpression::ArithmeticExpression(Sema* sema, s_ptr<Expression> left, s
     }
 }
 
-std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
-ArithmeticExpression::get_result() const
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> ArithmeticExpression::get_result() const
 {
     const auto left_result = left->get_result();
     const auto right_result = right->get_result();
@@ -199,6 +213,23 @@ ArithmeticExpression::get_result() const
         return left_result;
 
     return right_result;
+}
+
+std::string ArithmeticExpression::to_cpp() const noexcept
+{
+    const Function* fn = utils::get_function_for_operator(get_sema(), get_op());
+
+    return std::format("{}({}, {})", fn->get_full_name(), get_left()->to_cpp(), get_right()->to_cpp());
+}
+
+std::string ArithmeticExpression::to_python() const noexcept
+{
+    const Function* fn = utils::get_function_for_operator(get_sema(), op);
+
+    return std::format("{}({}, {})",
+        fn->get_full_name(),
+        get_left()->to_python(),
+        get_right()->to_python());
 }
 
 LetExpression::LetExpression(Sema* sema, const std::string& identifier, s_ptr<Expression> value,
@@ -300,10 +331,45 @@ OpenBindingExpression::OpenBindingExpression(const OpenBindingExpression& other)
 
 std::string OpenBindingExpression::to_cpp() const noexcept
 {
-    return std::format("cong::lang::Proj<{}>{{}}", N);
+    return std::format("::cong::lang::Proj<{}>{{}}", N);
 }
 
 std::string OpenBindingExpression::to_python() const noexcept
+{
+    // TODO
+    throw std::runtime_error("not implemented");
+}
+
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> QuoteExpression::get_result() const
+{
+    return get_inner()->get_result();
+}
+std::string QuoteExpression::to_cpp() const noexcept
+{
+    const auto& inner_str = get_inner()->to_cpp();
+
+    // needs Quote.hh and Traits.hh
+    return std::format("::cong::lang::Quote<::cong::lang::core::Plain::Call<decltype({})>::Type>{{{}}}", inner_str, inner_str);
+}
+
+std::string QuoteExpression::to_python() const noexcept
+{
+    // TODO
+    throw std::runtime_error("not implemented");
+}
+
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> EvalExpression::get_result() const
+{
+    return get_inner()->get_result();
+}
+
+std::string EvalExpression::to_cpp() const noexcept
+{
+    // needs Exp.hh
+    return std::format("::cong::lang::intern::eval({})", get_inner()->to_cpp());
+}
+
+std::string EvalExpression::to_python() const noexcept
 {
     // TODO
     throw std::runtime_error("not implemented");

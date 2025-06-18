@@ -336,21 +336,9 @@ struct ArithmeticExpression final : Expression,
     return right;
   }
 
-  [[nodiscard]] std::string to_cpp() const noexcept override {
+  [[nodiscard]] std::string to_cpp() const noexcept override;
 
-    auto fun = "::cong::" + std::string{utils::get_function_for_operator(get_sema(), get_op())};
-    for(auto& c : fun)
-      c = tolower(c);
-
-    return std::format("{}({}, {})", fun, get_left()->to_cpp(), get_right()->to_cpp());
-  }
-
-  [[nodiscard]] std::string to_python() const noexcept override {
-    return std::format("{}({}, {})",
-        utils::get_function_for_operator(get_sema(), op),
-        get_left()->to_python(),
-        get_right()->to_python());
-  }
+  [[nodiscard]] std::string to_python() const noexcept override;
 
   struct DebugVisitor;
 
@@ -471,6 +459,65 @@ struct OpenBindingExpression final : Expression, Introspection<OpenBindingExpres
 
 private:
   const unsigned int N;
+};
+
+struct CallMetafunExpression : Expression, Introspection<CallMetafunExpression>
+{
+  CallMetafunExpression(Sema *sema, s_ptr<Expression> value) : Expression(sema), inner(std::move(value)) {;
+    if (!inner)
+      throw SemaError("Inner expression must not be empty");
+  }
+
+  CallMetafunExpression(const CallMetafunExpression &other)
+      : Expression(other), inner(other.inner) {}
+
+  [[nodiscard]]
+  s_ptr<Expression> get_inner() const noexcept { return inner; }
+
+  struct DebugVisitor;
+private:
+  s_ptr<Expression> inner;
+};
+
+struct QuoteExpression final : CallMetafunExpression
+{
+  QuoteExpression(Sema *sema, const s_ptr<Expression>& value) : CallMetafunExpression(sema, value) {
+  }
+
+  [[nodiscard]]
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
+  get_result() const override;
+
+  static s_ptr<QuoteExpression> create(Sema *sema, const s_ptr<Expression>& value) {
+    return Expression::create<QuoteExpression>(sema, value);
+  }
+
+  [[nodiscard]] std::string to_cpp() const noexcept override;
+
+  [[nodiscard]] std::string to_python() const noexcept override;
+
+  struct DebugVisitor;
+};
+
+struct EvalExpression final : CallMetafunExpression
+{
+  EvalExpression(Sema *sema, const s_ptr<Expression>& value) : CallMetafunExpression(sema, value) {
+  }
+
+
+  [[nodiscard]]
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
+  get_result() const override;
+
+  static s_ptr<EvalExpression> create(Sema *sema, const s_ptr<Expression>& value) {
+    return Expression::create<EvalExpression>(sema, value);
+  }
+
+  [[nodiscard]] std::string to_cpp() const noexcept override;
+
+  [[nodiscard]] std::string to_python() const noexcept override;
+
+  struct DebugVisitor;
 };
 
 //@section DebugVisitor

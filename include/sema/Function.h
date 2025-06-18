@@ -19,7 +19,8 @@
 struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<Function>
 {
     Function(std::string name,
-             const Namespace* parent);
+             const Namespace* parent,
+            bool export_ = true);
 
     ~Function();
 
@@ -80,6 +81,9 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
         return exp_requires;
     }
 
+    [[nodiscard]]
+    bool export_enabled() const { return export_; }
+
     void add_requirement(s_ptr<Expression>, opt<std::string> = std::nullopt);
 
     [[nodiscard]]
@@ -106,13 +110,15 @@ private:
     vec<GenericImplementation> generic_implementations;
     vec<RequiresStatement> exp_requires;
     s_ptr<Expression> time_complexity, space_complexity;
+    bool export_;
 };
 
 struct ConcreteFunction final : Function, Introspection<ConcreteFunction>
 {
     ConcreteFunction(std::string name,
                     const Namespace* parent,
-                     const Concept* resulting_concept) : Function(std::move(name), parent),
+                    const Concept* resulting_concept,
+                    bool export_ = true) : Function(std::move(name), parent, export_),
                                                               resulting_concept(resulting_concept)
     {
         if (!resulting_concept) throw SemaError("Resulting concept must not be empty");
@@ -141,8 +147,9 @@ private:
 struct DependentFunction final : Function, Introspection<DependentFunction>
 {
     DependentFunction(std::string name,
-                      const Namespace* parent) :
-        Function(std::move(name), parent), dependency(nullptr)
+                      const Namespace* parent,
+                      bool export_ = true) :
+        Function(std::move(name), parent, export_), dependency(nullptr)
     {
     }
 
@@ -158,7 +165,8 @@ struct DependentFunction final : Function, Introspection<DependentFunction>
     [[nodiscard]] std::variant<const Concept*, PlaceholderFunctionParameter*>
     get_result() const override
     {
-        if (!dependency) throw SemaError("Dependency is empty");
+        if (!dependency)
+            throw SemaError("Dependency is empty");
         return dependency;
     }
 

@@ -1,0 +1,58 @@
+
+namespace Algebra {
+    concept Algebra (description: "algebraic structure");
+
+    fun isMagma(p1: Set::Set, p2: Map::Map) -> Boolean::Boolean {
+        description { "is p(1) a magma with respect to p(2)?" }
+    }
+
+    fun isAbelian(p1: Set::Set, p2: Map::Map) -> Boolean::Boolean {
+        description { "is p(1) Abelian with respect to p(2)?" }
+    }
+
+    fun isSemigroup(p1: Set::Set, p2: Map::Map) -> Boolean::Boolean {
+        description { "is p(1) a semigroup with respect to p(2)?" }
+    }
+
+    fun isMonoid(p1: Set::Set, p2: Map::Map) -> Boolean::Boolean {
+        description { "is p(1) a monoid with respect to p(2)?" }
+    }
+
+    fun neutral(p1: Set::Set, p2: Map::Map) -> Object::Object {
+        description { "neutral element of p(1) with respect to p(2)" }
+        requires { isMonoid(p1, p2) }
+    }
+
+    fun isGroup(p1: Set::Set, p2: Map::Map) -> Boolean::Boolean {
+        description { "is p(1) a group with respect to p(2)?" }
+    }
+
+    fun inv(p1: Set::Set, p2: Map::Map) -> Map::Map {
+        description { "inverse operation on p(1) with respect to p(2)" }
+        requires { isGroup(p1, p2) }
+    }
+
+    fun isAbelianGroup(p1: Set::Set, p2: Map::Map) -> Boolean::Boolean {
+        description { "is p(1) a abelian group with respect to p(2)?" }
+    }
+
+    fun isField(p1: Set::Set, p2: Map::Map, p3: Map::Map) -> Boolean::Boolean {
+        description { "is p(1) a field with respect to p(2) (addition) and p(3) (multiplication)?" }
+    }
+
+    fun hyper(p1: Number::Natural, p2: Number::Natural, p3: Number::Natural) -> Number::Natural {
+        description { "p(1)-th hyperoperation on p(2) and p(3): $H_{\\cd{p(1)}}(\\cd{p(2)},\\cd{p(3)})=\\cd{p(2)}[\\cd{p(1)}]\\cd{p(3)}$" }
+        /*generic() {
+            Boolean::cond(Object::isEqual(p1, 0),
+                 Number::succ(p3),
+                 Boolean::cond(Object::isEqual(p3, 0),
+                      Boolean::cond(Object::isEqual(p1, 1),
+                           p2,
+                           Boolean::cond(Object::isEqual(p1, 2),
+                                0,
+                                1)),
+                      p3
+                     ))
+        }*/
+    }
+}
