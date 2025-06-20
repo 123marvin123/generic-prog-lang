@@ -20,6 +20,33 @@ namespace cong::lang
 {
     namespace intern
     {
+        template<class Exp_, core::StringStatic S>
+        struct EnsureDefined
+        {
+        private:
+            using IsUndefined_ = typename core::Not_::Call<typename IsDefined::Call<Exp_>::Type>::Type;
+            using IsExp_ = typename IsExp::Call<Exp_>::Type;
+
+            static consteval auto call()
+            {
+                if constexpr (std::is_same_v<IsUndefined_, core::True>)
+                {
+                    core::print_string<PrintUndefined::Call<typename WrapUndefined::Call<S, Exp_>::Type>::call()>();
+                    return false;
+                }
+
+                if constexpr (std::is_same_v<IsExp_, core::False>)
+                {
+                    core::print_string<S>();
+                    return false;
+                }
+
+                return true;
+            }
+        public:
+            using Type = std::conditional_t<call(), Exp_, Exp_>;
+        };
+
         struct EvalRequirements {
         private:
             template<class N, class IsAvail_, class IsStatic_, class Dec_, class... Args>
@@ -56,7 +83,19 @@ namespace cong::lang
                         typename SuccReq_::Present, SuccIsStatic_, Dec_, Args...
                     >::call(std::forward<Args>(args)...));
 
-                    static_assert(A::native() && B::native(), "Requirement not met.");
+                    if constexpr(A::native() == false)
+                    {
+                        using R = typename Dec_::template Requirement<N>;
+                        core::print_string<
+                            core::concat<Dec_::name, ": requirement #",
+                            core::num_to_string<N::native()+1>::value, " (name: ", R::name, "), not met: ", R::description>()
+                        >();
+                    }
+                    else if constexpr (B::native() == false)
+                    {
+                        static_assert(A::native() && B::native(), "Other requirement not met");
+
+                     }
 
                     return A{};
                 }
@@ -107,29 +146,6 @@ namespace cong::lang
             };
         };
 
-        template<class Impl_>
-        class ConcreteFunctionCall : public Base
-        {
-            using Base_ = Base;
-        public:
-            using ReduceSpace = core::FunStaticMake<core::Zero>;
-            using ReduceTime = core::FunStaticMake<core::One>; // @todo appropriate?
-            using ReduceValue = core::FunId;
-
-            CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
-
-            using ApplyValue = Impl_;
-        };
-
-        template<class Dec_, class Spec_>
-        class GenericFunctionCall : public Base
-        {
-            using Base_ = Base;
-
-        public:
-            CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
-        };
-
         template <class Dec_, class Spec_>
         class FunctionImpl
             : public Base
@@ -163,7 +179,7 @@ namespace cong::lang
                 /*template <typename Exp__, typename TupleOfExp__, typename Offset_>
                 struct DispatchOffset;*/
 
-                template<typename Exp__, typename TupleOfExp__, typename ResultingType_>
+                template<typename Exp__, typename TupleOfExp__, typename ResultingType_, typename Available_>
                 struct DispatchStaticAvailable;
 
                 template<typename TupleOfImpl_>
@@ -175,7 +191,7 @@ namespace cong::lang
                 (DispatchDynamicAvailable,
                     (TupleOfImpl__), (),
                     (
-                        (Base__, (SelectDynamicGenericImpl<TupleOfImpl__>))
+                        (Base__, (SelectDynamicGenericImpl<TupleOfImpl__, Spec_>))
                     ),
                     Base__
                 );
@@ -186,7 +202,7 @@ namespace cong::lang
                 // whenever possible
                 CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchStaticAvailable, 
-                    (Exp__, TupleOfExp__, Impl_), (), 
+                    (Exp__, TupleOfExp__, Impl_, Available_), (),
                     (
                         (Base__, (Impl_))
                     ), 
@@ -197,7 +213,7 @@ namespace cong::lang
                 // we need to look if dynamic implementation is available
                 CONG_LANG_CORE_FUN_PROPAGATE
                 (DispatchStaticAvailable,
-                    (Exp__, TupleOfExp__), (cong::lang::core::Undefined),
+                    (Exp__, TupleOfExp__, Type_), (core::False),
                     (
                         (DynamicImpls_, (typename CollectDynamicGenericImpls<Spec_, Exp__, TupleOfExp__>::Type)),
                         (Base__, (DispatchDynamicAvailable<DynamicImpls_>))
@@ -211,7 +227,7 @@ namespace cong::lang
                 (
                     (
                         (StaticAvailable_, (typename FindStaticGenericImpl<Spec_, Exp_, TupleOfExp_>::Type)),
-                        (Base__, (DispatchStaticAvailable<Exp_, TupleOfExp_, StaticAvailable_>))
+                        (Base__, (DispatchStaticAvailable<Exp_, TupleOfExp_, StaticAvailable_, typename IsDefined::Call<StaticAvailable_>::Type>))
                     ),
                     Base__
                 );
@@ -223,13 +239,13 @@ namespace cong::lang
                 // Dispatches are Fun
 
                 // @todo allow to provide/process a tuple of (specific) implementations, as above
-                template <typename Exp__, typename TupleOfExp__, typename Offset_>
+                template <typename Exp__, typename TupleOfExp__, typename Stacktrace_, typename Offset_>
                 struct DispatchOffset;
 
                 // specific implementation is defined for given arguments;
                 // propagate the call to that implementation
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchDefined, (Exp__, TupleOfExp__, Offset_, Apply_, Type_), (),
+                (DispatchDefined, (Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_, IsDefined_), (),
                  (
                      (Base__, (Apply_))
                  ),
@@ -239,20 +255,21 @@ namespace cong::lang
                 // specific implementation is not defined for given arguments;
                 // re-try with specific implementation for predecessor in tuple of arguments
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchDefined, (Exp__, TupleOfExp__, Offset_, Apply_), (core::Undefined),
+                (DispatchDefined, (Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_), (core::False),
                  (
                      (Pred_, (typename core::Pred::Call<Offset_>::Type)),
-                     (Base__, (DispatchOffset<Exp__, TupleOfExp__, Pred_>))
+                     (Error_, (typename WrapUndefined::Call<"Specific implementation not defined", Stacktrace_>::Type)),
+                     (Base__, (DispatchOffset<Exp__, TupleOfExp__, Error_, Pred_>))
                  ),
                  Base__
                 );
 
                 // call specific implementation (converted to Fun) on given arguments, examine definedness
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchImpl, (Exp__, TupleOfExp__, Offset_, Apply_), (),
+                (DispatchImpl, (Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_), (),
                  (
                      (Type_, (typename Apply_::template Call<Exp__, TupleOfExp__>::Type)),
-                     (Base__, (DispatchDefined<Exp__, TupleOfExp__, Offset_, Apply_, Type_>))
+                     (Base__, (DispatchDefined<Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_, typename IsDefined::Call<Type_>::Type>))
                  ),
                  Base__
                 );
@@ -260,15 +277,15 @@ namespace cong::lang
                 // standard case: try specific implementation for argument at position before the previous
                 // note: arguments are counted from 1 (0 is Exp), thus use item N-1 of tuple if Offset is N
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchOffset, (Exp__, TupleOfExp__, Offset_), (),
+                (DispatchOffset, (Exp__, TupleOfExp__, Stacktrace_, Offset_), (),
                  (
                      (Pred_, (typename core::Pred::Call<Offset_>::Type)),
                      (Arg_, (typename core::ItemAt::Call<TupleOfExp__, Pred_>::Type)),
                      (ArgPlain_, (typename core::Plain::Call<Arg_>::Type)),
                      (ArgVal_, (typename Eval::Call<ArgPlain_>::Type)),
-                     (ValPlain_, (typename core::Plain::Call<ArgVal_>::Type)),
+                     (ValPlain_, (typename EnsureDefined<typename core::Plain::Call<ArgVal_>::Type, "Argument is undefined">::Type)),
                      (Apply_, (typename ValPlain_::template ApplyMember<Spec_, Offset_>)),
-                     (Base__, (DispatchImpl<Exp__, TupleOfExp__, Offset_, Apply_>))
+                     (Base__, (DispatchImpl<Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_>))
                  ),
                  Base__
                 );
@@ -276,10 +293,10 @@ namespace cong::lang
                 // final case: no further arguments (previously, first was checked),
                 // use specific implementation of Exp itself
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchOffset, (Exp__, TupleOfExp__), (core::NaturalStatic<0>),
+                (DispatchOffset, (Exp__, TupleOfExp__, Stacktrace_), (core::NaturalStatic<0>),
                  (
                      (ArgPlain_, (typename core::Plain::Call<Exp__>::Type)),
-                     (Base__, (typename ArgPlain_::template ApplyMember<Spec_, core::NaturalStatic<0>>)),
+                     (Base__, (typename ArgPlain_::template ApplyMember<Spec_, core::NaturalStatic<0>>)), // TODO: stacktrace weiter reichen?
                  ),
                  Base__
                 );
@@ -294,6 +311,7 @@ namespace cong::lang
                         (Length_, (typename core::Length::Call<TupleOfExp_>::Type)),
                         (Base__, (DispatchOffset<Exp_,
                             TupleOfExp_,
+                            void,
                             Length_>))
                     ),
                     Base__

@@ -9,28 +9,30 @@
 
 
 #include "Object/Object.hh"
+#include "Object/Object.hh"
 #include "Boolean/Boolean.hh"
-namespace Boolean {
 
-struct DecOr_ {
-    using Params = ::cong::lang::core::Tuple<::Boolean::ConceptBoolean, ::Boolean::ConceptBoolean>;
+namespace Object {
+
+struct DecIsModelOf {
+    using Params = ::cong::lang::core::Tuple<::Object::ConceptObject, ::Object::ConceptObject>;
 
     using ReturnConcept = ::Boolean::ConceptBoolean;
 
 };
 
-struct SpecOr_;
+struct SpecIsModelOf;
 
 template <typename... Exp_>
-using Or_ = ::cong::lang::Bind< 
+using IsModelOf = ::cong::lang::Bind< 
     ::cong::lang::intern::Environment,
-    ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecOr_, SpecOr_>>,
+    ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsModelOf, SpecIsModelOf>>,
     Exp_...
 >;
 
 template <typename... Exp_>
 constexpr
-Or_<Exp_...> or_(Exp_&&... args);
+IsModelOf<Exp_...> isModelOf(Exp_&&... args);
 
 
 }

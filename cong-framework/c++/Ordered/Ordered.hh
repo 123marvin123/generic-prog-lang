@@ -1,15 +1,16 @@
 #pragma once
 
-#include "../Seq/core/Tuple.hh"
-#include "../Decls.hh"
+#include "Seq/core/Tuple.hh"
+#include "Decls.hh"
+#include "Val.hh"
 
-#include "../Object/Object.hh"
+#include "Object/Object.hh"
 
 namespace Ordered {
-struct ConceptOrdered {
+struct ConceptOrdered : cong::lang::intern::Val, cong::lang::ConceptTag {
     using Bases = ::cong::lang::core::Tuple<Object::ConceptObject>;
-    static constexpr auto name = "Ordered";
-    static constexpr auto description = "element of totally ordered set";
+    static constexpr cong::lang::core::StringStatic name = "Ordered";
+    static constexpr cong::lang::core::StringStatic description = "element of totally ordered set";
 };
 
 }

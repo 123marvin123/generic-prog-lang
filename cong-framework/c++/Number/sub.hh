@@ -2,16 +2,22 @@
 
 #include "sub_dec.hh"
 
-#include "../Boolean/BooleanStatic.hh"
-#include "NaturalStatic.hh"
-#include "../Boolean/BooleanDynamic.hh"
-#include "NaturalDynamic.hh"
+#include "Boolean/BooleanStatic.hh"
+#include "Boolean/BooleanDynamic.hh"
+
+#include "Number/NaturalDynamic.hh"
+#include "Number/NaturalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
+#include "String/core/StringStatic.hh"
+
+#include "Proj.hh"
+
 
 namespace Number {
 
 struct SpecSub {
-    static constexpr auto name = "sub";
-    static constexpr auto description = "";
+    static constexpr cong::lang::core::StringStatic name = "sub";
+    static constexpr cong::lang::core::StringStatic description = "";
 
     template<class Index_>
     struct Requirement
@@ -20,7 +26,7 @@ struct SpecSub {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Req for Sub not specified">;
             static constexpr Type call(...);
         };
     };
@@ -32,10 +38,13 @@ struct SpecSub {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Generic impl for Sub not specified">;
             static constexpr Type call(...);
         };
     };
+
+    template<cong::lang::core::StringStatic Name>
+    struct NameToRequirement;
 
     using GenericImpls = cong::lang::core::Tuple<
     >;

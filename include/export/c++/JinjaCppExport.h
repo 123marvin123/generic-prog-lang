@@ -44,8 +44,8 @@ private:
     void register_concept_functions() override;
     void register_function_functions() override;
 
-    void create_function_declaration_file(const Function* f, jinja2::ValuesList& needed_files);
-    void create_function_definition_file(const Function* f, jinja2::ValuesList& needed_files);
+    void create_function_declaration_file(const Function* f, jinja2::ValuesMap& needed_files);
+    void create_function_definition_file(const Function* f, jinja2::ValuesMap& needed_files);
 
     vec<std::filesystem::path> output_files;
 

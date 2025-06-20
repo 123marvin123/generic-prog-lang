@@ -26,7 +26,7 @@ struct SemaIdentifier : SemaElement
 
 
     [[nodiscard]]
-    std::string get_full_name() const;
+    virtual std::string get_full_name() const;
 
 private:
     const std::string identifier;

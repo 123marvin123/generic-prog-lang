@@ -5,7 +5,7 @@ namespace Boolean {
         requires { or(not(p1), p2) }
     }
 
-    fun cond(p1: Boolean::Boolean, p2: <T>, p3: <K>) -> Object::Object {
+    fun cond(p1: Boolean::Boolean, p2: <T>, p3: T) -> T {
         description { "p(2) if p(1), else p(3)" }
         generic(time: 0, space: 0, lang: "c++") {
             using PlainP2 = std::decay_t<decltype(p2)>;

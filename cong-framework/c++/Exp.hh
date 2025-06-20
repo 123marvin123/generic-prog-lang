@@ -133,22 +133,76 @@ namespace cong::lang
         struct IsDefined
         {
         private:
-            template <typename Type_>
+            template <bool>
             struct Dispatch
             {
                 using Type = core::True;
             };
 
             template <>
-            struct Dispatch<core::Undefined>
+            struct Dispatch<true>
             {
                 using Type = core::False;
             };
 
         public:
             template <typename Exp_>
-            struct Call : Dispatch<typename core::Plain::Call<Exp_>::Type>
+            struct Call : Dispatch<std::is_base_of_v<core::UndefinedTag, typename core::Plain::Call<Exp_>::Type>>
             {
+            };
+        };
+
+        struct WrapUndefined
+        {
+        private:
+            template<core::StringStatic S, class IsDefined_, class Stacktrace_>
+            struct Dispatch
+            {
+                using Type = core::Undefined<S, Stacktrace_>;
+            };
+
+            template<core::StringStatic S, class Stacktrace_>
+            struct Dispatch<S, core::True, Stacktrace_>
+            {
+                using Type = core::Undefined<S>;
+            };
+
+        public:
+            template<core::StringStatic S, class Stacktrace_>
+            struct Call : Dispatch<S, typename IsDefined::Call<Stacktrace_>::Type, Stacktrace_>
+            {
+
+            };
+        };
+
+        struct PrintUndefined
+        {
+        private:
+            template<class Stacktrace_, core::StringStatic Sep_, class IsDefined_>
+            struct Dispatch
+            {
+                static consteval auto call()
+                {
+                    return core::StringStatic{""};
+                }
+            };
+
+            template<class Stacktrace_, core::StringStatic Sep_>
+            struct Dispatch<Stacktrace_, Sep_, core::False>
+            {
+                static consteval auto call()
+                {
+                    return core::concat<
+                        core::concat<Stacktrace_::str(), Sep_>(),
+                        Call<typename Stacktrace_::Parent>::call()
+                    >();
+                }
+            };
+        public:
+            template<class Stacktrace_, core::StringStatic Separator_ = "; ">
+            struct Call : Dispatch<Stacktrace_, Separator_, typename IsDefined::Call<Stacktrace_>::Type>
+            {
+
             };
         };
 

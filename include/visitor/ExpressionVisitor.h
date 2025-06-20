@@ -22,7 +22,8 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitLiteralExpression(CongParser::LiteralExpressionContext* ctx) override;
 
-    std::any visitParameterReferenceExpression(CongParser::ParameterReferenceExpressionContext* ctx) override;
+    std::any visitParameterOrConceptReferenceExpression(CongParser::ParameterOrConceptReferenceExpressionContext* ctx)
+    override;
 
     std::any visitCallExpression(CongParser::CallExpressionContext* ctx) override;
 
@@ -34,7 +35,9 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitQuoteExpression(CongParser::QuoteExpressionContext *context) override;
 
-    std::any visitEvalExpression(CongParser::EvalExpressionContext *context) override;
+    std::any visitEvalExpression(CongParser::EvalExpressionContext* context) override;
+
+    std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext* ctx) override;
 
 private:
     Namespace* ns;

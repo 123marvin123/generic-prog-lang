@@ -25,6 +25,10 @@ struct FinalizingFunctionVisitor final : AbstractVisitor
 
     std::any visitFunctionExpRequires(CongParser::FunctionExpRequiresContext* ctx) override;
 
+    std::any visitRequirementDetail(CongParser::RequirementDetailContext* ctx) override;
+
+    std::any visitRequirementDetails(CongParser::RequirementDetailsContext* ctx) override;
+
     std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext* ctx) override;
 
     std::any visitGenericImplDetail(CongParser::GenericImplDetailContext* ctx) override;

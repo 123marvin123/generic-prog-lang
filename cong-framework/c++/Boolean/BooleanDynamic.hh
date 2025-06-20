@@ -20,7 +20,8 @@ namespace cong::lang {
                 using Base_ = ObjectDynamic<Native_>;
             public:
                 using typename Base_::Native;
-            public:
+                using Satisfies = std::tuple<Boolean::ConceptBoolean>;
+
                 // @todo should only by accessible from factory function
                 explicit constexpr
                 BooleanDynamic(Native native = false)

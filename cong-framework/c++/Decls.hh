@@ -109,5 +109,6 @@ namespace cong::lang {
 
     struct StaticTag {};
 
+    struct ConceptTag {};
 
 }

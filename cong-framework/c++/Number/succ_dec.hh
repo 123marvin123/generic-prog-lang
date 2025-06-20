@@ -1,24 +1,23 @@
 #pragma once
 
-#include "../Exp.hh"
-#include "../Bind.hh"
-#include "../Function.hh"
-#include "../Traits.hh"
-#include "../Decls.hh"
-#include "../Seq/core/Tuple.hh"
-#include "core/NaturalStatic.hh"
+#include "Exp.hh"
+#include "Bind.hh"
+#include "Function.hh"
+#include "Traits.hh"
+#include "Decls.hh"
+#include "Seq/core/Tuple.hh"
 
 
-#include "../Object/Object.hh"
+#include "Object/Object.hh"
+#include "Number/Natural.hh"
+#include "Number/Integer.hh"
 
-#include "Natural.hh"
-#include "Integer.hh"
 namespace Number {
 
 struct DecSucc {
-    using Params = ::cong::lang::core::Tuple<Number::ConceptNatural>;
+    using Params = ::cong::lang::core::Tuple<::Number::ConceptNatural>;
 
-    using ReturnConcept = Number::ConceptInteger;
+    using ReturnConcept = ::Number::ConceptInteger;
 
 };
 

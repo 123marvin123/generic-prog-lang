@@ -42,7 +42,7 @@ functionBody
 functionBodyStmnt
     : DESCRIPTION LBRACE literal RBRACE
         # functionDescription
-    | GENERICIMPL g=genericImplDetails
+    | GENERICIMPL (g=genericImplDetails)?
         (
           { $g.hasLangArg }?
             LBRACE
@@ -52,8 +52,7 @@ functionBodyStmnt
             LBRACE body_expr=expression RBRACE
         )
         # functionGenericImpl
-    | REQUIRES (name=IDENTIFIER)? LBRACE expression RBRACE
-        # functionExpRequires
+    | REQUIRES (details=requirementDetails)? LBRACE expression RBRACE # functionExpRequires
     ;
 
 rawTextContent
@@ -75,6 +74,15 @@ genericImplDetail returns [bool isLangAttr]
     | LANG COLON targetLang=STRING { $isLangAttr = true; }
     ;
 
+requirementDetail
+    : NAME COLON name=STRING
+    | DESCRIPTION COLON desc=STRING
+    ;
+
+requirementDetails
+    : LPAREN (requirementDetail (COMMA requirementDetail)*)? RPAREN
+    ;
+
 genericImplDetails returns [bool hasLangArg]
   :  { $hasLangArg = false; }
      LPAREN (
@@ -90,12 +98,13 @@ parameter
 expression
     : left=expression op=(PLUS | MINUS | MUL | DIV | MOD | POW) right=expression # arithmeticExpression
     | val=literal # literalExpression
-    | fun=qualifiedIdentifier LPAREN (expression (COMMA expression)*)? RPAREN # callExpression
-    | param=IDENTIFIER # parameterReferenceExpression
-    | LET name=IDENTIFIER ASSIGN value=expression LBRACE body=expressionBlock RBRACE # letExpression
-    | OPEN_BINDING # openBindingExpression
     | QUOTE LPAREN expression RPAREN # quoteExpression
     | EVAL LPAREN expression RPAREN # evalExpression
+    | REQUIRES LPAREN STRING RPAREN # requiresCallExpression
+    | fun=qualifiedIdentifier LPAREN (expression (COMMA expression)*)? RPAREN # callExpression
+    | paramOrConcept=qualifiedIdentifier # parameterOrConceptReferenceExpression
+    | LET name=IDENTIFIER ASSIGN value=expression LBRACE body=expressionBlock RBRACE # letExpression
+    | OPEN_BINDING # openBindingExpression
     ;
 
 expressionBlock
@@ -115,7 +124,7 @@ qualifiedIdentifier: (DOUBLE_COLON)? IDENTIFIER (DOUBLE_COLON IDENTIFIER)*;
 
 literal
     : REAL DYNAMIC_ANNOTATOR?
-    | NUMBER DYNAMIC_ANNOTATOR?
+    | INTEGER DYNAMIC_ANNOTATOR?
     | STRING
     | BOOL DYNAMIC_ANNOTATOR?
     ;

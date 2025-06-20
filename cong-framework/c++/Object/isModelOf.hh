@@ -1,6 +1,6 @@
 #pragma once
 
-#include "isNotEqual_dec.hh"
+#include "isModelOf_dec.hh"
 
 #include "Boolean/BooleanStatic.hh"
 #include "Boolean/BooleanDynamic.hh"
@@ -13,13 +13,11 @@
 #include "Proj.hh"
 
 
-#include "Object/isEqual.hh"
-#include "Boolean/not_.hh"
 namespace Object {
 
-struct SpecIsNotEqual {
-    static constexpr cong::lang::core::StringStatic name = "isNotEqual";
-    static constexpr cong::lang::core::StringStatic description = "";
+struct SpecIsModelOf {
+    static constexpr cong::lang::core::StringStatic name = "isModelOf";
+    static constexpr cong::lang::core::StringStatic description = "does object p(1) model concept p(2)?";
 
     template<class Index_>
     struct Requirement
@@ -28,7 +26,7 @@ struct SpecIsNotEqual {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined<"Req for IsNotEqual not specified">;
+            using Type = cong::lang::core::Undefined<"Req for IsModelOf not specified">;
             static constexpr Type call(...);
         };
     };
@@ -40,7 +38,7 @@ struct SpecIsNotEqual {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined<"Generic impl for IsNotEqual not specified">;
+            using Type = cong::lang::core::Undefined<"Generic impl for IsModelOf not specified">;
             static constexpr Type call(...);
         };
     };
@@ -57,7 +55,7 @@ struct SpecIsNotEqual {
  * Generic Implementation #1:
 */
 template<>
-struct SpecIsNotEqual::GenericImpl<cong::lang::core::NaturalStatic<0>>
+struct SpecIsModelOf::GenericImpl<cong::lang::core::NaturalStatic<0>>
 {
     using Present = cong::lang::core::True;
     template<typename Exp_, typename TupleOfExp_>
@@ -73,7 +71,7 @@ private:
         {
         private:
             using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> a , std::tuple_element_t<1, TupleOfExp_> b, ...)
+            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> p1 , std::tuple_element_t<1, TupleOfExp_> p2, ...)
             {
                 return cong::lang::NaturalStatic<cong::lang::core::natInf>{};
             }
@@ -94,7 +92,7 @@ private:
         {
         private:
             using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> a , std::tuple_element_t<1, TupleOfExp_> b, ...)
+            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> p1 , std::tuple_element_t<1, TupleOfExp_> p2, ...)
             {
                 return cong::lang::NaturalStatic<cong::lang::core::natInf>{};
             }
@@ -112,9 +110,19 @@ public:
     {
     private:
         using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-        static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> a , std::tuple_element_t<1, TupleOfExp_> b, ...)
+        static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> p1 , std::tuple_element_t<1, TupleOfExp_> p2, ...)
         {
-            return ::Boolean::not_(::Object::isEqual(a, b));
+            
+            using Plain_ = typename cong::lang::core::Plain::Call<decltype(p2)>::Type;
+            if constexpr (!std::is_base_of_v<cong::lang::ConceptTag, Plain_>)
+            {
+                return cong::lang::BooleanStatic<false>{}; // Not a concept
+            }
+
+            return cong::lang::BooleanStatic<
+                cong::lang::core::IsModelOf::Call<decltype(p1), decltype(p2)>::Type::native()
+            >{};
+        
         }
     public:
         using ApplyTime = ApplyTime_;
@@ -127,14 +135,14 @@ public:
 };
 template <typename... Exp_>
 constexpr
-IsNotEqual<Exp_...> isNotEqual(Exp_&&... args) 
+IsModelOf<Exp_...> isModelOf(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecIsNotEqual, Exp_...>
+    cong::lang::intern::EvalRequirements::Call<SpecIsModelOf, Exp_...>
                 ::call(std::forward<Exp_>(args)...);
 
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
-        ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsNotEqual, SpecIsNotEqual>>{},
+        ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsModelOf, SpecIsModelOf>>{},
         std::forward<Exp_>(args)...);
 }
 

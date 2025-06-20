@@ -1,27 +1,22 @@
 #pragma once
 
-#include "../Exp.hh"
-#include "../Bind.hh"
-#include "../Function.hh"
-#include "../Traits.hh"
-#include "../Decls.hh"
-#include "../Seq/core/Tuple.hh"
-#include "../Number/core/NaturalStatic.hh"
+#include "Exp.hh"
+#include "Bind.hh"
+#include "Function.hh"
+#include "Traits.hh"
+#include "Decls.hh"
+#include "Seq/core/Tuple.hh"
 
 
-#include "../Object/Object.hh"
-
-#include "isLess_dec.hh"
-#include "../Object/isEqual_dec.hh"
-#include "Ordered.hh"
-#include "../Boolean/or__dec.hh"
-#include "../Boolean/Boolean.hh"
+#include "Object/Object.hh"
+#include "Ordered/Ordered.hh"
+#include "Boolean/Boolean.hh"
 namespace Ordered {
 
 struct DecIsLessEqual {
-    using Params = ::cong::lang::core::Tuple<Ordered::ConceptOrdered, Ordered::ConceptOrdered>;
+    using Params = ::cong::lang::core::Tuple<::Ordered::ConceptOrdered, ::Ordered::ConceptOrdered>;
 
-    using ReturnConcept = Boolean::ConceptBoolean;
+    using ReturnConcept = ::Boolean::ConceptBoolean;
 
 };
 

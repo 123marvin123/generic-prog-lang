@@ -12,6 +12,11 @@
 #include "succ_dec.hh"
 #include "pred_dec.hh"
 
+#include "../Ordered/isGreater_dec.hh"
+#include "../Ordered/isGreaterEqual_dec.hh"
+#include "../Ordered/isLess_dec.hh"
+#include "../Ordered/isLessEqual_dec.hh"
+
 namespace cong::lang
 {
     namespace local {
@@ -20,6 +25,7 @@ namespace cong::lang
             : ObjectStatic<Native_, native_>
         {
             using Base_ = ObjectStatic<Native_, native_>;
+            using Satisfies = core::Tuple<Number::ConceptNatural>;
 
             CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
         };

@@ -9,7 +9,19 @@
 #include "Number/NaturalDynamic.hh"
 #include "Number/NaturalStatic.hh"
 #include "Number/core/NaturalStatic.hh"
+#include "String/core/StringStatic.hh"
 
 #include "Proj.hh"
+
+{% for param in needed_files.functions %}
+
+{% set ParamName = sanitize(param.name) %}
+{% set Prefix = param.ns | join('/') -%}
+{%- if Prefix | length > 0 -%}
+#include "{{Prefix}}/{{ ParamName }}.hh"
+{%- else -%}
+#include "{{ ParamName }}.hh"
+{%- endif -%}
+{% endfor %}
 
 {{ FunctionDefinition(fun) }}

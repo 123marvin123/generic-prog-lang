@@ -7,7 +7,6 @@
     #import "Grid.txt"
     #import "Map.txt"
     #import "Matrix.txt"
-    #import "Ordered.txt"
     #import "Seq.txt"
     #import "Set.txt"
     #import "SpaceGeo.txt"

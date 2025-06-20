@@ -21,6 +21,7 @@ namespace cong::lang {
   		{
     		using Base_ = lang::ObjectStatic<Native_, native_>;
   		public:
+			using Satisfies = std::tuple<Boolean::ConceptBoolean>;
     		CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
   		};
 

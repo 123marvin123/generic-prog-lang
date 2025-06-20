@@ -6,18 +6,16 @@
 #include "Traits.hh"
 #include "Decls.hh"
 #include "Seq/core/Tuple.hh"
-#include "Number/core/NaturalStatic.hh"
 
 
 #include "Object/Object.hh"
-
 #include "Boolean/Boolean.hh"
 namespace Boolean {
 
 struct DecNot_ {
-    using Params = ::cong::lang::core::Tuple<Boolean::ConceptBoolean>;
+    using Params = ::cong::lang::core::Tuple<::Boolean::ConceptBoolean>;
 
-    using ReturnConcept = Boolean::ConceptBoolean;
+    using ReturnConcept = ::Boolean::ConceptBoolean;
 
 };
 

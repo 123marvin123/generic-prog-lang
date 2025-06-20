@@ -17,7 +17,7 @@
 #include "{{ ConceptObject.name }}.hh"
 {%- endif -%}
 
-{% for param in needed_files %}
+{% for param in needed_files.concepts %}
 
 {% set ParamName = sanitize(param.name) %}
 {% set Prefix = param.ns | join('/') -%}

@@ -1005,7 +1005,65 @@ namespace cong::lang::core
     template <typename T>
     struct IsStatic
     {
-        static constexpr bool value = std::is_base_of<StaticTag, std::remove_cv_t<T>>::value;
-        using Type = core::BooleanStatic<value>;
+        static constexpr bool value = std::is_base_of_v<StaticTag, std::remove_cv_t<T>>;
+        using Type = ::cong::lang::core::BooleanStatic<value>;
+    };
+
+namespace intern {
+    template <typename TargetConcept, typename CurrentConcept>
+    struct is_base_of_concept_impl;
+
+    template <typename TargetConcept, typename BasesTuple>
+    struct check_bases;
+
+    template <typename TargetConcept, typename... BaseConcepts>
+    struct check_bases<TargetConcept, Tuple<BaseConcepts...>>
+    {
+        using Type = core::BooleanStatic<
+            std::disjunction_v<is_base_of_concept_impl<TargetConcept, BaseConcepts>...>
+        >;
+    };
+
+    template <typename TargetConcept, typename CurrentConcept>
+    struct is_base_of_concept_impl
+    {
+        using Type = typename Or_::Call<
+            typename IsSame::Call<TargetConcept, CurrentConcept>::Type,
+            typename check_bases<TargetConcept, typename CurrentConcept::Bases>::Type
+        >::Type;
+        static constexpr bool value = Type::native();
+    };
+
+    template <typename TargetConcept, typename SatisfiesTuple>
+    struct check_satisfied;
+
+    template <typename TargetConcept, typename... SatisfiedConcepts>
+    struct check_satisfied<TargetConcept, Tuple<SatisfiedConcepts...>>
+    {
+        using Type = core::BooleanStatic<
+            std::disjunction_v<is_base_of_concept_impl<TargetConcept, SatisfiedConcepts>...>
+        >;
+    };
+
+    template <typename TargetConcept>
+    struct check_satisfied<TargetConcept, Tuple<>>
+    {
+        using Type = core::BooleanStatic<false>;
+    };
+}
+
+    struct IsModelOf
+    {
+    private:
+        template<typename T, typename Concept>
+        struct Dispatch : intern::check_satisfied<Concept, typename T::Satisfies> {};
+
+        template<typename T, typename Concept>
+        struct Dispatch<T, lang::intern::Exp<Concept>> : Dispatch<T, Concept> {};
+    public:
+        template <typename T, typename Concept>
+        struct Call : Dispatch<typename Plain::Call<T>::Type, typename Plain::Call<Concept>::Type>
+        {
+        };
     };
 };

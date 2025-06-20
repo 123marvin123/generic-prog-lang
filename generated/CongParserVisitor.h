@@ -50,9 +50,17 @@ public:
 
     virtual std::any visitGenericImplDetail(CongParser::GenericImplDetailContext *context) = 0;
 
+    virtual std::any visitRequirementDetail(CongParser::RequirementDetailContext *context) = 0;
+
+    virtual std::any visitRequirementDetails(CongParser::RequirementDetailsContext *context) = 0;
+
     virtual std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext *context) = 0;
 
     virtual std::any visitParameter(CongParser::ParameterContext *context) = 0;
+
+    virtual std::any visitParameterOrConceptReferenceExpression(CongParser::ParameterOrConceptReferenceExpressionContext *context) = 0;
+
+    virtual std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext *context) = 0;
 
     virtual std::any visitCallExpression(CongParser::CallExpressionContext *context) = 0;
 
@@ -67,8 +75,6 @@ public:
     virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *context) = 0;
 
     virtual std::any visitLiteralExpression(CongParser::LiteralExpressionContext *context) = 0;
-
-    virtual std::any visitParameterReferenceExpression(CongParser::ParameterReferenceExpressionContext *context) = 0;
 
     virtual std::any visitExpressionBlock(CongParser::ExpressionBlockContext *context) = 0;
 

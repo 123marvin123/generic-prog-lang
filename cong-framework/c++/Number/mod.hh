@@ -2,16 +2,22 @@
 
 #include "mod_dec.hh"
 
-#include "../Boolean/BooleanStatic.hh"
-#include "NaturalStatic.hh"
-#include "../Boolean/BooleanDynamic.hh"
-#include "NaturalDynamic.hh"
+#include "Boolean/BooleanStatic.hh"
+#include "Boolean/BooleanDynamic.hh"
+
+#include "Number/NaturalDynamic.hh"
+#include "Number/NaturalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
+#include "String/core/StringStatic.hh"
+
+#include "Proj.hh"
+
 
 namespace Number {
 
 struct SpecMod {
-    static constexpr auto name = "mod";
-    static constexpr auto description = "";
+    static constexpr cong::lang::core::StringStatic name = "mod";
+    static constexpr cong::lang::core::StringStatic description = "";
 
     template<class Index_>
     struct Requirement
@@ -20,7 +26,7 @@ struct SpecMod {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Req for Mod not specified">;
             static constexpr Type call(...);
         };
     };
@@ -32,10 +38,13 @@ struct SpecMod {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Generic impl for Mod not specified">;
             static constexpr Type call(...);
         };
     };
+
+    template<cong::lang::core::StringStatic Name>
+    struct NameToRequirement;
 
     using GenericImpls = cong::lang::core::Tuple<
     >;

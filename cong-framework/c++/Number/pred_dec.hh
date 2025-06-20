@@ -1,24 +1,22 @@
 #pragma once
 
-#include "../Exp.hh"
-#include "../Bind.hh"
-#include "../Function.hh"
-#include "../Traits.hh"
-#include "../Decls.hh"
-#include "../Seq/core/Tuple.hh"
-#include "core/NaturalStatic.hh"
+#include "Exp.hh"
+#include "Bind.hh"
+#include "Function.hh"
+#include "Traits.hh"
+#include "Decls.hh"
+#include "Seq/core/Tuple.hh"
 
 
-#include "../Object/Object.hh"
-
-#include "Natural.hh"
-#include "Integer.hh"
+#include "Object/Object.hh"
+#include "Number/Number.hh"
+#include "Object/Object.hh"
 namespace Number {
 
 struct DecPred {
-    using Params = ::cong::lang::core::Tuple<Number::ConceptNatural>;
+    using Params = ::cong::lang::core::Tuple<::Object::ConceptObject>;
 
-    using ReturnConcept = Number::ConceptInteger;
+    using ReturnConcept = ::Object::ConceptObject;
 
 };
 

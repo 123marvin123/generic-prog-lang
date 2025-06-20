@@ -4,6 +4,7 @@
 
 #include "sema/Expression.h"
 #include "sema/Sema.h"
+#include <sstream>
 
 std::set<const Function*> Expression::get_depending_functions() const
 {
@@ -40,6 +41,45 @@ std::set<const Function*> Expression::get_depending_functions() const
     return depending_functions;
 }
 
+std::set<const Concept*> Expression::get_depending_concepts() const
+{
+    std::set<const Concept*> depending_concepts{};
+
+    if (const auto& self = utils::dyn_cast<ConceptReferenceExpression>(this))
+    {
+        depending_concepts.insert(self->get_concept());
+    }
+
+    if (const auto& self = utils::dyn_cast<CallExpression>(this))
+    {
+        for (const auto& arg : self->get_arguments())
+        {
+            const auto nested_concepts = arg->get_depending_concepts();
+            depending_concepts.insert(nested_concepts.begin(), nested_concepts.end());
+        }
+    }
+
+    if (const auto& self = utils::dyn_cast<LetExpression>(this))
+    {
+        const auto value_depending = self->get_value()->get_depending_concepts();
+        depending_concepts.insert(value_depending.begin(), value_depending.end());
+
+        for (const auto& body : self->get_body())
+        {
+            const auto nested_concepts = body->get_depending_concepts();
+            depending_concepts.insert(nested_concepts.begin(), nested_concepts.end());
+        }
+    }
+
+    if (const auto& self = utils::dyn_cast<CallMetafunExpression>(this))
+    {
+        const auto inner_req = self->get_inner()->get_depending_concepts();
+        depending_concepts.insert(inner_req.begin(), inner_req.end());
+    }
+
+    return depending_concepts;
+}
+
 StringExpression::StringExpression(Sema* sema, const std::string& value) :
     ConstantExpression(sema, sema->builtin_concept<std::string>(), value, false)
 {
@@ -50,7 +90,7 @@ RealExpression::RealExpression(Sema* sema, const double value, bool is_dynamic) 
 {
 }
 
-NumberExpression::NumberExpression(Sema* sema, const long value, bool is_dynamic) :
+IntegerExpression::IntegerExpression(Sema* sema, const long value, bool is_dynamic) :
     ConstantExpression(sema, sema->builtin_concept<long>(), value, is_dynamic)
 {
 }
@@ -323,6 +363,57 @@ std::string LetVariableReferenceExpression::to_cpp() const noexcept
 std::string LetVariableReferenceExpression::to_python() const noexcept
 {
     return utils::sanitize_python_identifier(identifier);
+}
+
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+RequiresCallExpression::get_result() const
+{
+    return get_sema()->builtin_concept<bool>();
+}
+
+std::string RequiresCallExpression::to_cpp() const noexcept
+{
+    std::stringstream arg_list, tpl_list;
+    const auto& parameters = f->get_parameters();
+    for (int i = 0; i < parameters.size(); i++)
+    {
+        const FunctionParameter* p = parameters[i];
+        arg_list << p->get_identifier();
+        tpl_list << "Arg" << i + 1 << "_";
+        if (i + 1 < parameters.size())
+        {
+            arg_list << ", ";
+            tpl_list << ", ";
+        }
+    }
+
+    return std::format("NameToRequirement<\"{}\">::Type::Call<{}>::call({})", *get_stmnt().get_name(), tpl_list.str(), arg_list.str());
+}
+
+std::string RequiresCallExpression::to_python() const noexcept
+{
+    throw std::runtime_error("not implemented"); // TODO
+}
+
+std::string ConceptReferenceExpression::to_cpp() const noexcept
+{
+    const utils::FQIInfo& info = utils::split_fully_qualified_identifier(concept_->get_full_name());
+    const std::string& ns = info.join_namespaces();
+
+    std::string full_name;
+
+    if (!ns.ends_with("::"))
+        full_name = std::format("{}::Concept{}", ns, concept_->get_identifier());
+    else
+        full_name = std::format("{}Concept{}", ns, concept_->get_identifier());
+
+    return std::format("::cong::lang::intern::Exp<{}>{{}}", full_name);
+}
+
+std::string ConceptReferenceExpression::to_python() const noexcept
+{
+    // TODO
+    throw std::runtime_error("not implemented");
 }
 
 OpenBindingExpression::OpenBindingExpression(Sema* sema, unsigned int N) : Expression(sema), N(N) {}

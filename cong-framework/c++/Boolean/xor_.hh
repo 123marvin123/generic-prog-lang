@@ -3,15 +3,21 @@
 #include "xor__dec.hh"
 
 #include "Boolean/BooleanStatic.hh"
-#include "Number/NaturalStatic.hh"
 #include "Boolean/BooleanDynamic.hh"
+
 #include "Number/NaturalDynamic.hh"
+#include "Number/NaturalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
+#include "String/core/StringStatic.hh"
+
+#include "Proj.hh"
+
 
 namespace Boolean {
 
 struct SpecXor_ {
-    static constexpr auto name = "xor_";
-    static constexpr auto description = "p(1) $\\oplus$ p(2) (logical exclusive disjunction)";
+    static constexpr cong::lang::core::StringStatic name = "xor_";
+    static constexpr cong::lang::core::StringStatic description = "";
 
     template<class Index_>
     struct Requirement
@@ -20,7 +26,7 @@ struct SpecXor_ {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Req for Xor_ not specified">;
             static constexpr Type call(...);
         };
     };
@@ -32,61 +38,19 @@ struct SpecXor_ {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Generic impl for Xor_ not specified">;
             static constexpr Type call(...);
         };
     };
+
+    template<cong::lang::core::StringStatic Name>
+    struct NameToRequirement;
 
     using GenericImpls = cong::lang::core::Tuple<
     >;
 };
 
-/*
- * Requirement #1:
- * ::Object::isNotEqual(p1, p2)
-*/
-template<>
-struct SpecXor_::Requirement<cong::lang::core::NaturalStatic<0>> {
-    using Present = cong::lang::core::True;
-    template<class Arg1_ , class Arg2_>
-    struct Call
-    {
-        static constexpr auto call(Arg1_&& p1 , Arg2_&& p2)
-        {
-            using ExpType_ = std::decay_t<decltype(::Object::isNotEqual(p1, p2))>;
-            const auto& result = [&]{ return ::Object::isNotEqual(p1, p2); };
-            return cong::lang::intern::CondEval<
-                        typename ::cong::lang::intern::IsExp::Call<ExpType_>::Type,
-                        decltype(result),
-                        ExpType_
-                   >::call(result);
-        }
-        using Type = std::invoke_result_t<decltype(call), Arg1_ , Arg2_>;
-    };
-}; 
-/*
- * Requirement #2:
- * ::Boolean::or_(::Boolean::and_(p1, ::Boolean::not_(p2)), ::Boolean::and_(::Boolean::not_(p1), p2))
-*/
-template<>
-struct SpecXor_::Requirement<cong::lang::core::NaturalStatic<1>> {
-    using Present = cong::lang::core::True;
-    template<class Arg1_ , class Arg2_>
-    struct Call
-    {
-        static constexpr auto call(Arg1_&& p1 , Arg2_&& p2)
-        {
-            using ExpType_ = std::decay_t<decltype(::Boolean::or_(::Boolean::and_(p1, ::Boolean::not_(p2)), ::Boolean::and_(::Boolean::not_(p1), p2)))>;
-            const auto& result = [&]{ return ::Boolean::or_(::Boolean::and_(p1, ::Boolean::not_(p2)), ::Boolean::and_(::Boolean::not_(p1), p2)); };
-            return cong::lang::intern::CondEval<
-                        typename ::cong::lang::intern::IsExp::Call<ExpType_>::Type,
-                        decltype(result),
-                        ExpType_
-                   >::call(result);
-        }
-        using Type = std::invoke_result_t<decltype(call), Arg1_ , Arg2_>;
-    };
-};
+
 
 template <typename... Exp_>
 constexpr

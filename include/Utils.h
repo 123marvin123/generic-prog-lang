@@ -11,6 +11,15 @@ namespace utils
         vec<std::string> namespaces;
         std::string identifier;
         bool topLevel;
+
+        std::string join_namespaces() const
+        {
+            std::string ns = std::accumulate(std::next(namespaces.begin()), namespaces.end(), namespaces[0],
+                                   [](std::string a, const std::string& b) { return std::move(a) + "::" + b; });
+            if (topLevel)
+                return std::format("::{}", ns);
+            return ns;
+        }
     };
 
     constexpr auto ptr_transform = [](const auto& param) { return param.get(); };

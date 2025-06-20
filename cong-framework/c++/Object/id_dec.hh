@@ -6,15 +6,16 @@
 #include "Traits.hh"
 #include "Decls.hh"
 #include "Seq/core/Tuple.hh"
-#include "Number/core/NaturalStatic.hh"
-#include "Object/Object.hh"
 
+
+#include "Object/Object.hh"
+#include "Object/Object.hh"
 namespace Object {
 
 struct DecId {
-    using Params = ::cong::lang::core::Tuple<Object::ConceptObject>;
+    using Params = ::cong::lang::core::Tuple<::Object::ConceptObject>;
 
-    using ReturnConcept = Object::ConceptObject;
+    using ReturnConcept = ::Object::ConceptObject;
 
 };
 

@@ -1,20 +1,21 @@
 #pragma once
 
-#include "../Exp.hh"
-#include "../Bind.hh"
-#include "../Function.hh"
-#include "../Traits.hh"
-#include "../Decls.hh"
-#include "../Seq/core/Tuple.hh"
-#include "core/NaturalStatic.hh"
-#include "Number.hh"
+#include "Exp.hh"
+#include "Bind.hh"
+#include "Function.hh"
+#include "Traits.hh"
+#include "Decls.hh"
+#include "Seq/core/Tuple.hh"
 
+
+#include "Object/Object.hh"
+#include "Number/Number.hh"
 namespace Number {
 
 struct DecAdd {
-    using Params = ::cong::lang::core::Tuple<Number::ConceptNumber, Number::ConceptNumber>;
+    using Params = ::cong::lang::core::Tuple<::Number::ConceptNumber, ::Number::ConceptNumber>;
 
-    using ReturnConcept = Number::ConceptNumber;
+    using ReturnConcept = ::Number::ConceptNumber;
 
 };
 

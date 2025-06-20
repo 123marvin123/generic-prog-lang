@@ -6,3 +6,9 @@ CONG_LANG_CORE_OPERATOR_2(Number, Sub,sub,-,AUTO);
 CONG_LANG_CORE_OPERATOR_2(Number, Mul,mul,*,AUTO);
 CONG_LANG_CORE_OPERATOR_2(Number, Div,div,/,AUTO);
 CONG_LANG_CORE_OPERATOR_2(Number, Mod,mod,%,AUTO);
+
+CONG_LANG_CORE_OPERATOR_2(Ordered, IsLess,isLess,<,AUTO);
+CONG_LANG_CORE_OPERATOR_2(Ordered, IsLessEqual,isLessEqual,<=,AUTO);
+
+CONG_LANG_CORE_OPERATOR_2(Ordered, IsGreater,isGreater,>,AUTO);
+CONG_LANG_CORE_OPERATOR_2(Ordered, IsGreaterEqual,isGreaterEqual,>=,AUTO);

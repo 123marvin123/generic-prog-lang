@@ -34,7 +34,7 @@ struct Namespace : SemaIdentifier, SemaContext<Namespace>, SemaContext<Concept>,
     void set_parent(Namespace* parent) { this->parent = parent; }
 
     [[nodiscard]]
-    std::string get_full_name() const;
+    std::string get_full_name() const override;
 
     [[nodiscard]]
     bool is_global() const

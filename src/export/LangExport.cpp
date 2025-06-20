@@ -65,19 +65,12 @@ void LangExport::setup_environment()
             auto fqi_info = utils::split_fully_qualified_identifier(fqi);
             if (const auto& res = utils::resolve_fully_qualified_identifier<Concept>(fqi_info, get_sema()); res.has_value())
             {
-                std::stringstream ss;
-                ss << "";
-                std::string separator;
-                for (const auto& ns : (*res)->get_namespace()->namespace_chain())
-                {
-                    ss << separator << ns->get_identifier();
-                    separator = "::";
-                }
+                std::string ns = fqi_info.join_namespaces();
 
-                if (!(*res)->get_namespace()->namespace_chain().empty())
-                    ss << "::";
-                ss << prefix << (*res)->get_identifier();
-                return ss.str();
+                if (!ns.ends_with("::"))
+                    return std::format("{}::{}{}", ns, prefix, (*res)->get_identifier());
+
+                return std::format("{}{}{}", ns, prefix, (*res)->get_identifier());
             }
 
             throw std::runtime_error(std::format("FQI {} not found", fqi));

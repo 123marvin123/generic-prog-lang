@@ -76,7 +76,7 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     }
 
     [[nodiscard]]
-    vec<RequiresStatement> requirements() const
+    const vec<RequiresStatement>& requirements() const
     {
         return exp_requires;
     }
@@ -84,10 +84,28 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     [[nodiscard]]
     bool export_enabled() const { return export_; }
 
-    void add_requirement(s_ptr<Expression>, opt<std::string> = std::nullopt);
+    const RequiresStatement& add_requirement(s_ptr<Expression>, opt<std::string> = std::nullopt, opt<std::string> =
+    std::nullopt);
 
     [[nodiscard]]
-    virtual bool is_dependent() const { throw std::runtime_error("Not implemented."); };
+    virtual bool is_dependent() const
+    {
+        throw std::runtime_error("Not implemented.");
+    }
+
+    [[nodiscard]]
+    opt<const RequiresStatement*> find_requirement(std::string_view string) const
+    {
+        for (const auto& r : exp_requires)
+        {
+            if (r.get_name() == string)
+            {
+                return &r;
+            }
+        }
+
+        return std::nullopt;
+    }
 
     void set_time_complexity(s_ptr<Expression> exp) { time_complexity = std::move(exp); }
 

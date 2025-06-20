@@ -24,6 +24,7 @@ struct PlaceholderFunctionParameter;
 struct ConcreteFunctionParameter;
 struct Function;
 struct Sema;
+struct RequiresStatement;
 
 struct Object;
 struct Map;

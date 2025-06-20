@@ -3,15 +3,21 @@
 #include "id_dec.hh"
 
 #include "Boolean/BooleanStatic.hh"
-#include "Number/NaturalStatic.hh"
 #include "Boolean/BooleanDynamic.hh"
+
 #include "Number/NaturalDynamic.hh"
+#include "Number/NaturalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
+#include "String/core/StringStatic.hh"
+
+#include "Proj.hh"
+
 
 namespace Object {
 
 struct SpecId {
-    static constexpr auto name = "id";
-    static constexpr auto description = "p(1) (the argument itself)";
+    static constexpr cong::lang::core::StringStatic name = "id";
+    static constexpr cong::lang::core::StringStatic description = "";
 
     template<class Index_>
     struct Requirement
@@ -20,7 +26,7 @@ struct SpecId {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Req for Id not specified">;
             static constexpr Type call(...);
         };
     };
@@ -32,10 +38,13 @@ struct SpecId {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Generic impl for Id not specified">;
             static constexpr Type call(...);
         };
     };
+
+    template<cong::lang::core::StringStatic Name>
+    struct NameToRequirement;
 
     using GenericImpls = cong::lang::core::Tuple<
         GenericImpl<cong::lang::core::NaturalStatic<0>>    >;
@@ -62,7 +71,7 @@ private:
         {
         private:
             using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> p1, ...)
+            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> a, ...)
             {
                 return cong::lang::NaturalStatic<cong::lang::core::natInf>{};
             }
@@ -83,7 +92,7 @@ private:
         {
         private:
             using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> p1, ...)
+            static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> a, ...)
             {
                 return cong::lang::NaturalStatic<cong::lang::core::natInf>{};
             }
@@ -101,9 +110,9 @@ public:
     {
     private:
         using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-        static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> p1, ...)
+        static constexpr auto call_(std::tuple_element_t<0, TupleOfExp_> a, ...)
         {
-            return p1;
+            return a;
         }
     public:
         using ApplyTime = ApplyTime_;

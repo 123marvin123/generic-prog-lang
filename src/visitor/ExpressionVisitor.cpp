@@ -10,11 +10,11 @@ std::any ExpressionVisitor::visitLiteralExpression(CongParser::LiteralExpression
             std::stod(ctx->literal()->REAL()->getText()),
             ctx->literal()->DYNAMIC_ANNOTATOR() ? true : false);
     }
-    else if (ctx->literal()->NUMBER())
+    else if (ctx->literal()->INTEGER())
     {
-        exp = new NumberExpression(
+        exp = new IntegerExpression(
             ns->get_sema(),
-            std::stol(ctx->literal()->NUMBER()->getText()),
+            std::stol(ctx->literal()->INTEGER()->getText()),
             ctx->literal()->DYNAMIC_ANNOTATOR() ? true : false);
     }
     else if (ctx->literal()->STRING())
@@ -37,9 +37,12 @@ std::any ExpressionVisitor::visitLiteralExpression(CongParser::LiteralExpression
     throw std::runtime_error(std::format("Unknown literal type {}", ctx->getText()));
 }
 
-std::any ExpressionVisitor::visitParameterReferenceExpression(CongParser::ParameterReferenceExpressionContext* ctx)
+std::any ExpressionVisitor::visitParameterOrConceptReferenceExpression(CongParser::ParameterOrConceptReferenceExpressionContext* ctx)
 {
-    const std::string paramName = ctx->param->getText();
+    const std::string paramName = ctx->paramOrConcept->getText();
+
+    if (!fun)
+        throw SemaError("We are not inside a function context", ctx);
 
     if (const auto let_binding = findLetBinding(paramName)) {
         return utils::dyn_cast<Expression>(
@@ -47,12 +50,16 @@ std::any ExpressionVisitor::visitParameterReferenceExpression(CongParser::Parame
         );
     }
     
-    if (!fun)
-        throw SemaError("We are not inside a function context", ctx);
+    const auto& fqi = utils::split_fully_qualified_identifier(paramName);
+    if (const auto& concept_ = utils::resolve_fully_qualified_identifier<Concept>(fqi, ns);
+        concept_.has_value())
+    {
+        return utils::dyn_cast<Expression>(new ConceptReferenceExpression(get_sema(), *concept_));
+    }
 
     const opt<FunctionParameter*> param = fun->find_function_parameter(paramName);
     if (!param.has_value() || !param.value())
-        throw SemaError(std::format("Could not find parameter {}", paramName), ctx);
+        throw SemaError(std::format("Could not find parameter or concept {}", paramName), ctx);
 
     try
     {
@@ -208,13 +215,25 @@ std::any ExpressionVisitor::visitQuoteExpression(CongParser::QuoteExpressionCont
 
 std::any ExpressionVisitor::visitEvalExpression(CongParser::EvalExpressionContext* context)
 {
-    if (const std::any result = visit(context->expression()); result.has_value() && result.type() == typeid(Expression*))
+    if (const std::any result = visit(context->expression());
+        result.has_value() && result.type() == typeid(Expression*))
     {
         auto* value_exp = std::any_cast<Expression*>(result);
         return utils::dyn_cast<Expression>(new EvalExpression(sema, s_ptr<Expression>(value_exp)));
     }
 
     throw SemaError("Could not instantiate inner eval expression");
+}
+std::any ExpressionVisitor::visitRequiresCallExpression(CongParser::RequiresCallExpressionContext* ctx)
+{
+    if (const auto& r = fun->find_requirement(utils::cleanup_string_literal(ctx->STRING()->getText()));
+        r.has_value())
+    {
+        return utils::dyn_cast<Expression>(new RequiresCallExpression(sema, *r.value(), fun));
+    }
+
+    throw SemaError(
+        std::format("Requirement with name {} not found.", utils::cleanup_string_literal(ctx->STRING()->getText())), ctx);
 }
 
 void ExpressionVisitor::checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx)

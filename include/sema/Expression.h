@@ -1,14 +1,15 @@
 #pragma once
 
-#include <memory>
+#include <format>
 #include "Debug.h"
 #include "Decls.h"
 #include "Function.h"
 #include "FunctionParameter.h"
-#include "Utils.h"
-#include <format>
-#include "SemaError.h"
 #include "OpenBinding.h"
+#include "SemaError.h"
+#include "Utils.h"
+#include "RequiresStatement.h"
+
 struct Expression : SemaElement, Introspection<Expression> {
   explicit Expression(Sema *sema) : sema(sema) {}
 
@@ -47,6 +48,9 @@ struct Expression : SemaElement, Introspection<Expression> {
 
   [[nodiscard]]
   std::set<const Function *> get_depending_functions() const;
+
+  [[nodiscard]]
+  std::set<const Concept* > get_depending_concepts() const;
 
   struct DebugVisitor;
 
@@ -152,11 +156,11 @@ struct RealExpression final : ConstantExpression<double> {
   }
 };
 
-struct NumberExpression final : ConstantExpression<long> {
-  NumberExpression(Sema *sema, long value, bool is_dynamic);
+struct IntegerExpression final : ConstantExpression<long> {
+  IntegerExpression(Sema *sema, long value, bool is_dynamic);
 
-  static s_ptr<NumberExpression> create(Sema *sema, long value, bool is_dynamic) {
-    return Expression::create<NumberExpression>(sema, value, is_dynamic);
+  static s_ptr<IntegerExpression> create(Sema *sema, long value, bool is_dynamic) {
+    return Expression::create<IntegerExpression>(sema, value, is_dynamic);
   }
 
   [[nodiscard]] std::string to_cpp() const noexcept override {
@@ -384,9 +388,6 @@ struct LetExpression final : Expression, Introspection<LetExpression> {
 
   [[nodiscard]] std::string to_python() const noexcept override;
 
-  [[nodiscard]]
-  std::set<const Function *> get_depending_functions() const;
-
   struct DebugVisitor;
 
 private:
@@ -430,6 +431,66 @@ struct LetVariableReferenceExpression final : Expression, Introspection<LetVaria
 private:
   std::string identifier;
   s_ptr<Expression> bound_value;
+};
+
+struct RequiresCallExpression final : Expression, Introspection<RequiresCallExpression>
+{
+  RequiresCallExpression(Sema* sema, const RequiresStatement& r, const Function* f) : Expression(sema), stmnt(r), f(f) {};
+
+  RequiresCallExpression(const RequiresCallExpression &other) : Expression(other), stmnt(other.stmnt), f(other.f) {}
+
+  [[nodiscard]]
+  const RequiresStatement& get_stmnt() const { return stmnt; }
+
+  [[nodiscard]]
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
+  get_result() const override;
+
+  static s_ptr<RequiresCallExpression> create(Sema *sema, const RequiresStatement& r, const Function* f) {
+    return Expression::create<RequiresCallExpression>(sema, r, f);
+  }
+
+  [[nodiscard]] std::string to_cpp() const noexcept override;
+
+  [[nodiscard]] std::string to_python() const noexcept override;
+
+  struct DebugVisitor;
+
+private:
+  RequiresStatement stmnt;
+  const Function* f;
+};
+
+struct ConceptReferenceExpression final : Expression, Introspection<ConceptReferenceExpression>
+{
+  ConceptReferenceExpression(Sema *sema, const Concept* c) : Expression(sema), concept_(c)
+  {
+    if (!concept_)
+      throw SemaError("Concept must not be empty");
+  }
+
+  ConceptReferenceExpression(const ConceptReferenceExpression &other)
+      : Expression(other), concept_(other.concept_) {}
+
+  [[nodiscard]]
+  const Concept* get_concept() const { return concept_; }
+
+  [[nodiscard]]
+  std::variant<const Concept *, const PlaceholderFunctionParameter *, OpenBinding>
+  get_result() const override { return get_concept(); };
+
+  static s_ptr<ConceptReferenceExpression> create(Sema *sema, const Concept* c) {
+    return Expression::create<ConceptReferenceExpression>(sema, c);
+  }
+
+  [[nodiscard]] std::string to_cpp() const noexcept override;
+
+  [[nodiscard]] std::string to_python() const noexcept override;
+
+  struct DebugVisitor;
+
+private:
+  const Concept* concept_;
 };
 
 struct OpenBindingExpression final : Expression, Introspection<OpenBindingExpression>

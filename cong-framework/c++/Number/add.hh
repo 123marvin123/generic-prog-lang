@@ -2,15 +2,22 @@
 
 #include "add_dec.hh"
 
-#include "../Boolean/core/BooleanStatic.hh"
-#include "../Undefined.hh"
-#include "../Decls.hh"
+#include "Boolean/BooleanStatic.hh"
+#include "Boolean/BooleanDynamic.hh"
+
+#include "Number/NaturalDynamic.hh"
+#include "Number/NaturalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
+#include "String/core/StringStatic.hh"
+
+#include "Proj.hh"
+
 
 namespace Number {
 
 struct SpecAdd {
-    static constexpr auto name = "add";
-    static constexpr auto description = "";
+    static constexpr cong::lang::core::StringStatic name = "add";
+    static constexpr cong::lang::core::StringStatic description = "";
 
     template<class Index_>
     struct Requirement
@@ -19,7 +26,7 @@ struct SpecAdd {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Req for Add not specified">;
             static constexpr Type call(...);
         };
     };
@@ -31,10 +38,13 @@ struct SpecAdd {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Generic impl for Add not specified">;
             static constexpr Type call(...);
         };
     };
+
+    template<cong::lang::core::StringStatic Name>
+    struct NameToRequirement;
 
     using GenericImpls = cong::lang::core::Tuple<
     >;

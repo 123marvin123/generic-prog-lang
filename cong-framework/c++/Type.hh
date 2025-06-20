@@ -9,7 +9,7 @@ namespace cong::lang::core
         template <typename T>
         struct Call
         {
-            using Type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+            using Type = std::remove_cv_t<std::remove_reference_t<T>>;
         };
     };
 

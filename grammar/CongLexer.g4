@@ -7,6 +7,7 @@ FUNCTION: 'fun';
 NAMESPACE: 'namespace';
 LET: 'let';
 
+NAME: 'name';
 DESCRIPTION: 'description';
 GENERICIMPL: 'generic';
 REQUIRES: 'requires';
@@ -53,7 +54,7 @@ BOOL
     | 'false'
     ;
 
-NUMBER // This rule already handles negative numbers like -5
+INTEGER // This rule already handles negative numbers like -5
     : [1-9][0-9]*
     | '0'
     | '-' [1-9][0-9]*

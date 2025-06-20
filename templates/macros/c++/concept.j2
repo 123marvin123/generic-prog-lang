@@ -3,13 +3,13 @@
 {% macro ConceptDefinition(def) %}
 {% set Name_ = sanitize(def.name) %}
 {% call NamespaceChain(def.ns) %}
-struct Concept{{ Name_ }} {
+struct Concept{{ Name_ }} : cong::lang::intern::Val, cong::lang::ConceptTag {
     using Bases = ::cong::lang::core::Tuple<
     {%- for base in def.bases -%}
 {{base.ns | join('::')}}::Concept{{ sanitize(base.name) }}{{', ' if loop.nextitem is defined }}
     {%- endfor %}>;
-    static constexpr auto name = "{{ Name_ }}";
-    static constexpr auto description = "{{def.description}}";
+    static constexpr cong::lang::core::StringStatic name = "{{ Name_ }}";
+    static constexpr cong::lang::core::StringStatic description = "{{def.description}}";
 };
 {% endcall %}
 {% endmacro %}

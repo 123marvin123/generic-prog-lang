@@ -29,7 +29,7 @@ namespace cong::lang::intern
       template <typename...>
       struct Call
       {
-        using Type = core::Undefined;
+        using Type = core::Undefined<"Usage of ApplyMember from base class">;
       };
     };
   };

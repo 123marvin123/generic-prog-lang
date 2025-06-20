@@ -6,6 +6,12 @@ enum class GenericImplQualityType
     Time
 };
 
+enum class RequirementProperty
+{
+    Name,
+    Description
+};
+
 std::any FinalizingFunctionVisitor::visitFunctionStmnt(CongParser::FunctionStmntContext* ctx)
 {
     std::string fnName = ctx->name->getText();
@@ -37,24 +43,89 @@ std::any FinalizingFunctionVisitor::visitFunctionExpRequires(CongParser::Functio
 {
     ExpressionVisitor visitor(get_current_namespace(), current_function);
 
+    using DetailsType = std::map<RequirementProperty, std::string>;
+
+    opt<DetailsType> detail_map = std::nullopt;
+
+    if (ctx->requirementDetails())
+    {
+        if (const std::any details = visit(ctx->requirementDetails());
+            details.has_value() && details.type() == typeid(DetailsType))
+        {
+            detail_map = std::any_cast<DetailsType>(details);
+        }
+    }
+
+
     if (const std::any result = visitor.visit(ctx->expression());
         result.has_value() && result.type() == typeid(Expression*))
     {
         auto expr = std::any_cast<Expression*>(result);
-        const opt<std::string> name = ctx->name ? opt<std::string>{ctx->name->getText()} : std::nullopt;
+
+        opt<std::string> name = std::nullopt;
+        opt<std::string> desc = std::nullopt;
+
+        if (detail_map)
+        {
+            for (const auto& [key, value] : *detail_map)
+            {
+                if (value.empty())
+                    continue;
+
+                if (key == RequirementProperty::Name)
+                    name = value;
+                else if (key == RequirementProperty::Description)
+                    desc = value;
+            }
+        }
 
         try
         {
-            current_function->add_requirement(s_ptr<Expression>(expr), name);
+            current_function->add_requirement(s_ptr<Expression>(expr), name, desc);
         }
         catch (const std::exception& e)
         {
-            std::throw_with_nested(SemaError("Could not add requirement to function", ctx));
+            std::throw_with_nested(SemaError(std::format("Could not add requirement to function: {}", e.what()), ctx));
         }
         return expr;
     }
 
     throw SemaError("Could not parse expression", ctx);
+}
+
+std::any FinalizingFunctionVisitor::visitRequirementDetail(CongParser::RequirementDetailContext* ctx)
+{
+    if (ctx->desc)
+    {
+        return std::make_pair(RequirementProperty::Description, utils::cleanup_string_literal(ctx->desc->getText()));
+    }
+
+    if (ctx->name)
+    {
+        return std::make_pair(RequirementProperty::Name, utils::cleanup_string_literal(ctx->name->getText()));
+    }
+
+    throw std::runtime_error("Invalid requirement detail");
+}
+
+std::any FinalizingFunctionVisitor::visitRequirementDetails(CongParser::RequirementDetailsContext* ctx)
+{
+    std::map<RequirementProperty, std::string> details;
+    for (const auto& a : ctx->requirementDetail())
+    {
+        using ResultType = std::pair<RequirementProperty, std::string>;
+
+        if (const std::any result = visit(a);
+            result.has_value() && result.type() == typeid(ResultType))
+        {
+            const auto& [fst, snd] = std::any_cast<ResultType>(result);
+            if (details.contains(fst))
+                throw SemaError("Duplicate requirement detail found", a);
+
+            details[fst] = snd;
+        }
+    }
+    return details;
 }
 
 std::any FinalizingFunctionVisitor::visitGenericImplDetails(CongParser::GenericImplDetailsContext* ctx)

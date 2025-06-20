@@ -99,13 +99,13 @@ void Sema::register_builtin_functions()
         add_function->register_function_parameter<ConcreteFunctionParameter>("a", number_concept);
         add_function->register_function_parameter<ConcreteFunctionParameter>("b", number_concept);
     }
-    
+
     sub_function = *create_function<ConcreteFunction>(*number_ns, "sub", *number_ns, number_concept, false);
     {
         sub_function->register_function_parameter<ConcreteFunctionParameter>("a", number_concept);
         sub_function->register_function_parameter<ConcreteFunctionParameter>("b", number_concept);
     }
-    
+
     mul_function = *create_function<ConcreteFunction>(*number_ns, "mul", *number_ns, number_concept, false);
     {
         mul_function->register_function_parameter<ConcreteFunctionParameter>("a", number_concept);
@@ -117,7 +117,7 @@ void Sema::register_builtin_functions()
         div_function->register_function_parameter<ConcreteFunctionParameter>("a", number_concept);
         div_function->register_function_parameter<ConcreteFunctionParameter>("b", number_concept);
     }
-    
+
     mod_function = *create_function<ConcreteFunction>(*number_ns, "mod", *number_ns, number_concept, false);
     {
         mod_function->register_function_parameter<ConcreteFunctionParameter>("a", number_concept);
@@ -129,11 +129,10 @@ void Sema::register_builtin_functions()
         succ_function->register_function_parameter<ConcreteFunctionParameter>("n", natural_concept);
     }
 
-    pred_function = *create_function<ConcreteFunction>(*number_ns, "pred", *number_ns, integer_concept, false);
+    pred_function = *create_function<DependentFunction>(*number_ns, "pred", *number_ns, false);
     {
-        pred_function->register_function_parameter<ConcreteFunctionParameter>("n", natural_concept);
-        // requires { boolean::not(object::isEqual(p1, 0)) }
-        // must be checked in framework
+        const auto dep = pred_function->register_function_parameter<PlaceholderFunctionParameter>("n", "T");
+        utils::dyn_cast<DependentFunction>(pred_function)->set_dependency(dep);
     }
 
     pow_function = *create_function<ConcreteFunction>(*number_ns, "pow", *number_ns, number_concept, false);
@@ -161,9 +160,9 @@ void Sema::register_builtin_functions()
         xor_function->register_function_parameter<ConcreteFunctionParameter>("a", boolean_concept);
         xor_function->register_function_parameter<ConcreteFunctionParameter>("b", boolean_concept);
         /*
-        *        requires { Object::isNotEqual(p1, p2) }
-        *        requires { or(and(p1, not(p2)), and(not(p1), p2)) }
-        */
+         *        requires { Object::isNotEqual(p1, p2) }
+         *        requires { or(and(p1, not(p2)), and(not(p1), p2)) }
+         */
     }
 
     not_function = *create_function<ConcreteFunction>(*bool_ns, "not", *bool_ns, boolean_concept, false);
@@ -179,17 +178,20 @@ void Sema::register_builtin_functions()
         isEqual_function->register_function_parameter<ConcreteFunctionParameter>("b", object_concept);
     }
 
-    isNotEqual_function = *create_function<ConcreteFunction>(*object_ns, "isNotEqual", *object_ns, boolean_concept, false);
+    isNotEqual_function =
+        *create_function<ConcreteFunction>(*object_ns, "isNotEqual", *object_ns, boolean_concept, false);
     {
         auto a = isNotEqual_function->register_function_parameter<ConcreteFunctionParameter>("a", object_concept);
         auto b = isNotEqual_function->register_function_parameter<ConcreteFunctionParameter>("b", object_concept);
 
-        auto inner = CallExpression::create(this, isEqual_function, {
-            s_ptr<Expression>{FunctionParameterExpression::create(sema, a)},
-            s_ptr<Expression>{FunctionParameterExpression::create(sema, b)},
-        });
+        auto inner = CallExpression::create(this, isEqual_function,
+                                            {
+                                                s_ptr<Expression>{FunctionParameterExpression::create(sema, a)},
+                                                s_ptr<Expression>{FunctionParameterExpression::create(sema, b)},
+                                            });
 
-        isNotEqual_function->add_generic_implementation(GenericImplementation{CallExpression::create(this, not_function, {inner})});
+        isNotEqual_function->add_generic_implementation(
+            GenericImplementation{CallExpression::create(this, not_function, {inner})});
     }
 
     id_function = *create_function<DependentFunction>(*object_ns, "id", *object_ns, false);
@@ -197,8 +199,92 @@ void Sema::register_builtin_functions()
         auto placeholder = id_function->register_function_parameter<PlaceholderFunctionParameter>("a", "T");
         utils::dyn_cast<DependentFunction>(id_function)->set_dependency(placeholder);
 
-        id_function->add_generic_implementation(GenericImplementation{FunctionParameterExpression::create(sema, placeholder)});
+        id_function->add_generic_implementation(
+            GenericImplementation{FunctionParameterExpression::create(sema, placeholder)});
     }
+
+    isModelOf_function = *create_function<ConcreteFunction>(*object_ns, "isModelOf", *object_ns, boolean_concept, false);
+    {
+        isModelOf_function->set_description("does object p(1) model concept p(2)?");
+        isModelOf_function->register_function_parameter<ConcreteFunctionParameter>("p1", object_concept);
+        isModelOf_function->register_function_parameter<ConcreteFunctionParameter>("p2", object_concept);
+
+        GenericImplementation g(nullptr, nullptr, nullptr, "c++");
+        g.set_native_implementation(R"Impl(
+            using Plain_ = typename cong::lang::core::Plain::Call<decltype(p2)>::Type;
+            if constexpr (!std::is_base_of_v<cong::lang::ConceptTag, Plain_>)
+            {
+                return cong::lang::BooleanStatic<false>{}; // Not a concept
+            }
+
+            return cong::lang::BooleanStatic<
+                cong::lang::core::IsModelOf::Call<decltype(p1), decltype(p2)>::Type::native()
+            >{};
+        )Impl");
+
+        isModelOf_function->add_generic_implementation(g);
+    }
+
+
+    const auto& ordered_ns = find_namespace("Ordered");
+
+    isLess_function = *create_function<ConcreteFunction>(*ordered_ns, "isLess", *ordered_ns, boolean_concept, false);
+    {
+        isLess_function->register_function_parameter<ConcreteFunctionParameter>("a", ordered_concept);
+        isLess_function->register_function_parameter<ConcreteFunctionParameter>("b", ordered_concept);
+    }
+
+    isLessEqual_function =
+        *create_function<ConcreteFunction>(*ordered_ns, "isLessEqual", *ordered_ns, boolean_concept, false);
+    {
+        isLessEqual_function->register_function_parameter<ConcreteFunctionParameter>("a", ordered_concept);
+        isLessEqual_function->register_function_parameter<ConcreteFunctionParameter>("b", ordered_concept);
+    }
+
+    isGreater_function =
+        *create_function<ConcreteFunction>(*ordered_ns, "isGreater", *ordered_ns, boolean_concept, false);
+    {
+        isGreater_function->register_function_parameter<ConcreteFunctionParameter>("a", ordered_concept);
+        isGreater_function->register_function_parameter<ConcreteFunctionParameter>("b", ordered_concept);
+    }
+
+    isGreaterEqual_function =
+        *create_function<ConcreteFunction>(*ordered_ns, "isGreaterEqual", *ordered_ns, boolean_concept, false);
+    {
+        isGreaterEqual_function->register_function_parameter<ConcreteFunctionParameter>("a", ordered_concept);
+        isGreaterEqual_function->register_function_parameter<ConcreteFunctionParameter>("b", ordered_concept);
+    }
+}
+
+void Sema::register_builtin_requirements()
+{
+    {
+        const auto n = utils::dyn_cast<PlaceholderFunctionParameter>(*pred_function->find_function_parameter("n"));
+
+        // Object::isModelOf(p1, Number::Number)
+        const auto a = CallExpression::create(sema, isModelOf_function, { FunctionParameterExpression::create(sema, n),
+        ConceptReferenceExpression::create(sema, number_concept) });
+
+        RequiresStatement isNumber = pred_function->add_requirement(a, "IsNumber", "Argument is a number");
+
+        /*
+        * Boolean::or(
+        *   Boolean::not(Object::isModelOf(p1, Number::Natural)),
+        *   Ordered::isGreater(p1, 0)
+        * )
+        */
+        pred_function->add_requirement(
+        CallExpression::create(sema, or_function, {
+            CallExpression::create(sema, not_function, {
+                CallExpression::create(sema, isModelOf_function, { FunctionParameterExpression::create(sema, n), ConceptReferenceExpression::create(sema, natural_concept) })
+            }),
+            CallExpression::create(sema, isGreater_function, { FunctionParameterExpression::create(sema, n), IntegerExpression::create(sema, 0, false) })
+        }), "IsValidNatural", "p1 > 0 if Natural");
+
+
+    }
+
+
 }
 
 void Sema::register_builtin_operators()
@@ -269,8 +355,8 @@ const Concept* Sema::builtin_concept<bool>() const
 template <>
 const Concept* Sema::builtin_concept<long>() const
 {
-    if (!number_concept) throw SemaError("Number concept not registered");
-    return number_concept;
+    if (!integer_concept) throw SemaError("Integer concept not registered");
+    return integer_concept;
 }
 
 template <>

@@ -16,6 +16,7 @@ struct Sema final : DefaultNamespace
         register_builtin_functions();
 #endif
         register_builtin_operators();
+        register_builtin_requirements();
     }
 
     [[nodiscard]]
@@ -54,6 +55,7 @@ struct Sema final : DefaultNamespace
 private:
     void register_builtin_concepts();
     void register_builtin_functions();
+    void register_builtin_requirements();
     void register_builtin_operators();
 
     Concept* object_concept;
@@ -71,6 +73,8 @@ private:
     Concept* real_concept;
     Concept* complex_concept;
 
+    Function* isModelOf_function;
+
     Function* add_function;
     Function* sub_function;
     Function* mod_function;
@@ -84,6 +88,11 @@ private:
     Function* or_function;
     Function* xor_function;
     Function* and_function;
+
+    Function* isLess_function;
+    Function* isLessEqual_function;
+    Function* isGreater_function;
+    Function* isGreaterEqual_function;
 
     Function* isEqual_function;
     Function* isNotEqual_function;

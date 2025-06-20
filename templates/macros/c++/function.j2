@@ -41,8 +41,8 @@ constexpr
 {% set name_ = sanitize(def.name) %}
 
 struct Spec{{ Name_ }} {
-    static constexpr auto name = "{{ name_ }}";
-    static constexpr auto description = "{{def.description}}";
+    static constexpr cong::lang::core::StringStatic name = "{{ name_ }}";
+    static constexpr cong::lang::core::StringStatic description = "{{def.description}}";
 
     template<class Index_>
     struct Requirement
@@ -51,7 +51,7 @@ struct Spec{{ Name_ }} {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Req for {{ Name_ }} not specified">;
             static constexpr Type call(...);
         };
     };
@@ -63,10 +63,13 @@ struct Spec{{ Name_ }} {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Generic impl for {{ Name_ }} not specified">;
             static constexpr Type call(...);
         };
     };
+
+    template<cong::lang::core::StringStatic Name>
+    struct NameToRequirement;
 
     using GenericImpls = cong::lang::core::Tuple<
     {% for impl in function_generic_impls(def.full_name) %}
@@ -83,25 +86,39 @@ struct Spec{{ Name_ }} {
 template<>
 struct Spec{{ Name_ }}::Requirement<cong::lang::core::NaturalStatic<{{ loop.index0 }}>> {
     using Present = cong::lang::core::True;
+
+    static constexpr cong::lang::core::StringStatic name = "{{ req.name }}";
+    static constexpr cong::lang::core::StringStatic description = "{{ req.description }}";
+
     template<
     {%- for i in range(def.params | length) -%}
 class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
     {%- endfor -%}>
     struct Call
     {
-        static constexpr auto call({%- for p in def.params -%}Arg{{ loop.index }}_&& {{ p.name }}{{' , ' if not loop.last }}{% endfor -%})
+        static constexpr auto call({%- for p in def.params -%}Arg{{ loop.index }}_&& {{ p.name }}{{', ' if not loop.last }}{% endfor -%})
         {
-            using ExpType_ = std::decay_t<decltype({{ req.expression }})>;
-            const auto& result = [&]{ return {{ req.expression }}; };
+            const auto& resultFn = [&]{
+                return {{ req.expression }};
+            };
+
+            using ExpType_ = std::decay_t<decltype(resultFn())>;
             return cong::lang::intern::CondEval<
                         typename ::cong::lang::intern::IsExp::Call<ExpType_>::Type,
-                        decltype(result),
+                        decltype(resultFn),
                         ExpType_
-                   >::call(result);
+                   >::call(resultFn);
         }
         using Type = std::invoke_result_t<decltype(call), {% for p in def.params -%}Arg{{ loop.index }}_{{' , ' if not loop.last }}{% endfor -%}>;
     };
-};{{' \n' if not loop.last }}{% endfor %} 
+};
+
+template<>
+struct Spec{{ Name_ }}::NameToRequirement<"{{ req.name }}">
+{
+    using Type = Spec{{ Name_ }}::Requirement<cong::lang::core::NaturalStatic<{{ loop.index0 }}>>;
+};
+{{' \n' if not loop.last }}{% endfor %} 
 
 {% for impl in function_generic_impls(def.full_name) %}
 /*

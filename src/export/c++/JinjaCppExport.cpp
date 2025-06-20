@@ -29,7 +29,7 @@ void ensure_directory_exists(const std::filesystem::path& dir_path)
     }
 }
 
-void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2::ValuesList& needed_files)
+void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2::ValuesMap& needed_files)
 {
     std::filesystem::path current_path = get_output_folder();
     // Namespace-Ordner erstellen
@@ -66,7 +66,7 @@ void JinjaCppExport::create_function_declaration_file(const Function* f, jinja2:
     }
 }
 
-void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::ValuesList& needed_files)
+void JinjaCppExport::create_function_definition_file(const Function* f, jinja2::ValuesMap& needed_files)
 {
     std::filesystem::path current_path = get_output_folder();
     // Namespace-Ordner erstellen
@@ -163,7 +163,9 @@ vec<std::filesystem::path> JinjaCppExport::process()
         for (const auto& exp : f->requirements())
         {
             const auto& funs = exp.get_expression()->get_depending_functions();
+            const auto& concepts = exp.get_expression()->get_depending_concepts();
             needed_files_set.insert(funs.begin(), funs.end());
+            needed_files_set.insert(concepts.begin(), concepts.end());
         }
 
         for(const auto& impl : f->get_implementations())
@@ -171,7 +173,9 @@ vec<std::filesystem::path> JinjaCppExport::process()
             if (!impl.get_language().empty() && impl.get_language() != "c++") continue;
 
             const auto& funs = impl.get_expression()->get_depending_functions();
+            const auto& concepts = impl.get_expression()->get_depending_concepts();
             needed_files_set.insert(funs.begin(), funs.end());
+            needed_files_set.insert(concepts.begin(), concepts.end());
 
             if (impl.get_space_complexity())
             {
@@ -188,21 +192,27 @@ vec<std::filesystem::path> JinjaCppExport::process()
         /* TODO: handle usage of booleans, numbers, etc. for the
             corresponding cong::lang::core type */
 
-        // Convert the set to a jinja2::ValuesList:
-        jinja2::ValuesList needed_files;
-        needed_files.reserve(needed_files_set.size());
-        std::ranges::transform(needed_files_set, std::back_inserter(needed_files),
-                               [](const auto& p)
-                               {
-                                   if (std::holds_alternative<const Concept*>(p))
-                                       return jinja2::Reflect(std::get<const Concept*>(p));
-                                   if (std::holds_alternative<const Function*>(p))
-                                       return jinja2::Reflect(FunctionView{std::get<const Function*>(p)});
-                                   throw std::runtime_error("Invalid sema type");
-                               });
+        jinja2::ValuesMap file_map;
 
-        create_function_declaration_file(f, needed_files);
-        create_function_definition_file(f, needed_files);
+        // Convert the set to a jinja2::ValuesList:
+        jinja2::ValuesList concept_list;
+        jinja2::ValuesList function_list;
+
+        for (const auto& v : needed_files_set)
+        {
+            if (std::holds_alternative<const Concept*>(v))
+                concept_list.push_back(jinja2::Reflect(std::get<const Concept*>(v)));
+            else if (std::holds_alternative<const Function*>(v))
+                function_list.push_back(jinja2::Reflect(FunctionView{std::get<const Function*>(v)}));
+            else
+                throw std::runtime_error("Unknown sema type");
+        }
+
+        file_map["concepts"] = concept_list;
+        file_map["functions"] = function_list;
+
+        create_function_declaration_file(f, file_map);
+        create_function_definition_file(f, file_map);
     }
 
     return output_files;
@@ -232,6 +242,7 @@ void JinjaCppExport::register_function_functions()
                                    {
                                        jinja2::ValuesMap m{};
                                        m["name"] = utils::sanitize_cpp_identifier(exp.get_name().value_or(""));
+                                       m["description"] = exp.get_desc().value_or("");
                                        m["expression"] = exp.get_expression()->to_cpp();
                                        return m;
                                    });

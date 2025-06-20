@@ -138,7 +138,7 @@ namespace cong::lang::intern
         return result_variant;
     }
 
-    template <class TupleOfImpl_>
+    template <class TupleOfImpl_, class Spec_>
     struct SelectDynamicGenericImpl
     {
         template <class Exp_, class TupleOfExp_>
@@ -160,7 +160,7 @@ namespace cong::lang::intern
                 return std::visit([&e, &t](const auto& actual_impl_value)
                 {
                     using ActualImpl = std::decay_t<decltype(actual_impl_value)>;
-                    if constexpr (std::is_same_v<ActualImpl, core::Undefined>)
+                    if constexpr (std::is_same_v<typename IsDefined::Call<ActualImpl>::Type, core::False>)
                     {
                         throw std::runtime_error("No dynamic generic implementation available");
                     }
@@ -181,15 +181,17 @@ namespace cong::lang::intern
     // Neither static nor dynamic implementations are available for
     // given arguments; we return Undefined to state that result is
     // not defined.
-    template <>
-    struct SelectDynamicGenericImpl<core::Tuple<>>
+    template <class Spec_>
+    struct SelectDynamicGenericImpl<core::Tuple<>, Spec_>
     {
         template <class Exp_, class TupleOfExp_>
         struct Call
         {
-            static constexpr core::Undefined call(...)
+            static constexpr auto call(...)
             {
-                return {};
+                auto err = core::Undefined<core::concat<"No static or dynamic algorithms are available for ", Spec_::name>()>{};
+
+                return err;
             }
 
             using Type = std::invoke_result_t<decltype(call), TupleOfExp_>;
@@ -247,7 +249,7 @@ namespace cong::lang::intern
         template <>
         struct Dispatch<core::Tuple<>>
         {
-            using Type = core::Undefined;
+            using Type = core::Undefined<"No static generic implementation available">;
         };
 
     public:
@@ -288,7 +290,7 @@ namespace cong::lang::intern
         using Type = std::conditional_t<
             0 < std::tuple_size_v<ResultingTuple_>,
             typename SelectBestStaticGenericImpl<ResultingTuple_, Exp_, TupleOfExp_>::Type,
-            core::Undefined
+            core::Undefined<"No static generic implementation available">
         >;
     };
 

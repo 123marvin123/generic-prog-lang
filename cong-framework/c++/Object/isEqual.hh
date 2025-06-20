@@ -2,11 +2,22 @@
 
 #include "isEqual_dec.hh"
 
+#include "Boolean/BooleanStatic.hh"
+#include "Boolean/BooleanDynamic.hh"
+
+#include "Number/NaturalDynamic.hh"
+#include "Number/NaturalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
+#include "String/core/StringStatic.hh"
+
+#include "Proj.hh"
+
+
 namespace Object {
 
 struct SpecIsEqual {
-    static constexpr auto name = "isEqual";
-    static constexpr auto description = "p(1) $=$ p(2) (is p(1) equal to p(2)?)";
+    static constexpr cong::lang::core::StringStatic name = "isEqual";
+    static constexpr cong::lang::core::StringStatic description = "";
 
     template<class Index_>
     struct Requirement
@@ -15,7 +26,7 @@ struct SpecIsEqual {
         template<class...>
         struct Call
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Req for IsEqual not specified">;
             static constexpr Type call(...);
         };
     };
@@ -27,10 +38,13 @@ struct SpecIsEqual {
         template<typename...>
         struct Call 
         {
-            using Type = cong::lang::core::Undefined;
+            using Type = cong::lang::core::Undefined<"Generic impl for IsEqual not specified">;
             static constexpr Type call(...);
         };
     };
+
+    template<cong::lang::core::StringStatic Name>
+    struct NameToRequirement;
 
     using GenericImpls = cong::lang::core::Tuple<
     >;

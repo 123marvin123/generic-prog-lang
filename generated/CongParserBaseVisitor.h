@@ -74,11 +74,27 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitRequirementDetail(CongParser::RequirementDetailContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitRequirementDetails(CongParser::RequirementDetailsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitGenericImplDetails(CongParser::GenericImplDetailsContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual std::any visitParameter(CongParser::ParameterContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitParameterOrConceptReferenceExpression(CongParser::ParameterOrConceptReferenceExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -107,10 +123,6 @@ public:
   }
 
   virtual std::any visitLiteralExpression(CongParser::LiteralExpressionContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitParameterReferenceExpression(CongParser::ParameterReferenceExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
 
