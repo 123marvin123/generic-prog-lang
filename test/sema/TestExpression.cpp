@@ -28,7 +28,7 @@ struct ExpressionFixture {
 TEST_CASE_METHOD(ExpressionFixture, "Constant expression invalid construction", "[expression]")
 {
     INFO(sema->to_string());
-    REQUIRE_THROWS_AS(ConstantExpression<long>(sema_ptr, nullptr, 0), std::runtime_error);
+    REQUIRE_THROWS_AS(ConstantExpression<long>(sema_ptr, nullptr, 0, false), std::runtime_error);
 }
 
 TEST_CASE_METHOD(ExpressionFixture, "Constant expression evaluates to value", "[expression]")
@@ -37,7 +37,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Constant expression evaluates to value", "[
     const std::string val = "hello";
     INFO(sema->to_string());
 
-    const auto exp = ConstantExpression(sema_ptr, c_str, val);
+    const auto exp = ConstantExpression(sema_ptr, c_str, val, false);
     REQUIRE(val == exp.eval());
     REQUIRE(c_str == std::get<const Concept*>(exp.get_result()));
     REQUIRE(exp.is_constant());
@@ -105,8 +105,8 @@ TEST_CASE_METHOD(ExpressionFixture, "Call expression with invalid arguments thro
     INFO(sema->to_string());
 
     REQUIRE_THROWS_AS(CallExpression(sema_ptr, f, {
-        std::make_shared<NumberExpression>(sema_ptr, 1),
-        std::make_shared<BooleanExpression>(sema_ptr, false)
+        std::make_shared<IntegerExpression>(sema_ptr, 1, false),
+        std::make_shared<BooleanExpression>(sema_ptr, false, false)
     }), std::runtime_error);
 
     REQUIRE_THROWS_AS(CallExpression(sema_ptr, f, {}), std::runtime_error);
@@ -138,8 +138,8 @@ TEST_CASE_METHOD(ExpressionFixture, "Call expression result on dependent functio
 
 TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression construction", "[expression]")
 {
-    const auto num1 = NumberExpression::create(sema_ptr, 5);
-    const auto num2 = NumberExpression::create(sema_ptr, 10);
+    const auto num1 = IntegerExpression::create(sema_ptr, 5, false);
+    const auto num2 = IntegerExpression::create(sema_ptr, 10, false);
     INFO(sema->to_string());
 
     const auto expr = ArithmeticExpression::create(sema_ptr, num1, num2, Operator::ADD);
@@ -152,7 +152,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression construction", "[expr
 
 TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with incompatible types throws", "[expression]")
 {
-    const auto num = NumberExpression::create(sema_ptr, 5);
+    const auto num = IntegerExpression::create(sema_ptr, 5, false);
     const auto str = StringExpression::create(sema_ptr, "hello");
     INFO(sema->to_string());
 
@@ -161,8 +161,8 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with incompatible typ
 
 TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression result with same types", "[expression]")
 {
-    const auto num1 = NumberExpression::create(sema_ptr, 5);
-    const auto num2 = NumberExpression::create(sema_ptr, 10);
+    const auto num1 = IntegerExpression::create(sema_ptr, 5, false);
+    const auto num2 = IntegerExpression::create(sema_ptr, 10, false);
     const auto number_concept = sema->builtin_concept<long>();
     INFO(sema->to_string());
 
@@ -175,8 +175,8 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression result with same type
 
 TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression result with mixed types", "[expression]")
 {
-    const auto num = NumberExpression::create(sema_ptr, 5);
-    const auto real = RealExpression::create(sema_ptr, 3.14);
+    const auto num = IntegerExpression::create(sema_ptr, 5, false);
+    const auto real = RealExpression::create(sema_ptr, 3.14, false);
     const auto real_concept = sema->builtin_concept<double>();
     INFO(sema->to_string());
 
@@ -194,7 +194,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with placeholder", "[
     f->set_dependency(p);
     INFO(sema->to_string());
 
-    const auto num = NumberExpression::create(sema_ptr, 5);
+    const auto num = IntegerExpression::create(sema_ptr, 5, false);
     const auto param_expr = FunctionParameterExpression::create(sema_ptr, p);
 
     const auto expr = ArithmeticExpression::create(sema_ptr, num, param_expr, Operator::ADD);
@@ -222,7 +222,7 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with bound parameter"
 
     const auto param_expr = FunctionParameterExpression::create(sema_ptr, p);
     const auto bound_expr = param_expr->bind(number_concept);
-    const auto num = NumberExpression::create(sema_ptr, 5);
+    const auto num = IntegerExpression::create(sema_ptr, 5, false);
     INFO("Created bound parameter expression");
 
     const auto expr = ArithmeticExpression::create(sema_ptr, num, bound_expr, Operator::ADD);
@@ -234,8 +234,8 @@ TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with bound parameter"
 
 TEST_CASE_METHOD(ExpressionFixture, "Arithmetic expression with different operators", "[expression]")
 {
-    const auto num1 = NumberExpression::create(sema_ptr, 5);
-    const auto num2 = NumberExpression::create(sema_ptr, 10);
+    const auto num1 = IntegerExpression::create(sema_ptr, 5, false);
+    const auto num2 = IntegerExpression::create(sema_ptr, 10, false);
     const auto number_concept = sema->builtin_concept<long>();
     INFO(sema->to_string());
 
@@ -255,10 +255,10 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression basic functionality", "[expre
 {
     INFO(sema->to_string());
 
-    auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
 
     vec<s_ptr<Expression>> body_exprs;
-    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
     
     const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
     
@@ -275,12 +275,12 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression with multiple body expression
 {
     INFO(sema->to_string());
     
-    const auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    const auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
     
     vec<s_ptr<Expression>> body_exprs;
-    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 10));
-    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 20));
-    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 30));
+    body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 10, false));
+    body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 20, false));
+    body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 30, false));
     
     const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
     
@@ -292,9 +292,9 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression C++ export", "[expression][le
 {
     INFO(sema->to_string());
     
-    auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
     vec<s_ptr<Expression>> body_exprs;
-    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
     
     auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
     
@@ -310,9 +310,9 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression Python export", "[expression]
 {
     INFO(sema->to_string());
     
-    const auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    const auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
     vec<s_ptr<Expression>> body_exprs;
-    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
     
     const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
     
@@ -328,13 +328,13 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression invalid construction", "[expr
 {
     INFO(sema->to_string());
     
-    const auto value_expr = std::make_shared<NumberExpression>(sema_ptr, 42);
+    const auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
     
     vec<s_ptr<Expression>> empty_body;
     REQUIRE_THROWS_AS(LetExpression(sema_ptr, "x", value_expr, empty_body), std::runtime_error);
     
     vec<s_ptr<Expression>> body_exprs;
-    body_exprs.push_back(std::make_shared<NumberExpression>(sema_ptr, 100));
+    body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
     REQUIRE_THROWS_AS(LetExpression(sema_ptr, "", value_expr, body_exprs), std::runtime_error);
 
     REQUIRE_THROWS_AS(LetExpression(sema_ptr, "x", nullptr, body_exprs), std::runtime_error);

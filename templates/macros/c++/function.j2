@@ -113,11 +113,13 @@ class Arg{{ i + 1 }}_{{' , ' if not loop.last }}
     };
 };
 
+{% if req.name | length > 0 %}
 template<>
 struct Spec{{ Name_ }}::NameToRequirement<"{{ req.name }}">
 {
     using Type = Spec{{ Name_ }}::Requirement<cong::lang::core::NaturalStatic<{{ loop.index0 }}>>;
 };
+{% endif %}
 {{' \n' if not loop.last }}{% endfor %} 
 
 {% for impl in function_generic_impls(def.full_name) %}

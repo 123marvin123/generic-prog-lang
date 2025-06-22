@@ -1,9 +1,4 @@
-//
-// Created by Marvin Haschker on 12.03.25.
-//
-
-#ifndef FINALIZINGFUNCTIONVISITOR_H
-#define FINALIZINGFUNCTIONVISITOR_H
+#pragma once
 
 #include <format>
 
@@ -15,9 +10,9 @@
 
 struct FinalizingFunctionVisitor final : AbstractVisitor
 {
-    explicit FinalizingFunctionVisitor(Sema* sema) : AbstractVisitor(sema, false)
-    {
-    }
+    explicit FinalizingFunctionVisitor(Sema* sema) : AbstractVisitor(sema, false) {}
+
+    void createImplicitRequirements() const;
 
     std::any visitFunctionStmnt(CongParser::FunctionStmntContext* ctx) override;
 
@@ -38,5 +33,3 @@ struct FinalizingFunctionVisitor final : AbstractVisitor
 private:
     Function* current_function;
 };
-
-#endif //FINALIZINGFUNCTIONVISITOR_H

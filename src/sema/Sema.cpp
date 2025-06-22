@@ -303,9 +303,9 @@ void Sema::register_builtin_operators()
 
     vec<std::tuple<const Concept*, const Concept*, const Concept*>> results = {
         {boolean_concept, boolean_concept, boolean_concept},
-        {number_concept, boolean_concept, boolean_concept},
-        {number_concept, number_concept, number_concept},
-        {real_concept, number_concept, real_concept},
+        {integer_concept, boolean_concept, boolean_concept},
+        {integer_concept, integer_concept, integer_concept},
+        {real_concept, integer_concept, real_concept},
         {real_concept, real_concept, real_concept},
         {string_concept, string_concept, string_concept}
     };

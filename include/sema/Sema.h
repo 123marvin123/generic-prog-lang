@@ -16,7 +16,9 @@ struct Sema final : DefaultNamespace
         register_builtin_functions();
 #endif
         register_builtin_operators();
+#ifndef __CATCH2_TEST__
         register_builtin_requirements();
+#endif
     }
 
     [[nodiscard]]
@@ -58,6 +60,7 @@ private:
     void register_builtin_requirements();
     void register_builtin_operators();
 
+public:
     Concept* object_concept;
     Concept* string_concept;
     Concept* boolean_concept;

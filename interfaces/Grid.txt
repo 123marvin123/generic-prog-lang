@@ -1,6 +1,6 @@
 namespace Grid {
-    concept GridHierarchy (description: "");
-    concept Grid (description: "");
+    concept GridHierarchy (description: "") : Object::Object;
+    concept Grid (description: "") : Object::Object;
 
     fun seqOfGrid(p1: GridHierarchy) -> Seq::Seq {
         description { "sequence of grids in p(1)" }

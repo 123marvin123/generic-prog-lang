@@ -75,7 +75,7 @@ void Function::add_generic_implementation(const GenericImplementation& exp)
     generic_implementations.push_back(exp);
 }
 
-const RequiresStatement& Function::add_requirement(s_ptr<Expression> exp, opt<std::string> name, opt<std::string> desc)
+const RequiresStatement& Function::add_requirement(s_ptr<Expression> exp, opt<std::string> name, opt<std::string> description)
 {
     static const auto boolean = get_namespace()->get_sema()->builtin_concept<bool>();
 
@@ -87,7 +87,17 @@ const RequiresStatement& Function::add_requirement(s_ptr<Expression> exp, opt<st
             std::format("Expression must return {}, not {}",
                 boolean->get_identifier(), conceptResult->get_identifier()));
 
-    return exp_requires.emplace_back(std::move(exp), std::move(name), std::move(desc));
+    if (name)
+    {
+        for (const auto& param : exp_requires)
+        {
+            if (param.get_name() == name)
+                throw SemaError(
+                    std::format("Requirement with name '{}' already exists", name.value()));
+        }
+    }
+
+    return exp_requires.emplace_back(std::move(exp), std::move(name), std::move(description));
 }
 
 void Function::DebugVisitor::visitFunction(const Function& f)

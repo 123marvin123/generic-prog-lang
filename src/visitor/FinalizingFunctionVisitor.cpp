@@ -12,6 +12,33 @@ enum class RequirementProperty
     Description
 };
 
+void FinalizingFunctionVisitor::createImplicitRequirements() const
+{
+    for (const auto* p : current_function->get_parameters())
+    {
+        if (utils::dyn_cast<DependentFunctionParameter>(p)) continue;
+        if (const auto* concrete = utils::dyn_cast<ConcreteFunctionParameter>(p))
+        {
+            auto exp = CallExpression::create(sema, sema->isModelOf_function,
+                                   {FunctionParameterExpression::create(sema, p),
+                                    ConceptReferenceExpression::create(sema, concrete->get_type())});
+
+            std::string description = std::format("{} is model of {}",
+                                                  concrete->get_identifier(),
+                                                  concrete->get_type()->get_full_name());
+
+            try
+            {
+                current_function->add_requirement(exp, std::nullopt, description);
+            }
+            catch (const std::exception& e)
+            {
+                std::throw_with_nested(SemaError(std::format("Could not add implicit requirement for parameter {}: {}", concrete->get_identifier(), e.what())));
+            }
+        }
+    }
+}
+
 std::any FinalizingFunctionVisitor::visitFunctionStmnt(CongParser::FunctionStmntContext* ctx)
 {
     std::string fnName = ctx->name->getText();
@@ -20,6 +47,8 @@ std::any FinalizingFunctionVisitor::visitFunctionStmnt(CongParser::FunctionStmnt
         throw SemaError(std::format("Could not find function {}", fnName), ctx);
 
     current_function = fn.value();
+
+    createImplicitRequirements();
 
     visitChildren(ctx);
 

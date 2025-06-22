@@ -84,8 +84,9 @@ struct Function : SemaIdentifier, SemaContext<FunctionParameter>, Introspection<
     [[nodiscard]]
     bool export_enabled() const { return export_; }
 
-    const RequiresStatement& add_requirement(s_ptr<Expression>, opt<std::string> = std::nullopt, opt<std::string> =
-    std::nullopt);
+    const RequiresStatement& add_requirement(s_ptr<Expression> exp,
+        opt<std::string> name = std::nullopt,
+        opt<std::string> description = std::nullopt);
 
     [[nodiscard]]
     virtual bool is_dependent() const

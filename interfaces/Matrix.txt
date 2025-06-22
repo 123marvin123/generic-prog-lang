@@ -1,5 +1,5 @@
 namespace Matrix {
-    concept Matrix (description: "");
+    concept Matrix (description: "") : Object::Object;
 
     fun matrixForIdentity(p1: Number::Natural, p2: Number::Natural) -> Matrix {
         description { "identity matrix of p(1) rows and p(2) columns" }
