@@ -48,6 +48,9 @@ namespace Seq {
 
     fun item(p1: Seq) -> Object::Object {
         description { "any (random) item of p(1)" }
+        requires(description: "p(1) is not empty") {
+            Boolean::not(isEmptySeq(p1))
+        }
     }
 
     fun pick(p1: Seq) -> Object::Object {
@@ -230,5 +233,14 @@ namespace Seq {
     fun advance(p1: Object::Object) -> Object::Object {
         description { "advance iterator p(1) to next item" }
         generic() { p1 }
+    }
+
+    fun insertionSort(p1: Seq) -> Seq {
+        description { "sorts p1 using insertion sort algorithm" }
+        requires(name: "Ordered", description: "items should be model of Ordered") {
+            let notEmpty = Boolean::not(isEmptySeq(p1)) {
+                Boolean::cond(notEmpty, Object::isModelOf(item(p1), Ordered::Ordered), true)
+            }
+        }
     }
 }

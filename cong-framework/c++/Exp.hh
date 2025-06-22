@@ -206,6 +206,33 @@ namespace cong::lang
             };
         };
 
+        template<class Exp_, core::StringStatic S>
+        struct EnsureDefined
+        {
+        private:
+            using IsUndefined_ = typename core::Not_::Call<typename IsDefined::Call<Exp_>::Type>::Type;
+            using IsExp_ = typename IsExp::Call<Exp_>::Type;
+
+            static consteval auto call()
+            {
+                if constexpr (std::is_same_v<IsUndefined_, core::True>)
+                {
+                    core::print_string<PrintUndefined::Call<typename WrapUndefined::Call<S, Exp_>::Type>::call()>();
+                    return false;
+                }
+
+                if constexpr (std::is_same_v<IsExp_, core::False>)
+                {
+                    core::print_string<S>();
+                    return false;
+                }
+
+                return true;
+            }
+        public:
+            using Type = std::conditional_t<call(), Exp_, Exp_>;
+        };
+
         struct TransformExp // is a Fun(Exp)Dynamic
         {
         private:
@@ -218,13 +245,12 @@ namespace cong::lang
                 template <typename Exp_, typename TupleOfExp_>
                 struct Call
                 {
-                    using Type = core::Tuple<typename ApplyValue::Call<Exp_, ItemS_>::Type...>;
-
-                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    static constexpr auto call(Exp_ exp, TupleOfExp_ tupleOfExp)
                     {
                         return std::apply([&exp](ItemS_&... itemS)
-                                          { return core::tuple(ApplyValue ::Call<Exp_, ItemS_>::call(exp, itemS)...); },
-                                          tupleOfExp);
+                        {
+                            return core::tuple(eval(ApplyValue::Call<Exp_, ItemS_>::call(exp, itemS))...);
+                        }, tupleOfExp);
                     }
                 };
             };
@@ -236,9 +262,9 @@ namespace cong::lang
                 using Tuple_ = typename core::Plain::Call<TupleOfExp_>::Type;
                 using Base_ = Dispatch<Tuple_>;
 
-                using Type = typename Base_::template Call<Exp_, TupleOfExp_>::Type;
+                //using Type = typename Base_::template Call<Exp_, TupleOfExp_>::Type;
 
-                static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                static constexpr auto call(Exp_ exp, TupleOfExp_ tupleOfExp)
                 {
                     return Base_::template Call<Exp_, TupleOfExp_>::call(exp, tupleOfExp);
                 }

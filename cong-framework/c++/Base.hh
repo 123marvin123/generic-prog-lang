@@ -23,7 +23,7 @@ namespace cong::lang::intern
     using ApplyTime = core::FunStaticMake<core::Invalid>;
     using ApplyValue = core::FunStaticMake<core::Invalid>;
 
-    template <class Spec_, typename Offset_>
+    template <class Spec_, typename Offset_, typename Stacktrace_>
     struct ApplyMember
     {
       template <typename...>

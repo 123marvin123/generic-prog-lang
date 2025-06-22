@@ -41,23 +41,16 @@ namespace cong::lang
 
     namespace local
     {
-
-        template <typename Native_, Native_ native_>
-        CONG_LANG_INTERN_APPLYMEMBER((ObjectStatic<Native_, native_>),
-                             Object, Id, 1, 1,
-                             (intern::Exp<ObjectStatic>),
-                             (return p1));
-
         template <typename Native_, Native_ native_>
         CONG_LANG_INTERN_APPLYMEMBER((ObjectStatic<Native_, native_>),
                                      Object, IsEqual, 1, 2,
-                                     (B<core::IsSame::Call<Arg1_, Arg2_>::Type::native()>),
+                                     (B<Arg1_::native() == Arg2_::native()>),
                                      (return {}));
 
         template <typename Native_, Native_ native_>
         CONG_LANG_INTERN_APPLYMEMBER((ObjectStatic<Native_, native_>),
                                      Object, IsNotEqual, 1, 2,
-                                     (B<!core::IsSame::Call<Arg1_, Arg2_>::Type::native()>),
+                                     (B<Arg1_::native() != Arg2_::native()>),
                                      (return {}));
 
     }

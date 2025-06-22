@@ -10,9 +10,9 @@
 #define CONG_LANG_INTERN_APPLYMEMBER_DEFAULT \
 CONG_LANG_CORE_FUN_PROPAGATE \
 (ApplyMember, \
-(Spec__,Offset_,Dummy_ = void),(), \
+(Spec__,Offset_,Stacktrace_ = void),(), \
 ( \
-(Base__, (typename Base_::template ApplyMember<Spec__, Offset_>)) \
+(Base__, (typename Base_::template ApplyMember<Spec__, Offset_, Stacktrace_>)) \
 ), \
 Base__ \
 )
@@ -31,16 +31,16 @@ Base__ \
   template <typename...>
 
 #define CONG_LANG_INTERN_APPLYMEMBER(PAREN_CLASS_, Ns_, Name_, OFFSET_, ARITY_, PAREN_TYPE_, IMPL_) \
-  template<typename Dummy_> \
+  template<typename Stacktrace_> \
   struct CONG_LANG_CORE_INTERN_UNPAREN(PAREN_CLASS_)::ApplyMember \
   < \
     Ns_ :: CONG_LANG_CORE_INTERN_PASTE(Spec, Name_), \
     ::cong::lang::core::NaturalStatic<OFFSET_>, \
-    Dummy_ \
+    Stacktrace_ \
   > \
   { \
   private: \
-    struct Fun_ \
+    struct Name_ \
     { \
       BOOST_PP_CAT(CONG_LANG_INTERN_APPLYMEMBER_LOCAL_TEMP_LIST2_, \
                    BOOST_PP_GREATER(ARITY_, 0)) \
@@ -62,7 +62,7 @@ Base__ \
     struct Call \
     { \
     private: \
-      using Base_ = ::cong::lang::intern::local::ApplyByFun<Fun_>; \
+      using Base_ = ::cong::lang::intern::local::ApplyByFun<Name_>; \
       using Call_ = typename Base_::template Call<Exp_, TupleOfExp_>; \
     public: \
       using Type = typename Call_::Type; \

@@ -1,16 +1,7 @@
 #pragma once
 
 #include "isEqual_dec.hh"
-
-#include "Boolean/BooleanStatic.hh"
-#include "Boolean/BooleanDynamic.hh"
-
-#include "Number/NaturalDynamic.hh"
-#include "Number/NaturalStatic.hh"
-#include "Number/core/NaturalStatic.hh"
 #include "String/core/StringStatic.hh"
-
-#include "Proj.hh"
 
 
 namespace Object {

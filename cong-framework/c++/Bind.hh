@@ -11,6 +11,7 @@
 #include "Type.hh"
 
 #include <utility> // std::forward
+#include <Boolean/BooleanStatic.hh>
 
 namespace cong::lang
 {
@@ -23,11 +24,13 @@ namespace cong::lang
 
     namespace local
     {
+        struct BindTag {};
+
         template <typename Env_,
                   typename Exp_,
                   typename TupleOfExp_>
         class Bind
-            : public intern::Base
+            : public intern::Base, BindTag
         {
         public:
             struct IsStateful
@@ -84,9 +87,9 @@ namespace cong::lang
                     call(Exp__ exp,
                          TupleOfExp__ tupleOfExp)
                     {
-                        return ApplyValue_::call(exp,
-                                                 Transform_::call(BindArg_{tupleOfExp},
-                                                                  exp.tupleOfExp_));
+                        return ApplyValue_::call(ReduceValue::template Call<Exp__>::call(exp),
+                                                Transform_::call(BindArg_{tupleOfExp},
+                                                                 exp.tupleOfExp_));
                     }
                 };
             };
@@ -106,8 +109,7 @@ namespace cong::lang
                     Type
                     call(Exp__ exp)
                     {
-                        return ApplyValue_::call(exp.exp_,
-                                                 exp.tupleOfExp_);
+                        return ApplyValue_::call(exp.exp_, exp.tupleOfExp_);
                     }
                 };
             };

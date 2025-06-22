@@ -26,15 +26,14 @@ namespace cong::lang {
           : native_{std::forward<Init_>(init)}
         {}
 
-        constexpr
         //typename core::Traits<typename core::Traits<Native>::ToConst>::ToReference
-        const Native&
+        constexpr const Native&
         native() const
         {
           return native_;
         }
 
-        Native&
+        constexpr Native&
         native()
         {
           return native_;
@@ -48,4 +47,5 @@ namespace cong::lang {
 
     template <typename Native_>
     using ObjectDynamic = intern::Exp<local::ObjectDynamic<Native_>>;
+
 };

@@ -223,9 +223,9 @@ public:
     antlr4::tree::TerminalNode *GENERICIMPL();
     antlr4::tree::TerminalNode *LBRACE();
     antlr4::tree::TerminalNode *RBRACE();
+    GenericImplDetailsContext *genericImplDetails();
     RawTextContentContext *rawTextContent();
     ExpressionContext *expression();
-    GenericImplDetailsContext *genericImplDetails();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };

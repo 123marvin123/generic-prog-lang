@@ -120,7 +120,8 @@ public:
             }
 
             return cong::lang::BooleanStatic<
-                cong::lang::core::IsModelOf::Call<decltype(p1), decltype(p2)>::Type::native()
+                cong::lang::core::IsModelOf::Call<decltype(cong::lang::intern::eval(p1)), decltype(cong::lang::intern::eval(p2))
+                >::Type::native()
             >{};
         
         }

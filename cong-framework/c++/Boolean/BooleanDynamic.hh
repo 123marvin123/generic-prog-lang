@@ -39,7 +39,24 @@ namespace cong::lang {
 #define STAGE_ Dynamic
 #define DIR_ Boolean
 #include "../ApplyMember_operator.hh"
+
         }
 
     using BooleanDynamic = intern::Exp<local::BooleanDynamic<bool>>;
+
+    namespace local
+    {
+        template <typename Native_>
+        CONG_LANG_INTERN_APPLYMEMBER((ObjectDynamic<Native_>),
+                                              Object, IsEqual, 1, 2,
+                                              (cong::lang::BooleanDynamic),
+                                              (return {p1.native() == p2.native()}));
+
+        template <typename Native_>
+        CONG_LANG_INTERN_APPLYMEMBER((ObjectDynamic<Native_>),
+                                     Object, IsNotEqual, 1, 2,
+                                     (cong::lang::BooleanDynamic),
+                                     (return {p1.native() != p2.native()}));
+    }
+
 }

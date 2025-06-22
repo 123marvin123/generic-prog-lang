@@ -42,7 +42,7 @@ functionBody
 functionBodyStmnt
     : DESCRIPTION LBRACE literal RBRACE
         # functionDescription
-    | GENERICIMPL (g=genericImplDetails)?
+    | GENERICIMPL (g=genericImplDetails)
         (
           { $g.hasLangArg }?
             LBRACE

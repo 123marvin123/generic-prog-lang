@@ -5,6 +5,7 @@
 
 #include "NaturalStatic.hh"
 #include "../Object/ObjectDynamic.hh"
+#include "../Boolean/BooleanDynamic.hh"
 
 namespace cong::lang {
 
@@ -36,6 +37,31 @@ namespace cong::lang {
 #define STAGE_ Dynamic
 #define DIR_ Number
 #include "../ApplyMember_operator.hh"
+
+        template<class Native_>
+        CONG_LANG_INTERN_APPLYMEMBER((NaturalDynamic<Native_>),
+                                      Ordered, IsGreater, 1, 2,
+                                      (::cong::lang::BooleanDynamic),
+                                      (return {p1.native() > p2.native()}));
+
+
+        template<class Native_>
+        CONG_LANG_INTERN_APPLYMEMBER((NaturalDynamic<Native_>),
+                                      Ordered, IsGreaterEqual, 1, 2,
+                                      (cong::lang::BooleanDynamic),
+                                      (return {p1.native() >= p2.native()}));
+
+       template<class Native_>
+       CONG_LANG_INTERN_APPLYMEMBER((NaturalDynamic<Native_>),
+                                     Ordered, IsLess, 1, 2,
+                                     (cong::lang::BooleanDynamic),
+                                     (return {p1.native() < p2.native()}));
+
+        template<class Native_>
+       CONG_LANG_INTERN_APPLYMEMBER((NaturalDynamic<Native_>),
+                                     Ordered, IsLessEqual, 1, 2,
+                                     (cong::lang::BooleanDynamic),
+                                     (return {p1.native() <= p2.native()}));
 
     }
 

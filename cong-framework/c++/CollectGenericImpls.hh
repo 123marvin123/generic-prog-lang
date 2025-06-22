@@ -138,7 +138,7 @@ namespace cong::lang::intern
         return result_variant;
     }
 
-    template <class TupleOfImpl_, class Spec_>
+    template <class TupleOfImpl_, class Spec_, class Stacktrace_>
     struct SelectDynamicGenericImpl
     {
         template <class Exp_, class TupleOfExp_>
@@ -148,7 +148,7 @@ namespace cong::lang::intern
             {
                 if (core::Length::Call<TupleOfImpl_>::Type::native() == 0)
                 {
-                    throw std::runtime_error("No dynamic generic implementation available");
+                    throw std::runtime_error(std::format("No dynamic generic implementation available; {}", Stacktrace_::str().data));
                 }
 
                 const auto res = find_best_impl_runtime<Exp_, TupleOfExp_, TupleOfImpl_>(
@@ -162,7 +162,7 @@ namespace cong::lang::intern
                     using ActualImpl = std::decay_t<decltype(actual_impl_value)>;
                     if constexpr (std::is_same_v<typename IsDefined::Call<ActualImpl>::Type, core::False>)
                     {
-                        throw std::runtime_error("No dynamic generic implementation available");
+                        throw std::runtime_error(std::format("No dynamic generic implementation available; {}", Stacktrace_::str().data));
                     }
                     else
                     {
@@ -181,17 +181,16 @@ namespace cong::lang::intern
     // Neither static nor dynamic implementations are available for
     // given arguments; we return Undefined to state that result is
     // not defined.
-    template <class Spec_>
-    struct SelectDynamicGenericImpl<core::Tuple<>, Spec_>
+    template <class Spec_, class Stacktrace_>
+    struct SelectDynamicGenericImpl<core::Tuple<>, Spec_, Stacktrace_>
     {
         template <class Exp_, class TupleOfExp_>
         struct Call
         {
             static constexpr auto call(...)
             {
-                auto err = core::Undefined<core::concat<"No static or dynamic algorithms are available for ", Spec_::name>()>{};
-
-                return err;
+                return typename WrapUndefined::Call<
+                    core::concat<"No static or dynamic algorithms are available for ", Spec_::name>(), Stacktrace_>::Type{};
             }
 
             using Type = std::invoke_result_t<decltype(call), TupleOfExp_>;
