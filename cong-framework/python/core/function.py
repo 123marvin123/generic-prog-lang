@@ -4,9 +4,12 @@ from .exp import Exp, is_exp
 from .primitive import Number
 
 class FunctionSpecification:
-    def __init__(self, name, description, concept_args, concept_result, generic_impls=None):
+    def __init__(self, name, description, concept_args, concept_result, generic_impls=None, reqs=None):
         if generic_impls is None:
             generic_impls = []
+
+        if reqs is None:
+            reqs = []
 
         for impl in generic_impls:
             if not isinstance(impl, _GenericFunction):
@@ -18,7 +21,8 @@ class FunctionSpecification:
         self.concept_args = concept_args
         self.concept_result = concept_result
         self.generic_impls = generic_impls
-        
+        self.preconditions = reqs
+
     def __str__(self):
         return f"FunctionSpecification({self.name}, description={self.description}, concept_args={self.concept_args}, concept_result={self.concept_result}, generic_impls={len(self.generic_impls)})"
         
@@ -62,6 +66,8 @@ class _FunctionFromSpec(Base):
 
         if not generic_impls_from_spec:
             return Undefined(f"Neither specific implementation of {self.specification.name} nor any generic implementations are defined.")
+        elif len(generic_impls_from_spec) > 0:
+            best_generic_impl = generic_impls_from_spec[0]
 
         for gen_impl_wrapper in generic_impls_from_spec:
             cost_obj = gen_impl_wrapper.apply_space(*evaluated_args)
@@ -84,9 +90,9 @@ def FunctionFromSpec(*args, **kwargs):
 class _GenericFunction(Base):
 
     def __init__(self, impl, time_complexity=Undefined("Operation time cost not defined"), space_complexity=Undefined("Operation space cost not defined")):
-        if not isinstance(time_complexity, _CostFun):
+        if not isinstance(time_complexity, _CostFun) and not isinstance(time_complexity, Undefined):
             raise TypeError("time_complexity must be a CostFun")
-        if not isinstance(space_complexity, _CostFun):
+        if not isinstance(space_complexity, _CostFun) and not isinstance(space_complexity, Undefined):
             raise TypeError("space_complexity must be a CostFun")
 
         self.impl = impl

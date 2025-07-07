@@ -1,9 +1,5 @@
 {% macro ConceptDefinition(def) %}
-{% for base in def.bases %}
-from {{ base.ns | join('.') }}{% if base.ns | length > 0 %}.{% endif %}{{ base.name }} import Concept{{ sanitize(base.name) }}
-{% endfor %}
-
-from .core.concept import Concept
+from core.concept import Concept
 
 class Concept{{ sanitize(def.name) }}(Concept):
 

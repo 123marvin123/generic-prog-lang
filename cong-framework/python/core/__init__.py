@@ -5,6 +5,8 @@ from .bind import Bind
 from .primitive import Number, String, Boolean, Real
 from .proj import Proj
 from .base import Base
+from .quote import Quote
+from .concept import ConceptWrapper
 
 __all__ = [
     'Exp',
@@ -17,4 +19,6 @@ __all__ = [
     'Boolean',
     'Real',
     'Proj',
+    'Quote',
+    'ConceptWrapper'
 ]

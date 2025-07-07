@@ -1,3 +1,15 @@
 {% from "macros/python/function.j2" import FunctionDefinition with context %}
 
+from core.function import FunctionSpecification, FunctionFromSpec, GenericFunction
+from core import Bind, Proj, Quote, Boolean, Number, String, Real, ConceptWrapper
+
+{% for param in needed_files.functions %}
+{% set ParamName = sanitize(param.name) %}
+from {{ param.ns | join('.') }}{% if param.ns | length > 0 %}.{% endif %}{{ ParamName }} import {{ ParamName }}
+{% endfor %}
+{% for param in needed_files.concepts %}
+{% set ParamName = sanitize(param.name) %}
+from {{ param.ns | join('.') }}{% if param.ns | length > 0 %}.{% endif %}{{ ParamName }} import Concept{{ ParamName }}
+{% endfor %}
+
 {{ FunctionDefinition(function) }}

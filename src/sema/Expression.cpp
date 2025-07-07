@@ -319,23 +319,21 @@ std::string LetExpression::to_cpp() const noexcept
 std::string LetExpression::to_python() const noexcept
 {
     std::ostringstream oss;
-    oss << "(lambda: (\n";
-    oss << "    setattr(locals(), '" << utils::sanitize_python_identifier(identifier) << "', " << value->to_python()
-        << "),\n";
+    oss << "(lambda " << utils::sanitize_python_identifier(identifier) << ": (";
 
     // All expressions except the last
     for (size_t i = 0; i < body.size() - 1; ++i)
     {
-        oss << "    " << body[i]->to_python() << ",\n";
+        oss << body[i]->to_python() << ", ";
     }
 
     // The last expression is the return value
     if (!body.empty())
     {
-        oss << "    " << body.back()->to_python() << "\n";
+        oss << body.back()->to_python();
     }
 
-    oss << ")[-1])()";
+    oss << ")[-1])(" << value->to_python() << ")";
     return oss.str();
 }
 
@@ -412,8 +410,8 @@ std::string ConceptReferenceExpression::to_cpp() const noexcept
 
 std::string ConceptReferenceExpression::to_python() const noexcept
 {
-    // TODO
-    throw std::runtime_error("not implemented");
+    //TODO: is this correct?
+    return std::format("ConceptWrapper(Concept{})", utils::sanitize_python_identifier(concept_->get_identifier()));
 }
 
 OpenBindingExpression::OpenBindingExpression(Sema* sema, unsigned int N) : Expression(sema), N(N) {}
@@ -427,8 +425,7 @@ std::string OpenBindingExpression::to_cpp() const noexcept
 
 std::string OpenBindingExpression::to_python() const noexcept
 {
-    // TODO
-    throw std::runtime_error("not implemented");
+    return std::format("Proj({})", N);
 }
 
 std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> QuoteExpression::get_result() const
@@ -445,8 +442,7 @@ std::string QuoteExpression::to_cpp() const noexcept
 
 std::string QuoteExpression::to_python() const noexcept
 {
-    // TODO
-    throw std::runtime_error("not implemented");
+    return std::format("Quote({})", get_inner()->to_python());
 }
 
 std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> EvalExpression::get_result() const
@@ -463,7 +459,7 @@ std::string EvalExpression::to_cpp() const noexcept
 std::string EvalExpression::to_python() const noexcept
 {
     // TODO
-    throw std::runtime_error("not implemented");
+    return std::format("eval({})", get_inner()->to_python());
 }
 
 

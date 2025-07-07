@@ -16,7 +16,7 @@ class _Proj(Base):
             return Exp(self)
         
         return args[index]
-        
+
     def __str__(self):
         return f"Proj({self.n})"
         

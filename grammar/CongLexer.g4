@@ -1,7 +1,6 @@
-// File: CongLexer.g4
+
 lexer grammar CongLexer;
 
-// All your existing token definitions
 CONCEPT: 'concept';
 FUNCTION: 'fun';
 NAMESPACE: 'namespace';
@@ -20,9 +19,7 @@ EVAL: 'eval';
 
 LBRACE: '{';
 RBRACE: '}';
-VARARGS: '...';
 
-// New tokens for literals previously implicit in parser
 LPAREN: '(';
 RPAREN: ')';
 COLON: ':';
@@ -30,18 +27,18 @@ SEMI: ';';
 AMP: '&';
 ARROW: '->';
 COMMA: ',';
-ASSIGN: '='; // For let expressions
+ASSIGN: '=';
 PLUS: '+';
-MINUS: '-'; // For arithmetic operator, distinct from negative numbers
+MINUS: '-';
 MUL: '*';
 DIV: '/';
 MOD: '%';
 POW: '^';
-LT: '<'; // For placeholders
-GT: '>'; // For placeholders
+LT: '<';
+GT: '>';
 DOUBLE_COLON: '::';
 
-OPEN_BINDING: '_' [1-9][0-9]*; // Matches _1, _2, etc. for open bindings
+OPEN_BINDING: '_' [1-9][0-9]*;
 DYNAMIC_ANNOTATOR: '_d';
 
 REAL
@@ -54,7 +51,7 @@ BOOL
     | 'false'
     ;
 
-INTEGER // This rule already handles negative numbers like -5
+INTEGER
     : [1-9][0-9]*
     | '0'
     | '-' [1-9][0-9]*

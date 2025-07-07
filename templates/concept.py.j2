@@ -1,3 +1,6 @@
 {% from "macros/python/concept.j2" import ConceptDefinition with context %}
+{% for base in concept.bases %}
+from {{ base.ns | join('.') }}{% if base.ns | length > 0 %}.{% endif %}{{ base.name }} import Concept{{ sanitize(base.name) }}
+{% endfor %}
 
 {{ ConceptDefinition(concept) }}

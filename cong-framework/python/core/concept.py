@@ -1,4 +1,6 @@
 from .exp import Exp
+from .base import Base
+from .val import Val
 
 class Concept:
     
@@ -17,6 +19,17 @@ class Concept:
     def __repr__(self):
         return self.__str__()
 
+class _ConceptWrapper(Val):
+    def __init__(self, concept):
+        self._concept = concept
+
+    def concept(self):
+        return self._concept
+
+def ConceptWrapper(concept):
+    if not isinstance(concept, Concept):
+        raise TypeError("Das Konzept muss eine Instanz der Klasse Concept sein.")
+    return Exp(_ConceptWrapper(concept))
 
 def implements(obj_type, concept):
     if not isinstance(concept, Concept):

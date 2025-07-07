@@ -193,14 +193,14 @@ namespace cong::lang
 
                 // Static implementation is defined for given arguments;
                 // propagate the call to that implementation, no need to search
-                // for dynamic implementation because we prefer static eval 
+                // for dynamic implementation because we prefer static eval
                 // whenever possible
                 CONG_LANG_CORE_FUN_PROPAGATE
-                (DispatchStaticAvailable, 
+                (DispatchStaticAvailable,
                     (Exp__, TupleOfExp__, Impl_, Stacktrace__, Available_), (),
                     (
                         (Base__, (Impl_))
-                    ), 
+                    ),
                     Base__
                 );
 
@@ -300,7 +300,8 @@ namespace cong::lang
                      (Arg_, (typename core::ItemAt::Call<TupleOfExp__, Pred_>::Type)),
                      (ArgPlain_, (typename core::Plain::Call<Arg_>::Type)),
                      (ArgVal_, (typename Eval::Call<ArgPlain_>::Type)),
-                     (ValPlain_, (typename EnsureDefined<typename core::Plain::Call<ArgVal_>::Type, "Argument is undefined">::Type)),
+                     (ValPlain_, (typename EnsureDefined<typename core::Plain::Call<ArgVal_>::Type,
+                     core::concat<"Argument is undefined: ", core::num_to_string<Offset_::native()>::value>()>::Type)),
                      (Apply_, (typename ValPlain_::template ApplyMember<Spec_, Offset_, Stacktrace_>)),
                      (Base__, (DispatchImpl<Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_>))
                  ),

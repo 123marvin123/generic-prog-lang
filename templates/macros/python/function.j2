@@ -21,7 +21,7 @@ Concept{{ param.concept.name }}.instance()
             Concept{{ sanitize(def.result.name) }}.instance(),
             [{% for impl in impls +%}
                 GenericFunction(
-                    lambda {{ GenericLambdaParams }}: {{ impl.exp }}{{ ', ' if ((impl.time_complexity | list | length) + (impl.space_complexity | list | length)) > 0 }}
+                    lambda {{ GenericLambdaParams }}: {{ impl.expression }}{{ ', ' if ((impl.time_complexity | list | length) + (impl.space_complexity | list | length)) > 0 }}
                 {% if impl.time_complexity | list | length > 0 %}
                     CostFun(lambda {{ GenericLambdaParams }}: {{ impl.time_complexity }}){{', ' if space_complexity | list | length > 0 }}
                 {% endif %}
@@ -31,10 +31,20 @@ Concept{{ param.concept.name }}.instance()
                 )
                 {%- if not loop.last %}, {% endif %}
             {% endfor +%}
+            ],
+            [{% for req in reqs +%}
+                lambda {{ GenericLambdaParams }}: {{ req.expression }}{% if not loop.last %}, {% endif %}
+            {% endfor +%}
             ]
         )
 
 def {{ sanitize(def.name) }}(*args):
-    return Bind(Function(Spec{{ Name_ }}()), *args)
+    spec = Spec{{ Name_ }}()
+
+    for x in spec.preconditions:
+        if not x(*args):
+            raise RuntimeError(f"Precondition not satisfied for {{Name_}}")
+    
+    return Bind(FunctionFromSpec(spec), *args)
 
 {% endmacro %}

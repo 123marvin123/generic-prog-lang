@@ -229,8 +229,7 @@ struct FunctionParameterExpression
   }
 
   [[nodiscard]] std::string to_python() const noexcept override {
-    // TODO: are there differences in python and c++ syntax?
-    return to_cpp();
+    return utils::sanitize_python_identifier(param->get_identifier());
   }
 
   struct DebugVisitor;

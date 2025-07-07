@@ -48,7 +48,7 @@ Base__ \
       struct Call \
       { \
         using Type = CONG_LANG_CORE_INTERN_UNPAREN(PAREN_TYPE_); \
-        static constexpr \
+        static \
         Type \
         call(BOOST_PP_ENUM(ARITY_, CONG_LANG_INTERN_APPLYMEMBER_LOCAL_PARAM_LIST, ~)) \
         { \

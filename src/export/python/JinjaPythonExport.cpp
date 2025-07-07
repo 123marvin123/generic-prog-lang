@@ -122,6 +122,69 @@ vec<std::filesystem::path> JinjaPythonExport::process()
         jinja2::ValuesMap context{};
         context["function"] = jinja2::Reflect(FunctionView{f});
 
+        std::unordered_set<std::variant<const Concept*, const Function*>> needed_files_set = {};
+
+        if (std::holds_alternative<const Concept*>(f->get_result()))
+            needed_files_set.emplace(std::get<const Concept*>(f->get_result()));
+        else
+            needed_files_set.emplace(f->get_namespace()->get_sema()->builtin_concept<Object>());
+
+        for (FunctionParameter* param : f->get_parameters())
+        {
+            if (const auto cast = utils::dyn_cast<ConcreteFunctionParameter>(param); cast)
+                needed_files_set.emplace(cast->get_type());
+        }
+
+        for (const auto& exp : f->requirements())
+        {
+            const auto& funs = exp.get_expression()->get_depending_functions();
+            const auto& concepts = exp.get_expression()->get_depending_concepts();
+            needed_files_set.insert(funs.begin(), funs.end());
+            needed_files_set.insert(concepts.begin(), concepts.end());
+        }
+
+        for(const auto& impl : f->get_implementations())
+        {
+            if (!impl.get_language().empty() && impl.get_language() != "python") continue;
+
+            const auto& funs = impl.get_expression()->get_depending_functions();
+            const auto& concepts = impl.get_expression()->get_depending_concepts();
+            needed_files_set.insert(funs.begin(), funs.end());
+            needed_files_set.insert(concepts.begin(), concepts.end());
+
+            if (impl.get_space_complexity())
+            {
+                const auto& funs = impl.get_space_complexity()->get_depending_functions();
+                needed_files_set.insert(funs.begin(), funs.end());
+            }
+            if (impl.get_time_complexity())
+            {
+                const auto& funs = impl.get_time_complexity()->get_depending_functions();
+                needed_files_set.insert(funs.begin(), funs.end());
+            }
+        }
+
+        jinja2::ValuesMap file_map;
+
+        // Convert the set to a jinja2::ValuesList:
+        jinja2::ValuesList concept_list;
+        jinja2::ValuesList function_list;
+
+        for (const auto& v : needed_files_set)
+        {
+            if (std::holds_alternative<const Concept*>(v))
+                concept_list.push_back(jinja2::Reflect(std::get<const Concept*>(v)));
+            else if (std::holds_alternative<const Function*>(v))
+                function_list.push_back(jinja2::Reflect(FunctionView{std::get<const Function*>(v)}));
+            else
+                throw std::runtime_error("Unknown sema type");
+        }
+
+        file_map["concepts"] = concept_list;
+        file_map["functions"] = function_list;
+
+        context["needed_files"] = file_map;
+
         if (const auto res = function_tpl.RenderAsString(context); res.has_value())
         {
             std::ofstream out_file(out_path, std::ios::app);
@@ -226,7 +289,7 @@ void JinjaPythonExport::register_function_functions()
                 jinja2::ValuesMap m;
 
                 if (impl.get_language().empty())
-                    m["expression"] = std::format("return {}", impl.get_expression()->to_python());
+                    m["expression"] = impl.get_expression()->to_python();
                 else
                     m["expression"] = impl.get_native_implementation();
 

@@ -11,7 +11,7 @@ class _Object(Val):
         return self._native
 
     def __str__(self):
-        return f"ObjectDynamic({self._native})"
+        return f"Object({self._native})"
         
     def __repr__(self):
         return self.__str__()
