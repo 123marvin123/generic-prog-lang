@@ -94,6 +94,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -106,6 +110,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitConditionalExpression(CongParser::ConditionalExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitLetExpression(CongParser::LetExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -115,6 +123,10 @@ public:
   }
 
   virtual std::any visitEvalExpression(CongParser::EvalExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitComparisonExpression(CongParser::ComparisonExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
 

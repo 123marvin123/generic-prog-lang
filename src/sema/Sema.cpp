@@ -170,6 +170,31 @@ void Sema::register_builtin_functions()
         not_function->register_function_parameter<ConcreteFunctionParameter>("a", boolean_concept);
     }
 
+    cond_function = *create_function<DependentFunction>(*bool_ns, "cond", *bool_ns, false);
+    {
+        cond_function->register_function_parameter<ConcreteFunctionParameter>("c", boolean_concept);
+        auto placeholder = cond_function->register_function_parameter<PlaceholderFunctionParameter>("a", "T");
+        utils::dyn_cast<DependentFunction>(cond_function)->set_dependency(placeholder);
+
+        cond_function->register_function_parameter<PlaceholderFunctionParameter>("b", "T");
+
+        auto generic_impl = GenericImplementation(nullptr, nullptr, nullptr, "c++");
+        generic_impl.set_native_implementation(R"(
+            using PlainP2 = std::decay_t<decltype(p2)>;
+            using PlainP3 = std::decay_t<decltype(p3)>;
+
+            using IsSame_ = std::is_same<PlainP2, PlainP3>;
+
+            if constexpr (IsSame_::value) {
+                return p1.native() ? p2 : p3;
+            } else {
+                return p1.native() ? std::variant<PlainP2, PlainP3>{std::in_place_index<0>, p2}
+                                           : std::variant<PlainP2, PlainP3>{std::in_place_index<1>, p3};
+            }
+        )");
+        cond_function->add_generic_implementation(generic_impl);
+    }
+
     const auto& object_ns = find_namespace("Object");
 
     isEqual_function = *create_function<ConcreteFunction>(*object_ns, "isEqual", *object_ns, boolean_concept, false);

@@ -17,12 +17,13 @@ public:
   enum {
     CONCEPT = 1, FUNCTION = 2, NAMESPACE = 3, LET = 4, NAME = 5, DESCRIPTION = 6, 
     GENERICIMPL = 7, REQUIRES = 8, TIME = 9, SPACE = 10, LANG = 11, QUOTE = 12, 
-    EVAL = 13, LBRACE = 14, RBRACE = 15, VARARGS = 16, LPAREN = 17, RPAREN = 18, 
-    COLON = 19, SEMI = 20, AMP = 21, ARROW = 22, COMMA = 23, ASSIGN = 24, 
-    PLUS = 25, MINUS = 26, MUL = 27, DIV = 28, MOD = 29, POW = 30, LT = 31, 
-    GT = 32, DOUBLE_COLON = 33, OPEN_BINDING = 34, DYNAMIC_ANNOTATOR = 35, 
-    REAL = 36, BOOL = 37, INTEGER = 38, STRING = 39, IDENTIFIER = 40, WHITESPACE = 41, 
-    COMMENT = 42, LINE_COMMENT = 43, OTHER = 44
+    EVAL = 13, LBRACE = 14, RBRACE = 15, LPAREN = 16, RPAREN = 17, COLON = 18, 
+    QUESTION_MARK = 19, SEMI = 20, AMP = 21, ARROW = 22, COMMA = 23, ASSIGN = 24, 
+    EQUAL = 25, NOT_EQUAL = 26, PLUS = 27, MINUS = 28, MUL = 29, DIV = 30, 
+    MOD = 31, POW = 32, LT = 33, LESS_EQUAL = 34, GT = 35, GREATER_EQUAL = 36, 
+    DOUBLE_COLON = 37, OPEN_BINDING = 38, DYNAMIC_ANNOTATOR = 39, REAL = 40, 
+    BOOL = 41, INTEGER = 42, STRING = 43, IDENTIFIER = 44, WHITESPACE = 45, 
+    COMMENT = 46, LINE_COMMENT = 47, OTHER = 48
   };
 
   enum {
@@ -422,6 +423,17 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  ParenthesizedExpressionContext : public ExpressionContext {
+  public:
+    ParenthesizedExpressionContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *LPAREN();
+    ExpressionContext *expression();
+    antlr4::tree::TerminalNode *RPAREN();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  RequiresCallExpressionContext : public ExpressionContext {
   public:
     RequiresCallExpressionContext(ExpressionContext *ctx);
@@ -455,6 +467,21 @@ public:
     OpenBindingExpressionContext(ExpressionContext *ctx);
 
     antlr4::tree::TerminalNode *OPEN_BINDING();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  ConditionalExpressionContext : public ExpressionContext {
+  public:
+    ConditionalExpressionContext(ExpressionContext *ctx);
+
+    CongParser::ExpressionContext *cond = nullptr;
+    CongParser::ExpressionContext *left = nullptr;
+    CongParser::ExpressionContext *right = nullptr;
+    antlr4::tree::TerminalNode *QUESTION_MARK();
+    antlr4::tree::TerminalNode *COLON();
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -497,6 +524,25 @@ public:
     antlr4::tree::TerminalNode *LPAREN();
     ExpressionContext *expression();
     antlr4::tree::TerminalNode *RPAREN();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  ComparisonExpressionContext : public ExpressionContext {
+  public:
+    ComparisonExpressionContext(ExpressionContext *ctx);
+
+    CongParser::ExpressionContext *left = nullptr;
+    antlr4::Token *op = nullptr;
+    CongParser::ExpressionContext *right = nullptr;
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
+    antlr4::tree::TerminalNode *LT();
+    antlr4::tree::TerminalNode *LESS_EQUAL();
+    antlr4::tree::TerminalNode *GT();
+    antlr4::tree::TerminalNode *GREATER_EQUAL();
+    antlr4::tree::TerminalNode *EQUAL();
+    antlr4::tree::TerminalNode *NOT_EQUAL();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };

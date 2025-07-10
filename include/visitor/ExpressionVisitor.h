@@ -39,6 +39,12 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext* ctx) override;
 
+    std::any visitConditionalExpression(CongParser::ConditionalExpressionContext* ctx) override;
+
+    std::any visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext* ctx) override;
+
+    std::any visitComparisonExpression(CongParser::ComparisonExpressionContext* ctx) override;
+
 private:
     Namespace* ns;
     Function* fun;

@@ -96,8 +96,12 @@ parameter
     ;
 
 expression
-    : left=expression op=(PLUS | MINUS | MUL | DIV | MOD | POW) right=expression # arithmeticExpression
+    :
+    LPAREN expression RPAREN # parenthesizedExpression
+    | left=expression op=(PLUS | MINUS | MUL | DIV | MOD | POW) right=expression # arithmeticExpression
+    | left=expression op=(LT | LESS_EQUAL | GT | GREATER_EQUAL | EQUAL | NOT_EQUAL) right=expression # comparisonExpression
     | val=literal # literalExpression
+    | cond=expression QUESTION_MARK left=expression COLON right=expression # conditionalExpression
     | QUOTE LPAREN expression RPAREN # quoteExpression
     | EVAL LPAREN expression RPAREN # evalExpression
     | REQUIRES LPAREN STRING RPAREN # requiresCallExpression

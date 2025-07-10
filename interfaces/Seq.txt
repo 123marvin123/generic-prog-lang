@@ -233,12 +233,10 @@ namespace Seq {
         generic() { p1 }
     }
 
-    fun insertionSort(p1: Seq) -> Seq {
-        description { "sorts p1 using insertion sort algorithm" }
-        requires(name: "Ordered", description: "items should be model of Ordered") {
-            let notEmpty = Boolean::not(isEmptySeq(p1)) {
-                Boolean::cond(notEmpty, Object::isModelOf(item(p1), Ordered::Ordered), true)
-            }
+    fun indexOf(s: Seq, p2: Object::Object) -> Number::Integer {
+        description { "index of first occurrence of p(2) in p(1)" }
+        generic() {
+            fold(let acc = _1 { itemAt(s, acc) == p2 ? acc : Number::succ(acc) }, 0, s)
         }
     }
 }

@@ -226,14 +226,69 @@ std::any ExpressionVisitor::visitEvalExpression(CongParser::EvalExpressionContex
 }
 std::any ExpressionVisitor::visitRequiresCallExpression(CongParser::RequiresCallExpressionContext* ctx)
 {
-    if (const auto& r = fun->find_requirement(utils::cleanup_string_literal(ctx->STRING()->getText()));
-        r.has_value())
+    if (const auto& r = fun->find_requirement(utils::cleanup_string_literal(ctx->STRING()->getText())); r.has_value())
     {
         return utils::dyn_cast<Expression>(new RequiresCallExpression(sema, *r.value(), fun));
     }
 
     throw SemaError(
-        std::format("Requirement with name {} not found.", utils::cleanup_string_literal(ctx->STRING()->getText())), ctx);
+        std::format("Requirement with name {} not found.", utils::cleanup_string_literal(ctx->STRING()->getText())),
+        ctx);
+}
+std::any ExpressionVisitor::visitConditionalExpression(CongParser::ConditionalExpressionContext* ctx)
+{
+    const auto& [cond, left, right] = std::make_tuple(visit(ctx->cond), visit(ctx->left), visit(ctx->right));
+
+    if (!cond.has_value() || cond.type() != typeid(Expression*))
+        throw SemaError(std::format("Condition value is not valid"), ctx);
+    if (!left.has_value() || left.type() != typeid(Expression*))
+        throw SemaError(std::format("Left value is not valid"), ctx);
+    if (!right.has_value() || right.type() != typeid(Expression*))
+        throw SemaError(std::format("Right value is not valid"), ctx);
+
+    auto* cond_exp = std::any_cast<Expression*>(cond);
+    auto* left_exp = std::any_cast<Expression*>(left);
+    auto* right_exp = std::any_cast<Expression*>(right);
+
+    return utils::dyn_cast<Expression>(
+        new CallExpression(sema, sema->cond_function,
+                           {std::shared_ptr<Expression>{cond_exp}, std::shared_ptr<Expression>{left_exp},
+                            std::shared_ptr<Expression>{right_exp}}));
+}
+
+std::any ExpressionVisitor::visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext* ctx)
+{
+    return visit(ctx->expression());
+}
+
+std::any ExpressionVisitor::visitComparisonExpression(CongParser::ComparisonExpressionContext* ctx)
+{
+    const auto& [left, right] = std::make_pair(visit(ctx->left), visit(ctx->right));
+    if (!left.has_value() || left.type() != typeid(Expression*))
+        throw SemaError(std::format("Left value is not valid"), ctx);
+
+    if (!right.has_value() || right.type() != typeid(Expression*))
+        throw SemaError(std::format("Right value is not valid"), ctx);
+
+    static std::map<std::string, const Function*> comparison_functions = {
+        {"<", sema->isLess_function},
+        {"<=", sema->isLessEqual_function},
+        {">", sema->isGreater_function},
+        {">=", sema->isGreaterEqual_function},
+        {"==", sema->isEqual_function},
+        {"!=", sema->isNotEqual_function}
+    };
+
+    const std::string operator_str = ctx->op->getText();
+    const auto& it = comparison_functions.find(operator_str);
+    if (it == comparison_functions.end()) {
+        throw SemaError(std::format("Unknown comparison operator {}", operator_str), ctx);
+    }
+
+    return utils::dyn_cast<Expression>(
+        new CallExpression(sema, it->second,
+                           {std::shared_ptr<Expression>(std::any_cast<Expression*>(left)),
+                            std::shared_ptr<Expression>(std::any_cast<Expression*>(right))}));
 }
 
 void ExpressionVisitor::checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx)

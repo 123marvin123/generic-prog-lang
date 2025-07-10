@@ -60,17 +60,23 @@ public:
 
     virtual std::any visitParameterOrConceptReferenceExpression(CongParser::ParameterOrConceptReferenceExpressionContext *context) = 0;
 
+    virtual std::any visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext *context) = 0;
+
     virtual std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext *context) = 0;
 
     virtual std::any visitCallExpression(CongParser::CallExpressionContext *context) = 0;
 
     virtual std::any visitOpenBindingExpression(CongParser::OpenBindingExpressionContext *context) = 0;
 
+    virtual std::any visitConditionalExpression(CongParser::ConditionalExpressionContext *context) = 0;
+
     virtual std::any visitLetExpression(CongParser::LetExpressionContext *context) = 0;
 
     virtual std::any visitQuoteExpression(CongParser::QuoteExpressionContext *context) = 0;
 
     virtual std::any visitEvalExpression(CongParser::EvalExpressionContext *context) = 0;
+
+    virtual std::any visitComparisonExpression(CongParser::ComparisonExpressionContext *context) = 0;
 
     virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *context) = 0;
 

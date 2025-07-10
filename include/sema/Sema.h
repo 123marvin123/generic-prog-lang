@@ -91,6 +91,7 @@ public:
     Function* or_function;
     Function* xor_function;
     Function* and_function;
+    Function* cond_function;
 
     Function* isLess_function;
     Function* isLessEqual_function;

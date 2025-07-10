@@ -264,7 +264,8 @@ std::any FinalizingFunctionVisitor::visitFunctionGenericImpl(CongParser::Functio
         }
         catch (const SemaError& e)
         {
-            std::throw_with_nested(SemaError(std::format("Could not add generic implementation to function: {}", e.what()), ctx));
+            std::throw_with_nested(
+                SemaError(std::format("Could not add generic implementation to function: {}", e.what()), ctx));
         }
 
         return expr;
@@ -272,5 +273,3 @@ std::any FinalizingFunctionVisitor::visitFunctionGenericImpl(CongParser::Functio
 
     throw SemaError("Could not parse expression", ctx);
 }
-
-

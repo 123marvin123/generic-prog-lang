@@ -301,7 +301,8 @@ namespace cong::lang
                      (ArgPlain_, (typename core::Plain::Call<Arg_>::Type)),
                      (ArgVal_, (typename Eval::Call<ArgPlain_>::Type)),
                      (ValPlain_, (typename EnsureDefined<typename core::Plain::Call<ArgVal_>::Type,
-                     core::concat<"Argument is undefined: ", core::num_to_string<Offset_::native()>::value>()>::Type)),
+                     core::concat<Spec_::name, core::concat<" -> Argument is undefined: ", core::num_to_string<Pred_::native()>::value>()>()
+                     >::Type)),
                      (Apply_, (typename ValPlain_::template ApplyMember<Spec_, Offset_, Stacktrace_>)),
                      (Base__, (DispatchImpl<Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_>))
                  ),
