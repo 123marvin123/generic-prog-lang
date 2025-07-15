@@ -48,7 +48,8 @@ std::any FinalizingFunctionVisitor::visitFunctionStmnt(CongParser::FunctionStmnt
 
     current_function = fn.value();
 
-    createImplicitRequirements();
+    // Cannot work unless argument evaluation is implemented correctly
+    //createImplicitRequirements();
 
     visitChildren(ctx);
 

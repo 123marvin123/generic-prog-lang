@@ -33,6 +33,15 @@ struct Expression;
 
 struct GenericImplementation;
 
+// Structure to represent a let binding for scope checking
+struct LetBinding {
+    std::string identifier;
+    s_ptr<Expression> value;
+
+    LetBinding(std::string id, s_ptr<Expression> val)
+        : identifier(std::move(id)), value(std::move(val)) {}
+};
+
 enum class Operator
 {
     ADD,

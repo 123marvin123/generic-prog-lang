@@ -93,7 +93,47 @@ namespace cong::lang
             struct Call
             {
             private:
-                using Base_ = ReduceValue::Call<Exp_>;
+                template <typename CurrentExp_>
+                struct IterateUntilFixed
+                {
+                private:
+                    using PlainExp_ = typename core::Plain::Call<CurrentExp_>::Type;
+                    using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
+
+                    using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
+
+                    using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
+
+                    template <typename Condition_>
+                    struct LazyRecursion
+                    {
+                        using Type = typename IterateUntilFixed<Reduced_>::Type;
+                    };
+
+                    template <>
+                    struct LazyRecursion<core::True>
+                    {
+                        using Type = CurrentExp_;
+                    };
+
+                public:
+                    using Type = typename LazyRecursion<IsSame_>::Type;
+
+                    static constexpr Type call(CurrentExp_ exp)
+                    {
+                        if constexpr (IsSame_::native())
+                        {
+                            return exp;
+                        }
+                        else
+                        {
+                            auto reduced = ReduceValue::Call<PlainExp_>::call(exp);
+                            return IterateUntilFixed<PlainReducedExp_>::call(reduced);
+                        }
+                    }
+                };
+
+                using Base_ = IterateUntilFixed<Exp_>;
 
             public:
                 using Type = typename Base_::Type;
@@ -245,11 +285,12 @@ namespace cong::lang
                 template <typename Exp_, typename TupleOfExp_>
                 struct Call
                 {
-                    static constexpr auto call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    using Type = core::Tuple<typename ApplyValue::Call<Exp_, ItemS_>::Type...>;
+                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
                     {
                         return std::apply([&exp](ItemS_&... itemS)
                         {
-                            return core::tuple(eval(ApplyValue::Call<Exp_, ItemS_>::call(exp, itemS))...);
+                            return core::tuple(ApplyValue ::Call<Exp_, ItemS_>::call(exp, itemS)...);
                         }, tupleOfExp);
                     }
                 };
@@ -262,9 +303,9 @@ namespace cong::lang
                 using Tuple_ = typename core::Plain::Call<TupleOfExp_>::Type;
                 using Base_ = Dispatch<Tuple_>;
 
-                //using Type = typename Base_::template Call<Exp_, TupleOfExp_>::Type;
+                using Type = typename Base_::template Call<Exp_, TupleOfExp_>::Type;
 
-                static constexpr auto call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
                 {
                     return Base_::template Call<Exp_, TupleOfExp_>::call(exp, tupleOfExp);
                 }

@@ -13,3 +13,9 @@
     #import "SpaceTopo.txt"
     #import "Statistics.txt"
     #import "Tree.txt"
+
+    fun x(a: Object::Object) -> Object::Object {
+        generic() {
+            (b: Object::Object) => { a }
+        }
+    }

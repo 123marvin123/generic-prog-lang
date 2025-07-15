@@ -66,7 +66,7 @@ namespace Seq {
     fun length2(s: Seq) -> Number::Number {
         description { "length of s" }
         generic() {
-            Seq::fold(Number::succ(_1), 0, s)
+            Seq::fold(Number::succ(_1), 0_d, s)
         }
     }
 

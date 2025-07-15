@@ -138,9 +138,6 @@ template <typename... Exp_>
 constexpr
 IsModelOf<Exp_...> isModelOf(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecIsModelOf, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsModelOf, SpecIsModelOf>>{},

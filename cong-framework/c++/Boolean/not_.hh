@@ -56,9 +56,6 @@ template <typename... Exp_>
 constexpr
 Not_<Exp_...> not_(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecNot_, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecNot_, SpecNot_>>{},

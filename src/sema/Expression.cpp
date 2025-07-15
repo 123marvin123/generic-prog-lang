@@ -22,8 +22,11 @@ std::set<const Function*> Expression::get_depending_functions() const
 
     if (const auto& self = utils::dyn_cast<LetExpression>(this))
     {
-        const auto value_depending = self->get_value()->get_depending_functions();
-        depending_functions.insert(value_depending.begin(), value_depending.end());
+        for (const auto& b : self->get_bindings())
+        {
+            const auto value_depending = b.value->get_depending_functions();
+            depending_functions.insert(value_depending.begin(), value_depending.end());
+        }
 
         for (const auto& body : self->get_body())
         {
@@ -61,8 +64,11 @@ std::set<const Concept*> Expression::get_depending_concepts() const
 
     if (const auto& self = utils::dyn_cast<LetExpression>(this))
     {
-        const auto value_depending = self->get_value()->get_depending_concepts();
-        depending_concepts.insert(value_depending.begin(), value_depending.end());
+        for (const auto& b : self->get_bindings())
+        {
+            const auto value_depending = b.value->get_depending_concepts();
+            depending_concepts.insert(value_depending.begin(), value_depending.end());
+        }
 
         for (const auto& body : self->get_body())
         {
@@ -139,10 +145,11 @@ CallExpression::CallExpression(Sema* sema, const Function* fun, vec<s_ptr<Expres
             if (const auto concrete_param = utils::dyn_cast<ConcreteFunctionParameter>(*fun_it))
             {
                 if (!std::get<const Concept*>(v)->matches_concept(concrete_param->get_type()))
-                    throw SemaError(std::format("Argument #{} ({}) does not match concept of parameter {} ({})",
+                    throw SemaError(std::format("Argument #{} ({}) does not match concept of parameter {} ({}) of function {}",
                                                 idx + 1, std::get<const Concept*>(v)->get_identifier(),
                                                 concrete_param->get_identifier(),
-                                                concrete_param->get_type()->get_identifier()));
+                                                concrete_param->get_type()->get_identifier(),
+                                                fun->get_identifier()));
             }
         }
     }
@@ -272,16 +279,20 @@ std::string ArithmeticExpression::to_python() const noexcept
         get_right()->to_python());
 }
 
-LetExpression::LetExpression(Sema* sema, const std::string& identifier, s_ptr<Expression> value,
+LetExpression::LetExpression(Sema* sema, const vec<LetBinding>& bindings,
                              vec<s_ptr<Expression>> body) :
-    Expression(sema), identifier(identifier), value(std::move(value)), body(std::move(body))
+    Expression(sema), bindings(bindings), body(std::move(body))
 {
-    if (!this->value)
-        throw SemaError("Let expression value must not be empty");
     if (this->body.empty())
         throw SemaError("Let expression body must not be empty");
-    if (identifier.empty())
-        throw SemaError("Let expression identifier must not be empty");
+    for (const auto& b : bindings)
+    {
+        if (!b.value)
+            throw SemaError("Let expression value must not be empty");
+        if (b.identifier.empty())
+            throw SemaError("Let expression identifier must not be empty");
+    }
+
 }
 
 std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
@@ -298,7 +309,9 @@ std::string LetExpression::to_cpp() const noexcept
 {
     std::ostringstream oss;
     oss << "[&]() {\n";
-    oss << "    const auto " << utils::sanitize_cpp_identifier(identifier) << " = " << value->to_cpp() << ";\n";
+    for (const auto& binding : bindings)
+        oss << "    const auto " << utils::sanitize_cpp_identifier(binding.identifier) << " = " << binding.value->to_cpp()
+        << ";\n";
 
     // All expressions except the last are statements
     for (size_t i = 0; i < body.size() - 1; ++i)
@@ -319,7 +332,15 @@ std::string LetExpression::to_cpp() const noexcept
 std::string LetExpression::to_python() const noexcept
 {
     std::ostringstream oss;
-    oss << "(lambda " << utils::sanitize_python_identifier(identifier) << ": (";
+    oss << "(lambda ";
+    for (auto it = bindings.begin(); it != bindings.end(); ++it)
+    {
+        oss << utils::sanitize_python_identifier(it->identifier);
+        if (it + 1 != bindings.end())
+            oss << ", ";
+    }
+
+    oss << ": (";
 
     // All expressions except the last
     for (size_t i = 0; i < body.size() - 1; ++i)
@@ -333,7 +354,15 @@ std::string LetExpression::to_python() const noexcept
         oss << body.back()->to_python();
     }
 
-    oss << ")[-1])(" << value->to_python() << ")";
+    oss << ")[-1])(";
+    for (auto it = bindings.begin(); it != bindings.end(); ++it)
+    {
+        oss << it->value->to_python();;
+        if (it + 1 != bindings.end())
+            oss << ", ";
+    }
+
+    oss << ")";
     return oss.str();
 }
 
@@ -462,6 +491,43 @@ std::string EvalExpression::to_python() const noexcept
     return std::format("eval({})", get_inner()->to_python());
 }
 
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> LambdaExpression::get_result() const
+{
+    return get_sema()->builtin_concept<Map>();
+}
+
+std::string LambdaExpression::to_cpp() const noexcept
+{
+    // TODO
+    throw std::runtime_error("not implemented");
+}
+
+std::string LambdaExpression::to_python() const noexcept
+{
+    // TODO
+    throw std::runtime_error("not implemented");
+}
+
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+LambdaVariableReferenceExpression::get_result() const
+{
+    auto x = std::get<1>(lambdaExp->get_params()[idx]);
+    return std::visit(
+        [](auto a)
+    {
+        return std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>{a};
+    }, x);
+}
+
+std::string LambdaVariableReferenceExpression::to_cpp() const noexcept
+{
+    return std::get<0>(lambdaExp->get_params()[idx]);
+}
+
+std::string LambdaVariableReferenceExpression::to_python() const noexcept
+{
+    return to_cpp();
+}
 
 void Expression::DebugVisitor::visitExpression(const Expression& e)
 {
@@ -552,11 +618,14 @@ void LetExpression::DebugVisitor::visitExpression(const Expression& e)
 {
     const auto& let_expr = dynamic_cast<const LetExpression&>(e);
 
-    ss << spaces() << termcolor::green << "let " << termcolor::reset << termcolor::blue << let_expr.get_identifier()
-       << termcolor::reset << " = ";
+    for (const auto& b : let_expr.bindings)
+    {
+        ss << spaces() << termcolor::green << "let " << termcolor::reset << termcolor::blue << b.identifier
+           << termcolor::reset << " = ";
 
-    // Show the value expression
-    ss << let_expr.get_value()->to_string(0) << " " << termcolor::green << "{" << termcolor::reset << "\n";
+        // Show the value expression
+        ss << b.value->to_string(0) << " " << termcolor::green << "{" << termcolor::reset << "\n";
+    }
 
     tabsize += 2;
 

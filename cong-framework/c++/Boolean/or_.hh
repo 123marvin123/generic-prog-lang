@@ -56,9 +56,6 @@ template <typename... Exp_>
 constexpr
 Or_<Exp_...> or_(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecOr_, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecOr_, SpecOr_>>{},

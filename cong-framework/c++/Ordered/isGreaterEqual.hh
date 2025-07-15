@@ -56,9 +56,6 @@ template <typename... Exp_>
 constexpr
 IsGreaterEqual<Exp_...> isGreaterEqual(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecIsGreaterEqual, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsGreaterEqual, SpecIsGreaterEqual>>{},

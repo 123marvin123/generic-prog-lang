@@ -3,15 +3,7 @@
 #include "AbstractVisitor.h"
 #include "sema/Expression.h"
 #include "sema/Namespace.h"
-
-// Structure to represent a let binding for scope checking
-struct LetBinding {
-    std::string identifier;
-    s_ptr<Expression> value;
-    
-    LetBinding(std::string id, s_ptr<Expression> val) 
-        : identifier(std::move(id)), value(std::move(val)) {}
-};
+#include "Decls.h"
 
 struct ExpressionVisitor final : AbstractVisitor
 {
@@ -45,15 +37,31 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitComparisonExpression(CongParser::ComparisonExpressionContext* ctx) override;
 
+    std::any visitLetBinding(CongParser::LetBindingContext* ctx) override;
+
+    std::any visitLambdaExpression(CongParser::LambdaExpressionContext* ctx) override;
+
+    std::any visitParameterList(CongParser::ParameterListContext* ctx) override;
+    std::any visitParameter(CongParser::ParameterContext* ctx) override;
+    std::any visitPlaceholderOrQualifiedId(CongParser::PlaceholderOrQualifiedIdContext* ctx) override;
+    std::any visitPlaceholder(CongParser::PlaceholderContext* ctx) override;
+    std::any visitQualifiedIdentifier(CongParser::QualifiedIdentifierContext* ctx) override;
+
+
 private:
     Namespace* ns;
     Function* fun;
     std::stack<std::vector<LetBinding>> let_binding_stack;
-    
+    std::stack<LambdaExpression*> lambda_exp_stack;
+
     // Check for name collisions with existing symbols
     void checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx = nullptr) const;
     
     // Find a let binding in the current scope stack
     [[nodiscard]]
     opt<LetBinding> findLetBinding(const std::string& identifier) const;
+
+    [[nodiscard]]
+    opt<std::pair<LambdaExpression*, std::size_t>>
+    findLambdaParam(const std::string &string) const;
 };

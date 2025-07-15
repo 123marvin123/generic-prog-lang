@@ -126,6 +126,7 @@ namespace cong::lang
             };
 
         public:
+
             template<class Dec_, class... Args>
             struct Call : Dispatch<
                 core::Zero,
@@ -139,6 +140,17 @@ namespace cong::lang
                 Dec_, Args...>
             {
             };
+
+            // Helper to unpack tuple types into parameter pack
+            template<class Spec_, class TupleType>
+            struct UnpackTuple;
+
+            template<class Spec_, class... Types>
+            struct UnpackTuple<Spec_, std::tuple<Types...>>
+            {
+                using Type = Call<Spec_, Types...>;
+            };
+
         };
 
         template <class Dec_, class Spec_>
@@ -301,8 +313,8 @@ namespace cong::lang
                      (ArgPlain_, (typename core::Plain::Call<Arg_>::Type)),
                      (ArgVal_, (typename Eval::Call<ArgPlain_>::Type)),
                      (ValPlain_, (typename EnsureDefined<typename core::Plain::Call<ArgVal_>::Type,
-                     core::concat<Spec_::name, core::concat<" -> Argument is undefined: ", core::num_to_string<Pred_::native()>::value>()>()
-                     >::Type)),
+                     core::concat<Spec_::name, " -> Argument is undefined: ", core::num_to_string<Offset_::native()
+                     >::value>()>::Type)),
                      (Apply_, (typename ValPlain_::template ApplyMember<Spec_, Offset_, Stacktrace_>)),
                      (Base__, (DispatchImpl<Exp__, TupleOfExp__, Offset_, Apply_, Stacktrace_>))
                  ),
@@ -327,22 +339,19 @@ namespace cong::lang
                 template <typename Exp_, typename TupleOfExp_>
                 struct Call
                 {
-                private:
-                    using RecursiveReduce_ = typename RecursiveReduce::template Call<TupleOfExp_>::Type;
-                    using Length_ = typename core::Length::Call<RecursiveReduce_>::Type;
-                    using Base__ = DispatchOffset<Exp_, RecursiveReduce_, void, Length_>;
-                    using Call_ = typename Base__::template Call<Exp_, RecursiveReduce_>;
-
-                public:
-                    using Type = typename Call_::Type;
-                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    static constexpr auto call(Exp_ exp, TupleOfExp_ tupleOfExp)
                     {
-                        auto res = std::apply([](auto&&... args)
-                        {
-                            return core::tupleNonRValRef(local::ReduceValue::Call<decltype(args)>::call(args)...);
-                        }, tupleOfExp);
-                        return Call_::call(exp, res);
+                        using Length_ = typename core::Length::Call<TupleOfExp_>::Type;
+                        using Base__ = DispatchOffset<Exp_, TupleOfExp_, void, Length_>;
+                        using Call_ = typename Base__::template Call<Exp_, TupleOfExp_>;
+
+                        // Check requirements - unpack tuple types into parameter pack
+                        //std::apply(EvalRequirements::UnpackTuple<Spec_, decltype(tupleOfExp)>::Type::call, tupleOfExp);
+
+                        return Call_::call(exp, tupleOfExp);
                     }
+
+                    using Type = std::invoke_result_t<decltype(call), Exp_, TupleOfExp_>;
                 };
             };
         };

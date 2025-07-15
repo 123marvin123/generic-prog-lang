@@ -21,9 +21,9 @@ public:
     QUESTION_MARK = 19, SEMI = 20, AMP = 21, ARROW = 22, COMMA = 23, ASSIGN = 24, 
     EQUAL = 25, NOT_EQUAL = 26, PLUS = 27, MINUS = 28, MUL = 29, DIV = 30, 
     MOD = 31, POW = 32, LT = 33, LESS_EQUAL = 34, GT = 35, GREATER_EQUAL = 36, 
-    DOUBLE_COLON = 37, OPEN_BINDING = 38, DYNAMIC_ANNOTATOR = 39, REAL = 40, 
-    BOOL = 41, INTEGER = 42, STRING = 43, IDENTIFIER = 44, WHITESPACE = 45, 
-    COMMENT = 46, LINE_COMMENT = 47, OTHER = 48
+    DOUBLE_COLON = 37, LAMBDA_ARROW = 38, OPEN_BINDING = 39, DYNAMIC_ANNOTATOR = 40, 
+    REAL = 41, BOOL = 42, INTEGER = 43, STRING = 44, IDENTIFIER = 45, WHITESPACE = 46, 
+    COMMENT = 47, LINE_COMMENT = 48, OTHER = 49
   };
 
   enum {
@@ -32,8 +32,9 @@ public:
     RuleFunctionBody = 6, RuleFunctionBodyStmnt = 7, RuleRawTextContent = 8, 
     RuleElement = 9, RuleParameterList = 10, RuleGenericImplDetail = 11, 
     RuleRequirementDetail = 12, RuleRequirementDetails = 13, RuleGenericImplDetails = 14, 
-    RuleParameter = 15, RuleExpression = 16, RuleExpressionBlock = 17, RulePlaceholderOrQualifiedId = 18, 
-    RulePlaceholder = 19, RuleQualifiedIdentifier = 20, RuleLiteral = 21
+    RuleParameter = 15, RuleExpression = 16, RuleLetBinding = 17, RuleExpressionBlock = 18, 
+    RulePlaceholderOrQualifiedId = 19, RulePlaceholder = 20, RuleQualifiedIdentifier = 21, 
+    RuleLiteral = 22
   };
 
   explicit CongParser(antlr4::TokenStream *input);
@@ -70,6 +71,7 @@ public:
   class GenericImplDetailsContext;
   class ParameterContext;
   class ExpressionContext;
+  class LetBindingContext;
   class ExpressionBlockContext;
   class PlaceholderOrQualifiedIdContext;
   class PlaceholderContext;
@@ -423,41 +425,16 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  ParenthesizedExpressionContext : public ExpressionContext {
+  class  LambdaExpressionContext : public ExpressionContext {
   public:
-    ParenthesizedExpressionContext(ExpressionContext *ctx);
+    LambdaExpressionContext(ExpressionContext *ctx);
 
-    antlr4::tree::TerminalNode *LPAREN();
+    CongParser::ExpressionContext *body = nullptr;
+    ParameterListContext *parameterList();
+    antlr4::tree::TerminalNode *LAMBDA_ARROW();
+    antlr4::tree::TerminalNode *LBRACE();
+    antlr4::tree::TerminalNode *RBRACE();
     ExpressionContext *expression();
-    antlr4::tree::TerminalNode *RPAREN();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  RequiresCallExpressionContext : public ExpressionContext {
-  public:
-    RequiresCallExpressionContext(ExpressionContext *ctx);
-
-    antlr4::tree::TerminalNode *REQUIRES();
-    antlr4::tree::TerminalNode *LPAREN();
-    antlr4::tree::TerminalNode *STRING();
-    antlr4::tree::TerminalNode *RPAREN();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  CallExpressionContext : public ExpressionContext {
-  public:
-    CallExpressionContext(ExpressionContext *ctx);
-
-    CongParser::QualifiedIdentifierContext *fun = nullptr;
-    antlr4::tree::TerminalNode *LPAREN();
-    antlr4::tree::TerminalNode *RPAREN();
-    QualifiedIdentifierContext *qualifiedIdentifier();
-    std::vector<ExpressionContext *> expression();
-    ExpressionContext* expression(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> COMMA();
-    antlr4::tree::TerminalNode* COMMA(size_t i);
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -482,36 +459,6 @@ public:
     antlr4::tree::TerminalNode *COLON();
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  LetExpressionContext : public ExpressionContext {
-  public:
-    LetExpressionContext(ExpressionContext *ctx);
-
-    antlr4::Token *name = nullptr;
-    CongParser::ExpressionContext *value = nullptr;
-    CongParser::ExpressionBlockContext *body = nullptr;
-    antlr4::tree::TerminalNode *LET();
-    antlr4::tree::TerminalNode *ASSIGN();
-    antlr4::tree::TerminalNode *LBRACE();
-    antlr4::tree::TerminalNode *RBRACE();
-    antlr4::tree::TerminalNode *IDENTIFIER();
-    ExpressionContext *expression();
-    ExpressionBlockContext *expressionBlock();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  QuoteExpressionContext : public ExpressionContext {
-  public:
-    QuoteExpressionContext(ExpressionContext *ctx);
-
-    antlr4::tree::TerminalNode *QUOTE();
-    antlr4::tree::TerminalNode *LPAREN();
-    ExpressionContext *expression();
-    antlr4::tree::TerminalNode *RPAREN();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -566,6 +513,72 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  ParenthesizedExpressionContext : public ExpressionContext {
+  public:
+    ParenthesizedExpressionContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *LPAREN();
+    ExpressionContext *expression();
+    antlr4::tree::TerminalNode *RPAREN();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  RequiresCallExpressionContext : public ExpressionContext {
+  public:
+    RequiresCallExpressionContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *REQUIRES();
+    antlr4::tree::TerminalNode *LPAREN();
+    antlr4::tree::TerminalNode *STRING();
+    antlr4::tree::TerminalNode *RPAREN();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  CallExpressionContext : public ExpressionContext {
+  public:
+    CallExpressionContext(ExpressionContext *ctx);
+
+    CongParser::QualifiedIdentifierContext *fun = nullptr;
+    antlr4::tree::TerminalNode *LPAREN();
+    antlr4::tree::TerminalNode *RPAREN();
+    QualifiedIdentifierContext *qualifiedIdentifier();
+    std::vector<ExpressionContext *> expression();
+    ExpressionContext* expression(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  LetExpressionContext : public ExpressionContext {
+  public:
+    LetExpressionContext(ExpressionContext *ctx);
+
+    CongParser::ExpressionBlockContext *body = nullptr;
+    antlr4::tree::TerminalNode *LET();
+    antlr4::tree::TerminalNode *LBRACE();
+    antlr4::tree::TerminalNode *RBRACE();
+    ExpressionBlockContext *expressionBlock();
+    std::vector<LetBindingContext *> letBinding();
+    LetBindingContext* letBinding(size_t i);
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  QuoteExpressionContext : public ExpressionContext {
+  public:
+    QuoteExpressionContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *QUOTE();
+    antlr4::tree::TerminalNode *LPAREN();
+    ExpressionContext *expression();
+    antlr4::tree::TerminalNode *RPAREN();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  LiteralExpressionContext : public ExpressionContext {
   public:
     LiteralExpressionContext(ExpressionContext *ctx);
@@ -578,6 +591,23 @@ public:
 
   ExpressionContext* expression();
   ExpressionContext* expression(int precedence);
+  class  LetBindingContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *name = nullptr;
+    CongParser::ExpressionContext *value = nullptr;
+    LetBindingContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *ASSIGN();
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    ExpressionContext *expression();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  LetBindingContext* letBinding();
+
   class  ExpressionBlockContext : public antlr4::ParserRuleContext {
   public:
     ExpressionBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);

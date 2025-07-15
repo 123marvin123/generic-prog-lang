@@ -87,7 +87,7 @@ namespace cong::lang
                     call(Exp__ exp,
                          TupleOfExp__ tupleOfExp)
                     {
-                        return ApplyValue_::call(ReduceValue::template Call<Exp__>::call(exp),
+                        return ApplyValue_::call(exp,
                                                 Transform_::call(BindArg_{tupleOfExp},
                                                                  exp.tupleOfExp_));
                     }

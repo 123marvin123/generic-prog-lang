@@ -56,6 +56,9 @@ namespace cong::lang::core {
 
         template<unsigned... digits>
         struct explode<0, digits...> : to_chars<digits...> {};
+
+        template<>
+        struct explode<0> : to_chars<0> {};
     }
 
     template<unsigned num>

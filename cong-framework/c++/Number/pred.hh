@@ -133,9 +133,6 @@ template <typename... Exp_>
 constexpr
 Pred<Exp_...> pred(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecPred, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecPred, SpecPred>>{},

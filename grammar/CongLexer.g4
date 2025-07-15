@@ -42,6 +42,7 @@ LESS_EQUAL: '<=';
 GT: '>';
 GREATER_EQUAL: '>=';
 DOUBLE_COLON: '::';
+LAMBDA_ARROW: '=>';
 
 OPEN_BINDING: '_' [1-9][0-9]*;
 DYNAMIC_ANNOTATOR: '_d';

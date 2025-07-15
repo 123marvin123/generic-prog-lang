@@ -107,8 +107,13 @@ expression
     | REQUIRES LPAREN STRING RPAREN # requiresCallExpression
     | fun=qualifiedIdentifier LPAREN (expression (COMMA expression)*)? RPAREN # callExpression
     | paramOrConcept=qualifiedIdentifier # parameterOrConceptReferenceExpression
-    | LET name=IDENTIFIER ASSIGN value=expression LBRACE body=expressionBlock RBRACE # letExpression
+    | LET letBinding+ LBRACE body=expressionBlock RBRACE # letExpression
+    | parameterList LAMBDA_ARROW LBRACE body=expression RBRACE # lambdaExpression
     | OPEN_BINDING # openBindingExpression
+    ;
+
+letBinding
+    : name=IDENTIFIER ASSIGN value=expression
     ;
 
 expressionBlock

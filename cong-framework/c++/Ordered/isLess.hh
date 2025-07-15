@@ -56,9 +56,6 @@ template <typename... Exp_>
 constexpr
 IsLess<Exp_...> isLess(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecIsLess, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsLess, SpecIsLess>>{},

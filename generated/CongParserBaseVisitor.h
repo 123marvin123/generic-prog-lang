@@ -94,15 +94,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitCallExpression(CongParser::CallExpressionContext *ctx) override {
+  virtual std::any visitLambdaExpression(CongParser::LambdaExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -111,14 +103,6 @@ public:
   }
 
   virtual std::any visitConditionalExpression(CongParser::ConditionalExpressionContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitLetExpression(CongParser::LetExpressionContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitQuoteExpression(CongParser::QuoteExpressionContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -134,7 +118,31 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitCallExpression(CongParser::CallExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLetExpression(CongParser::LetExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitQuoteExpression(CongParser::QuoteExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitLiteralExpression(CongParser::LiteralExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLetBinding(CongParser::LetBindingContext *ctx) override {
     return visitChildren(ctx);
   }
 

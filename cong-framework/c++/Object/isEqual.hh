@@ -47,9 +47,6 @@ template <typename... Exp_>
 constexpr
 IsEqual<Exp_...> isEqual(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecIsEqual, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsEqual, SpecIsEqual>>{},

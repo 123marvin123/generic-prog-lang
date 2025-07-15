@@ -129,9 +129,6 @@ template <typename... Exp_>
 constexpr
 IsNotEqual<Exp_...> isNotEqual(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecIsNotEqual, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecIsNotEqual, SpecIsNotEqual>>{},

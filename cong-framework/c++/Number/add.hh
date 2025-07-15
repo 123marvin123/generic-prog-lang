@@ -56,9 +56,6 @@ template <typename... Exp_>
 constexpr
 Add<Exp_...> add(Exp_&&... args) 
 {
-    cong::lang::intern::EvalRequirements::Call<SpecAdd, Exp_...>
-                ::call(std::forward<Exp_>(args)...);
-
     return ::cong::lang::bind(
         ::cong::lang::intern::Environment{},
         ::cong::lang::intern::Exp<::cong::lang::intern::FunctionImpl<DecAdd, SpecAdd>>{},
