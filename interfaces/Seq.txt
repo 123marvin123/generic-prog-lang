@@ -66,7 +66,9 @@ namespace Seq {
     fun length2(s: Seq) -> Number::Number {
         description { "length of s" }
         generic() {
-            Seq::fold(Number::succ(_1), 0_d, s)
+            let fn = (acc: Number::Natural, x: Object::Object) => { Number::succ(acc) } {
+                Seq::fold(fn, 0_d, s)
+            }
         }
     }
 
@@ -236,7 +238,13 @@ namespace Seq {
     fun indexOf(s: Seq, p2: Object::Object) -> Number::Integer {
         description { "index of first occurrence of p(2) in p(1)" }
         generic() {
-            fold(let acc = _1 { itemAt(s, acc) == p2 ? acc : Number::succ(acc) }, 0, s)
+            Seq::fold(
+                (acc: Number::Integer, idx: Number::Natural) => {
+                    acc != -1_d ? acc : ((Seq::itemAt(s, idx) == p2) ? idx : -1_d)
+                },
+                -1_d,
+                Number::range(0_nd, Seq::length(s))
+            )
         }
     }
 }

@@ -16,10 +16,75 @@
 
 #include <utility>
 
+namespace Map
+{
+    struct SpecMap;
+}
+
 namespace cong::lang
 {
     namespace intern
     {
+        namespace local
+        {
+            template<class Fn_>
+            struct AnonymousFunctionImpl : Base
+            {
+                using Satisfies = core::Tuple<Map::SpecMap>;
+                using Base_ = Base;
+
+                using ReduceSpace = core::FunStaticMake<core::Zero>;
+                using ReduceTime = core::FunStaticMake<core::One>;
+                using ReduceValue = core::FunId;
+
+            private:
+                const Fn_& fn;
+
+            public:
+
+                explicit AnonymousFunctionImpl(const Fn_& lambda) : fn(lambda)
+                {
+                }
+
+                template<typename... Args>
+                auto operator()(Args&&... args)
+                {
+                    return bind(cong::lang::intern::Exp<AnonymousFunctionImpl>{*this}, std::forward<Args>(args)...);
+                }
+
+                using IsEager = core::FunStaticMake<core::False>;
+                using IsSpecific = core::FunStaticMake<core::False>;
+
+                CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
+
+                struct ApplyValue
+                {
+                    template <typename Exp_, typename TupleOfExp_>
+                    struct Call
+                    {
+                        static constexpr auto call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                        {
+                            auto res = std::apply([&]<typename... Args>(Args&&... args)
+                            {
+                                return exp.fn(std::forward<Args>(args)...);
+                            }, tupleOfExp);
+                            return res;
+                        }
+
+                        using Type = std::invoke_result_t<decltype(call), Exp_, TupleOfExp_>;
+                    };
+                };
+            };
+        }
+
+        template<typename T>
+        using AnonymousFunctionImpl = Exp<local::AnonymousFunctionImpl<T>>;
+
+        template<class Fn_>
+        auto WrapLambda(Fn_&& f)
+        {
+            return AnonymousFunctionImpl<Fn_>{std::forward<Fn_>(f)};
+        }
 
         struct EvalRequirements {
         private:
@@ -341,6 +406,11 @@ namespace cong::lang
                 {
                     static constexpr auto call(Exp_ exp, TupleOfExp_ tupleOfExp)
                     {
+                        auto res = std::apply([](auto... args)
+                        {
+                            return core::tuple(eval(args)...);
+                        }, tupleOfExp);
+
                         using Length_ = typename core::Length::Call<TupleOfExp_>::Type;
                         using Base__ = DispatchOffset<Exp_, TupleOfExp_, void, Length_>;
                         using Call_ = typename Base__::template Call<Exp_, TupleOfExp_>;
@@ -348,7 +418,7 @@ namespace cong::lang
                         // Check requirements - unpack tuple types into parameter pack
                         //std::apply(EvalRequirements::UnpackTuple<Spec_, decltype(tupleOfExp)>::Type::call, tupleOfExp);
 
-                        return Call_::call(exp, tupleOfExp);
+                        return Call_::call(exp, res);
                     }
 
                     using Type = std::invoke_result_t<decltype(call), Exp_, TupleOfExp_>;

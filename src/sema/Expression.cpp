@@ -498,8 +498,18 @@ std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> L
 
 std::string LambdaExpression::to_cpp() const noexcept
 {
-    // TODO
-    throw std::runtime_error("not implemented");
+    std::stringstream ss;
+
+    ss << "cong::lang::intern::WrapLambda([=](";
+    for (auto it = params.begin(); it != params.end(); ++it)
+    {
+        ss << "auto " << std::get<0>(*it);
+        if (it + 1 != params.end())
+            ss << ", ";
+    }
+    ss << ") { return " << body->to_cpp() << "; })";
+
+    return ss.str();
 }
 
 std::string LambdaExpression::to_python() const noexcept

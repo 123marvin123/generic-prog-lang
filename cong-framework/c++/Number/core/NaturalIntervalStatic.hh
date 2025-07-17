@@ -11,6 +11,8 @@ namespace cong::lang::core
         template <typename Native_, Native_ min_, Native_ max_>
         struct NaturalIntervalStatic
         {
+            static constexpr auto min() { return min_; };
+            static constexpr auto max() { return max_; };
         };
     };
 
@@ -95,9 +97,9 @@ namespace cong::lang::core
                          NaturalIntervalStatic<min2_, max2_>>
         {
             using Type = NaturalIntervalStatic<Max::Call<NaturalStatic<min1_>,
-                                                         NaturalStatic<min2_>>::Type::value,
+                                                         NaturalStatic<min2_>>::Type::native(),
                                                Min::Call<NaturalStatic<max1_>,
-                                                         NaturalStatic<max2_>>::Type::value>;
+                                                         NaturalStatic<max2_>>::Type::native()>;
         };
 
     public:

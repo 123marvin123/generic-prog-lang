@@ -7,6 +7,7 @@
 #include "Undefined.hh"
 
 #include <utility>
+#include <Number/core/NaturalIntervalStatic.hh>
 
 namespace cong::lang
 {
@@ -86,89 +87,6 @@ namespace cong::lang
         CONG_LANG_LOCAL_FUNBYMEMBERFUN(ApplyValue);
 
 #undef CONG_LANG_LOCAL_FUNBYMEMBERFUN
-
-        struct Eval
-        {
-            template <typename Exp_>
-            struct Call
-            {
-            private:
-                template <typename CurrentExp_>
-                struct IterateUntilFixed
-                {
-                private:
-                    using PlainExp_ = typename core::Plain::Call<CurrentExp_>::Type;
-                    using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
-
-                    using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
-
-                    using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
-
-                    template <typename Condition_>
-                    struct LazyRecursion
-                    {
-                        using Type = typename IterateUntilFixed<Reduced_>::Type;
-                    };
-
-                    template <>
-                    struct LazyRecursion<core::True>
-                    {
-                        using Type = CurrentExp_;
-                    };
-
-                public:
-                    using Type = typename LazyRecursion<IsSame_>::Type;
-
-                    static constexpr Type call(CurrentExp_ exp)
-                    {
-                        if constexpr (IsSame_::native())
-                        {
-                            return exp;
-                        }
-                        else
-                        {
-                            auto reduced = ReduceValue::Call<PlainExp_>::call(exp);
-                            return IterateUntilFixed<PlainReducedExp_>::call(reduced);
-                        }
-                    }
-                };
-
-                using Base_ = IterateUntilFixed<Exp_>;
-
-            public:
-                using Type = typename Base_::Type;
-
-                static constexpr Type call(Exp_ exp) { return Base_::call(exp); }
-            };
-        };
-
-        template <typename... ExpS_>
-        typename Eval::Call<ExpS_...>::Type eval(ExpS_&&... expS)
-        {
-            return Eval::Call<ExpS_...>::call(std::forward<ExpS_>(expS)...);
-        }
-
-        struct IsValid
-        {
-        private:
-            template <typename Type_>
-            struct Dispatch
-            {
-                using Type = core::True;
-            };
-
-            template <>
-            struct Dispatch<core::Invalid>
-            {
-                using Type = core::False;
-            };
-
-        public:
-            template <typename Exp_>
-            struct Call : Dispatch<typename core::Plain::Call<Exp_>::Type>
-            {
-            };
-        };
 
         struct IsDefined
         {
@@ -273,6 +191,96 @@ namespace cong::lang
             using Type = std::conditional_t<call(), Exp_, Exp_>;
         };
 
+        struct IsValid
+        {
+        private:
+            template <typename Type_>
+            struct Dispatch
+            {
+                using Type = core::True;
+            };
+
+            template <>
+            struct Dispatch<core::Invalid>
+            {
+                using Type = core::False;
+            };
+
+        public:
+            template <typename Exp_>
+            struct Call : Dispatch<typename core::Plain::Call<Exp_>::Type>
+            {
+            };
+        };
+
+        struct Eval
+        {
+            template <typename Exp_>
+            struct Call
+            {
+            private:
+                template <typename CurrentExp_>
+                struct IterateUntilFixed
+                {
+                private:
+                    using PlainExp_ = typename core::Plain::Call<CurrentExp_>::Type;
+                    using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
+
+                    using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
+
+                    using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
+
+                    template <typename Condition_>
+                    struct LazyRecursion
+                    {
+                        using Type = typename IterateUntilFixed<Reduced_>::Type;
+                    };
+
+                    template <>
+                    struct LazyRecursion<core::True>
+                    {
+                        using Type = CurrentExp_;
+                    };
+
+                public:
+                    using Type = typename LazyRecursion<IsSame_>::Type;
+
+                    template<class Exp__>
+                    static constexpr auto call(Exp__&& exp)
+                    {
+                        if constexpr (IsSame_::native())
+                        {
+                            return std::forward<Exp__>(exp);
+                        }
+                        else
+                        {
+                            if(IsDefined::Call<PlainExp_>::Type::native() == false)
+                            {
+                                return std::forward<Exp__>(exp);
+                            }
+                            auto reduced = ReduceValue::Call<PlainExp_>::call(std::forward<Exp__>(exp));
+                            return IterateUntilFixed<PlainReducedExp_>::call(reduced);
+                        }
+                    }
+                };
+
+                using Base_ = IterateUntilFixed<Exp_>;
+
+            public:
+                using Type = typename Base_::Type;
+
+                template<typename Exp__>
+                static constexpr Type call(Exp__&& exp) { return Base_::call(std::forward<Exp__>(exp)); }
+            };
+        };
+
+        template <typename... ExpS_>
+        auto eval(ExpS_&&... expS)
+        {
+            return Eval::Call<ExpS_...>::call(std::forward<ExpS_>(expS)...);
+        }
+
+
         struct TransformExp // is a Fun(Exp)Dynamic
         {
         private:
@@ -366,9 +374,11 @@ namespace cong::lang
                 public:
                     using Type = typename Call_::Type;
 
-                    static constexpr Type call(Exp_, core::Tuple<ExpS_...> tupleOfExp)
+                    static constexpr Type call(Exp_, core::Tuple<ExpS_...>& tupleOfExp)
                     {
-                        return std::apply(Call_::call, tupleOfExp);
+                        return std::apply([]<typename... Exp__>(Exp__&&... expS) {
+                            return Call_::call(std::forward<Exp__>(expS)...);
+                        }, tupleOfExp);
                     }
                 };
             };

@@ -184,9 +184,16 @@ struct IntegerExpression final : ConstantExpression<long>
 
     [[nodiscard]] std::string to_cpp() const noexcept override
     {
+        auto val = eval();
+        if (val >= 0)
+        {
+            if (is_dynamic())
+                return std::format("::cong::lang::NaturalDynamic{{{}ul}}", val);
+            return std::format("::cong::lang::NaturalStatic<{}>{{}}", val);
+        }
         if (is_dynamic())
-            return std::format("::cong::lang::NaturalDynamic{{{}ul}}", eval());
-        return std::format("::cong::lang::NaturalStatic<{}>{{}}", eval());
+            return std::format("::cong::lang::IntegerDynamic{{{}l}}", val);
+        return std::format("::cong::lang::IntegerStatic<{}>{{}}", val);
     }
 
     [[nodiscard]]

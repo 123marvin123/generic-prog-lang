@@ -1,0 +1,4 @@
+namespace Number
+{
+    fun range(start: Number::Natural, stop: Number::Natural) -> Seq::Seq {}
+}
