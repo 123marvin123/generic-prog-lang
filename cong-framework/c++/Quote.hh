@@ -25,11 +25,12 @@ namespace cong::lang
                 template <typename Arg1_>
                 struct Call
                 {
-                    using Type = typename core::Plain::Call<Arg1_>::Type::Exp_&;
-                    static constexpr Type call(Arg1_ arg1)
+                    static constexpr auto call(Arg1_ arg1)
                     {
                         return arg1.exp_;
                     }
+
+                    using Type = decltype(call(std::declval<Arg1_>()));
                 };
             };
 
@@ -62,5 +63,11 @@ namespace cong::lang
 
     template <typename Exp_>
     using Quote = intern::Exp<local::Quote<Exp_>>;
+
+    template <typename Exp_>
+    static constexpr auto quote(Exp_&& e)
+    {
+        return Quote<Exp_>{std::forward<Exp_>(e)};
+    }
 
 };
