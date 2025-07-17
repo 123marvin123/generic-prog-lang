@@ -143,7 +143,8 @@ private:
         {
         private:
             using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-            static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
+            template<{%- for p in def.params -%}typename T{{loop.index}}{{', ' if not loop.last }}{% endfor -%}>
+            static constexpr auto call_({%- for p in def.params -%}T{{loop.index}}&& {{ p.name }}{{' , ' if not loop.last }}{% endfor -%})
             {
                 {% if impl.time_complexity %}
                 return {{ impl.time_complexity }};
@@ -152,9 +153,9 @@ private:
                 {% endif %}
             }
         public:
-            using Type = std::invoke_result_t<decltype(call_), Args...>;
+            using Type = decltype(call_({%- for p in def.params -%}std::declval<std::tuple_element_t<{{loop.index0}}, TupleOfExp_>>(){{', ' if not loop.last }}{% endfor -%}));
             static constexpr Type call(Exp_ exp, TupleOfExp_ args) {
-                return std::apply(call_, args);
+                return call_({%- for p in def.params -%}std::get<{{loop.index0}}>(args){{', ' if not loop.last }}{% endfor -%});
             }
         };
     };
@@ -168,7 +169,8 @@ private:
         {
         private:
             using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-            static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
+            template<{%- for p in def.params -%}typename T{{loop.index}}{{', ' if not loop.last }}{% endfor -%}>
+            static constexpr auto call_({%- for p in def.params -%}T{{loop.index}}&& {{ p.name }}{{' , ' if not loop.last }}{% endfor -%})
             {
                 {% if impl.space_complexity %}
                 return {{ impl.space_complexity }};
@@ -177,9 +179,9 @@ private:
                 {% endif %}
             }
         public:
-            using Type = std::invoke_result_t<decltype(call_), Args...>;
+            using Type = decltype(call_({%- for p in def.params -%}std::declval<std::tuple_element_t<{{loop.index0}}, TupleOfExp_>>(){{', ' if not loop.last }}{% endfor -%}));
             static constexpr Type call(Exp_ exp, TupleOfExp_ args) {
-                return std::apply(call_, args);
+                return call_({%- for p in def.params -%}std::get<{{loop.index0}}>(args){{', ' if not loop.last }}{% endfor -%});
             }
         };
     };
@@ -190,16 +192,17 @@ public:
     {
     private:
         using TupleOfExp_ = cong::lang::core::Tuple<Args...>;
-        static constexpr auto call_({%- for p in def.params -%}std::tuple_element_t<{{loop.index0}}, TupleOfExp_> {{ p.name }}{{' , ' if not loop.last }}{% endfor -%}, ...)
+        template<{%- for p in def.params -%}typename T{{loop.index}}{{', ' if not loop.last }}{% endfor -%}>
+        static constexpr auto call_({%- for p in def.params -%}T{{loop.index}}&& {{ p.name }}{{' , ' if not loop.last }}{% endfor -%})
         {
             {{ impl.expression }}
         }
     public:
         using ApplyTime = ApplyTime_;
         using ApplySpace = ApplySpace_;
-        using Type = std::invoke_result_t<decltype(call_), Args...>;
+        using Type = decltype(call_({%- for p in def.params -%}std::declval<std::tuple_element_t<{{loop.index0}}, TupleOfExp_>>(){{', ' if not loop.last }}{% endfor -%}));
         static constexpr Type call(Exp_ exp, TupleOfExp_ args) {
-            return std::apply(call_, args);
+            return call_({%- for p in def.params -%}std::get<{{loop.index0}}>(args){{', ' if not loop.last }}{% endfor -%});
         }
     };
 };{{' \n' if not loop.last }}{% endfor %} 

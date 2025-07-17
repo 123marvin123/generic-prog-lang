@@ -466,7 +466,7 @@ std::string QuoteExpression::to_cpp() const noexcept
     const auto& inner_str = get_inner()->to_cpp();
 
     // needs Quote.hh and Traits.hh
-    return std::format("::cong::lang::Quote<::cong::lang::core::Plain::Call<decltype({})>::Type>{{{}}}", inner_str, inner_str);
+    return std::format("::cong::lang::quote({})", inner_str);
 }
 
 std::string QuoteExpression::to_python() const noexcept
@@ -500,10 +500,10 @@ std::string LambdaExpression::to_cpp() const noexcept
 {
     std::stringstream ss;
 
-    ss << "cong::lang::intern::WrapLambda([=](";
+    ss << "cong::lang::intern::WrapLambda([&](";
     for (auto it = params.begin(); it != params.end(); ++it)
     {
-        ss << "auto " << std::get<0>(*it);
+        ss << "auto&& " << std::get<0>(*it);
         if (it + 1 != params.end())
             ss << ", ";
     }

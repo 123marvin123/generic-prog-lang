@@ -238,13 +238,23 @@ namespace Seq {
     fun indexOf(s: Seq, p2: Object::Object) -> Number::Integer {
         description { "index of first occurrence of p(2) in p(1)" }
         generic() {
-            Seq::fold(
+            eval(Seq::fold(
                 (acc: Number::Integer, idx: Number::Natural) => {
                     acc != -1_d ? acc : ((Seq::itemAt(s, idx) == p2) ? idx : -1_d)
                 },
                 -1_d,
-                Number::range(0_nd, Seq::length(s))
-            )
+                Number::range(0_d, Seq::length(s))
+            ))
         }
+    }
+
+    fun test(s: Seq, p2: Object::Object) -> Number::Integer {
+        generic() {
+                    eval(Seq::fold(
+                        quote(Number::succ(_1)),
+                        0_d,
+                        Number::range(0_d, Seq::length(s))
+                    ))
+                }
     }
 }

@@ -225,36 +225,36 @@ namespace cong::lang
                 {
                 private:
                     using PlainType_ = typename core::Plain::Call<ExprType_>::Type;
-                    
+
                     template <typename T>
                     struct CheckArity
                     {
                         using Type = core::False;
                     };
-                    
+
                     template <typename T>
                         requires requires { typename T::Arity; }
                     struct CheckArity<T>
                     {
                     private:
                         using ArityCall_ = typename Arity::Call<T>::Type;
-                        
+
                         template <typename ArityType_>
                         struct CheckInterval
                         {
                             using Type = core::False;
                         };
-                        
+
                         template <typename IntType_, IntType_ min_, IntType_ max_>
                         struct CheckInterval<core::NaturalIntervalStatic<min_, max_>>
                         {
                             using Type = std::conditional_t<(min_ > 0), core::True, core::False>;
                         };
-                        
+
                     public:
                         using Type = typename CheckInterval<ArityCall_>::Type;
                     };
-                    
+
                 public:
                     using Type = typename CheckArity<PlainType_>::Type;
                 };
@@ -265,14 +265,14 @@ namespace cong::lang
                     static constexpr auto call(Exp__&& exp)
                     {
                         using PlainExp_ = typename core::Plain::Call<Exp__>::Type;
-                        
+
                         // Check if expression has open bindings first
                         using HasOpenBindings_ = typename HasOpenBindings<PlainExp_>::Type;
-                        
+
                         if constexpr (HasOpenBindings_::native())
                         {
                             // Expression has open bindings, return as-is
-                            return std::forward<Exp__>(exp);
+                            return exp;
                         }
                         else
                         {
@@ -282,18 +282,17 @@ namespace cong::lang
 
                             if constexpr (IsSame_::native())
                             {
-                                return std::forward<Exp__>(exp);
+                                return exp;
                             }
                             else
                             {
                                 if constexpr(IsDefined::Call<PlainExp_>::Type::native() == false)
                                 {
-                                    return std::forward<Exp__>(exp);
+                                    return exp;
                                 }
                                 else
                                 {
-                                    auto reduced = ReduceValue::Call<PlainExp_>::call(std::forward<Exp__>(exp));
-                                    return IterateUntilFixed::call(std::move(reduced));
+                                    return IterateUntilFixed::call(ReduceValue::Call<Exp__>::call(exp));
                                 }
                             }
                         }
