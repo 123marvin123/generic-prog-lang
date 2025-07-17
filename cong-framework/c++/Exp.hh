@@ -219,65 +219,52 @@ namespace cong::lang
             struct Call
             {
             private:
-                template <typename CurrentExp_>
+
                 struct IterateUntilFixed
                 {
-                private:
-                    using PlainExp_ = typename core::Plain::Call<CurrentExp_>::Type;
-                    using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
-
-                    using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
-
-                    using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
-
-                    template <typename Condition_>
-                    struct LazyRecursion
-                    {
-                        using Type = typename IterateUntilFixed<Reduced_>::Type;
-                    };
-
-                    template <>
-                    struct LazyRecursion<core::True>
-                    {
-                        using Type = CurrentExp_;
-                    };
-
-                public:
-                    using Type = typename LazyRecursion<IsSame_>::Type;
-
                     template<class Exp__>
                     static constexpr auto call(Exp__&& exp)
                     {
+                        using PlainExp_ = typename core::Plain::Call<Exp__>::Type;
+                        using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
+
+                        using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
+                        using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
+
                         if constexpr (IsSame_::native())
                         {
                             return std::forward<Exp__>(exp);
                         }
                         else
                         {
-                            if(IsDefined::Call<PlainExp_>::Type::native() == false)
+                            if constexpr(IsDefined::Call<PlainExp_>::Type::native() == false)
                             {
                                 return std::forward<Exp__>(exp);
                             }
-                            auto reduced = ReduceValue::Call<PlainExp_>::call(std::forward<Exp__>(exp));
-                            return IterateUntilFixed<PlainReducedExp_>::call(reduced);
+                            else
+                            {
+                                auto reduced = ReduceValue::Call<PlainExp_>::call(std::forward<Exp__>(exp));
+                                return IterateUntilFixed::call(reduced);
+                            }
                         }
                     }
                 };
 
-                using Base_ = IterateUntilFixed<Exp_>;
-
             public:
-                using Type = typename Base_::Type;
-
                 template<typename Exp__>
-                static constexpr Type call(Exp__&& exp) { return Base_::call(std::forward<Exp__>(exp)); }
+                static constexpr auto call(Exp__&& exp)
+                {
+                    return IterateUntilFixed::call(std::forward<Exp__>(exp));
+                }
+
+                using Type = decltype(call(std::declval<Exp_>()));
             };
         };
 
         template <typename... ExpS_>
         auto eval(ExpS_&&... expS)
         {
-            return Eval::Call<ExpS_...>::call(std::forward<ExpS_>(expS)...);
+            return Eval::Call<std::decay_t<ExpS_>...>::call(std::forward<ExpS_>(expS)...);
         }
 
 

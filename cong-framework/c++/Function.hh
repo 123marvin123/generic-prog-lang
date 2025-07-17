@@ -412,8 +412,8 @@ namespace cong::lang
                         }, tupleOfExp);
 
                         using Length_ = typename core::Length::Call<TupleOfExp_>::Type;
-                        using Base__ = DispatchOffset<Exp_, TupleOfExp_, void, Length_>;
-                        using Call_ = typename Base__::template Call<Exp_, TupleOfExp_>;
+                        using Base__ = DispatchOffset<Exp_, decltype(res), void, Length_>;
+                        using Call_ = typename Base__::template Call<Exp_, decltype(res)>;
 
                         // Check requirements - unpack tuple types into parameter pack
                         //std::apply(EvalRequirements::UnpackTuple<Spec_, decltype(tupleOfExp)>::Type::call, tupleOfExp);
