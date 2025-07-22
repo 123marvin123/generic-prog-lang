@@ -1,4 +1,16 @@
 namespace Number
 {
     fun range(start: Number::Natural, stop: Number::Natural) -> Seq::Seq {}
+
+    fun sum(seq: Seq::Seq) -> Number::Number {
+        description { "sum of elements of p(1)" }
+        requires { Object::isModelOf(Seq::item(seq), Number::Number) }
+        generic() {
+            Seq::fold(
+                Number::add(_1, _2),
+                0,
+                seq
+            )
+        }
+    }
 }

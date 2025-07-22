@@ -247,14 +247,4 @@ namespace Seq {
             ))
         }
     }
-
-    fun test(s: Seq, p2: Object::Object) -> Number::Integer {
-        generic() {
-                    eval(Seq::fold(
-                        quote(Number::succ(_1)),
-                        0_d,
-                        Number::range(0_d, Seq::length(s))
-                    ))
-                }
-    }
 }

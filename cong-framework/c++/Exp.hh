@@ -17,7 +17,7 @@ namespace cong::lang
         {
         };
 
-        template <class Impl_>
+        template<typename Impl_>
         class Exp : public Impl_
         {
             using Base_ = Impl_;
@@ -27,6 +27,18 @@ namespace cong::lang
             constexpr Exp(InitS_&&... initS) : Base_{std::forward<InitS_>(initS)...}
             {
             }
+
+            // Copy constructor
+            constexpr Exp(const Exp& other) = default;
+
+            // Move constructor
+            constexpr Exp(Exp&& other) = default;
+
+            // Copy assignment
+            constexpr Exp& operator=(const Exp& other) = default;
+
+            // Move assignment
+            constexpr Exp& operator=(Exp&& other) = default;
 
             template <typename... ExpS_>
             constexpr auto operator()(ExpS_&&... expS) const
@@ -113,30 +125,29 @@ namespace cong::lang
         struct WrapUndefined
         {
         private:
-            template<core::StringStatic S, class IsDefined_, class Stacktrace_>
+            template <core::StringStatic S, class IsDefined_, class Stacktrace_>
             struct Dispatch
             {
                 using Type = core::Undefined<S, Stacktrace_>;
             };
 
-            template<core::StringStatic S, class Stacktrace_>
+            template <core::StringStatic S, class Stacktrace_>
             struct Dispatch<S, core::True, Stacktrace_>
             {
                 using Type = core::Undefined<S>;
             };
 
         public:
-            template<core::StringStatic S, class Stacktrace_>
+            template <core::StringStatic S, class Stacktrace_>
             struct Call : Dispatch<S, typename IsDefined::Call<Stacktrace_>::Type, Stacktrace_>
             {
-
             };
         };
 
         struct PrintUndefined
         {
         private:
-            template<class Stacktrace_, core::StringStatic Sep_, class IsDefined_>
+            template <class Stacktrace_, core::StringStatic Sep_, class IsDefined_>
             struct Dispatch
             {
                 static consteval auto call()
@@ -145,7 +156,7 @@ namespace cong::lang
                 }
             };
 
-            template<class Stacktrace_, core::StringStatic Sep_>
+            template <class Stacktrace_, core::StringStatic Sep_>
             struct Dispatch<Stacktrace_, Sep_, core::False>
             {
                 static consteval auto call()
@@ -156,15 +167,15 @@ namespace cong::lang
                     >();
                 }
             };
+
         public:
-            template<class Stacktrace_, core::StringStatic Separator_ = "; ">
+            template <class Stacktrace_, core::StringStatic Separator_ = "; ">
             struct Call : Dispatch<Stacktrace_, Separator_, typename IsDefined::Call<Stacktrace_>::Type>
             {
-
             };
         };
 
-        template<class Exp_, core::StringStatic S>
+        template <class Exp_, core::StringStatic S>
         struct EnsureDefined
         {
         private:
@@ -187,6 +198,7 @@ namespace cong::lang
 
                 return true;
             }
+
         public:
             using Type = std::conditional_t<call(), Exp_, Exp_>;
         };
@@ -219,88 +231,40 @@ namespace cong::lang
             struct Call
             {
             private:
-                // Check if expression has open bindings (arity > 0)
-                template <typename ExprType_>
-                struct HasOpenBindings
-                {
-                private:
-                    using PlainType_ = typename core::Plain::Call<ExprType_>::Type;
-
-                    template <typename T>
-                    struct CheckArity
-                    {
-                        using Type = core::False;
-                    };
-
-                    template <typename T>
-                        requires requires { typename T::Arity; }
-                    struct CheckArity<T>
-                    {
-                    private:
-                        using ArityCall_ = typename Arity::Call<T>::Type;
-
-                        template <typename ArityType_>
-                        struct CheckInterval
-                        {
-                            using Type = core::False;
-                        };
-
-                        template <typename IntType_, IntType_ min_, IntType_ max_>
-                        struct CheckInterval<core::NaturalIntervalStatic<min_, max_>>
-                        {
-                            using Type = std::conditional_t<(min_ > 0), core::True, core::False>;
-                        };
-
-                    public:
-                        using Type = typename CheckInterval<ArityCall_>::Type;
-                    };
-
-                public:
-                    using Type = typename CheckArity<PlainType_>::Type;
-                };
-
                 struct IterateUntilFixed
                 {
-                    template<class Exp__>
+                    template <class Exp__>
                     static constexpr auto call(Exp__&& exp)
                     {
                         using PlainExp_ = typename core::Plain::Call<Exp__>::Type;
+                        using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
+                        using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
+                        using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
 
-                        // Check if expression has open bindings first
-                        using HasOpenBindings_ = typename HasOpenBindings<PlainExp_>::Type;
-
-                        if constexpr (HasOpenBindings_::native())
+                        if constexpr (IsSame_::native())
                         {
-                            // Expression has open bindings, return as-is
+                            // Expression cannot be reduced further, return as-is
                             return exp;
                         }
                         else
                         {
-                            using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
-                            using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
-                            using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
-
-                            if constexpr (IsSame_::native())
+                            // Expression can be reduced, check if it's defined and continue
+                            if constexpr (IsDefined::Call<Reduced_>::Type::native())
                             {
-                                return exp;
+                                // Continue reducing
+                                return IterateUntilFixed::call(ReduceValue::Call<Exp__>::call(exp));
                             }
                             else
                             {
-                                if constexpr(IsDefined::Call<PlainExp_>::Type::native() == false)
-                                {
-                                    return exp;
-                                }
-                                else
-                                {
-                                    return IterateUntilFixed::call(ReduceValue::Call<Exp__>::call(exp));
-                                }
+                                using _ = EnsureDefined<Reduced_, PrintUndefined::Call<Reduced_>::call()>::Type;
+                                return exp;
                             }
                         }
                     }
                 };
 
             public:
-                template<typename Exp__>
+                template <typename Exp__>
                 static constexpr auto call(Exp__&& exp)
                 {
                     return IterateUntilFixed::call(std::forward<Exp__>(exp));
@@ -313,7 +277,7 @@ namespace cong::lang
         template <typename... ExpS_>
         auto eval(ExpS_&&... expS)
         {
-            return Eval::Call<std::decay_t<ExpS_>...>::call(std::forward<ExpS_>(expS)...);
+            return Eval::Call<ExpS_...>::call(std::forward<ExpS_>(expS)...);
         }
 
 
@@ -330,11 +294,12 @@ namespace cong::lang
                 struct Call
                 {
                     using Type = core::Tuple<typename ApplyValue::Call<Exp_, ItemS_>::Type...>;
+
                     static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
                     {
                         return std::apply([&exp](ItemS_&... itemS)
                         {
-                            return core::tuple(ApplyValue ::Call<Exp_, ItemS_>::call(exp, itemS)...);
+                            return core::tuple(ApplyValue::Call<Exp_, ItemS_>::call(exp, itemS)...);
                         }, tupleOfExp);
                     }
                 };
@@ -349,9 +314,11 @@ namespace cong::lang
 
                 using Type = typename Base_::template Call<Exp_, TupleOfExp_>::Type;
 
-                static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                static constexpr Type call(Exp_&& exp, TupleOfExp_&& tupleOfExp)
                 {
-                    return Base_::template Call<Exp_, TupleOfExp_>::call(exp, tupleOfExp);
+                    return Base_::template Call<Exp_, TupleOfExp_>::call(
+                        std::forward<Exp_>(exp),
+                        std::forward<TupleOfExp_>(tupleOfExp));
                 }
             };
         };
@@ -402,7 +369,7 @@ namespace cong::lang
                 struct Call;
 
                 template <typename Exp_, typename... ExpS_>
-                struct Call<Exp_, core::Tuple<ExpS_...>>
+                struct Call<Exp_, core::Tuple<ExpS_...>&&>
                 {
                 private:
                     using Call_ = typename Fun_::template Call<ExpS_...>;
@@ -410,11 +377,13 @@ namespace cong::lang
                 public:
                     using Type = typename Call_::Type;
 
-                    static constexpr Type call(Exp_, core::Tuple<ExpS_...>& tupleOfExp)
+                    static constexpr Type call(Exp_&&, auto&& tupleOfExp)
                     {
-                        return std::apply([]<typename... Exp__>(Exp__&&... expS) {
-                            return Call_::call(std::forward<Exp__>(expS)...);
-                        }, tupleOfExp);
+                        return std::apply(Call_::call, std::forward<decltype(tupleOfExp)>(tupleOfExp));
+                        /*return std::apply([](auto&&... expS)
+                        {
+                            return Call_::call(std::forward<decltype(expS)>(expS)...);
+                        }, std::forward<core::Tuple<ExpS_...>>(tupleOfExp));*/
                     }
                 };
             };

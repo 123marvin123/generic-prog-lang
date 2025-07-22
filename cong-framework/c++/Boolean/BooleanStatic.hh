@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../Object/ObjectStatic.hh"
-#include "../ApplyMember.hh"
-#include "../Exp.hh"
+#include "Object/ObjectStatic.hh"
+#include "ApplyMember.hh"
+#include "Exp.hh"
 
 #include "core/Boolean.hh"
 #include "core/BooleanStatic.hh"
-#include "../Number/core/NaturalStatic.hh"
+#include "Number/core/NaturalStatic.hh"
 
 #include "not__dec.hh"
 #include "or__dec.hh"
@@ -17,7 +17,7 @@ namespace cong::lang {
 	namespace local {
 		template <typename Native_, Native_ native_>
   		class BooleanStatic
-    		: public lang::ObjectStatic<Native_, native_>
+    		: public ::cong::lang::ObjectStatic<Native_, native_>
   		{
     		using Base_ = lang::ObjectStatic<Native_, native_>;
   		public:

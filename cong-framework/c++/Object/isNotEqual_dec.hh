@@ -9,8 +9,8 @@
 
 
 #include "Object/Object.hh"
-#include "Object/Object.hh"
 #include "Boolean/Boolean.hh"
+
 namespace Object {
 
 struct DecIsNotEqual {

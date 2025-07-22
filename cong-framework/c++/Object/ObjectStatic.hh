@@ -1,16 +1,16 @@
 #pragma once
 
 #include <type_traits>
-#include "../ApplyMember.hh"
-#include "../Decls.hh"
-#include "../Number/core/NaturalStatic.hh"
-#include "../Val.hh"
+#include "ApplyMember.hh"
+#include "Decls.hh"
+#include "Number/core/NaturalStatic.hh"
+#include "Val.hh"
 
 #include "Object.hh"
 #include "isEqual_dec.hh"
 #include "isNotEqual_dec.hh"
 #include "id_dec.hh"
-#include "../Ordered/isGreater_dec.hh"
+#include "Ordered/isGreater_dec.hh"
 
 namespace cong::lang
 {

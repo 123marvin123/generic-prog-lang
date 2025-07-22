@@ -1,43 +1,18 @@
 namespace Statistics {
-    fun minMax(set: Set::Set) -> Object::Object {
-      description {
-        "minimal and maximal element of p(1)"
-      }
-    }
-
-    fun min(set: Set::Set) -> Object::Object {
-      description {
-        "minimal element of p(1)"
-      }
-    }
-
-    fun max(set: Set::Set) -> Object::Object {
-      description {
-        "maximal element of p(1)"
-      }
-    }
-
-    fun mean(set: Set::Set) -> Object::Object {
-      description {
-        "arithmetic mean of elements of multi-set p(1)"
-      }
-    }
-
-    fun median(set: Set::Set) -> Object::Object {
-      description {
-        "median of elements of multi-set p(1)"
-      }
+    fun mean(seq: Seq::Seq) -> Number::Number {
+        description { "arithmetic mean of elements of p(1)" }
+        requires { Object::isModelOf(Seq::item(seq), Number::Number) }
+        generic() {
+            Number::div(
+                Number::sum(seq),
+                Seq::length(seq)
+            )
+        }
     }
 
     fun variance(set: Set::Set) -> Object::Object {
       description {
         "variance of elements of multi-set p(1)"
-      }
-    }
-
-    fun deviation(set: Set::Set) -> Object::Object {
-      description {
-        "standard deviation of elements of multi-set p(1)"
       }
     }
 }

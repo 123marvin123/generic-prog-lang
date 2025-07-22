@@ -3,6 +3,7 @@
 #include "../Object/ObjectStatic.hh"
 #include "../ApplyMember.hh"
 #include "../Exp.hh"
+#include "NaturalStatic.hh"
 
 #include "core/Integer.hh"
 #include "add_dec.hh"

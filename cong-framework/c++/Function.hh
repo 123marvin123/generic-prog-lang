@@ -404,22 +404,29 @@ namespace cong::lang
                 template <typename Exp_, typename TupleOfExp_>
                 struct Call
                 {
-                private:
-                    using RecursiveReduce_ = typename RecursiveReduce::template Call<TupleOfExp_>::Type;
-                    using Length_ = typename core::Length::Call<RecursiveReduce_>::Type;
-                    using Base__ = DispatchOffset<Exp_, RecursiveReduce_, void, Length_>;
-                    using Call_ = typename Base__::template Call<Exp_, RecursiveReduce_>;
-
-                public:
-                    using Type = typename Call_::Type;
-                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    static constexpr auto call(Exp_&& exp, TupleOfExp_&& tupleOfExp)
                     {
-                        auto res = std::apply([](auto&&... args)
+                        auto&& res = std::apply([](auto&&... args)
                         {
-                            return core::tupleNonRValRef(local::ReduceValue::Call<decltype(args)>::call(args)...);
-                        }, tupleOfExp);
-                        return Call_::call(exp, res);
+                            return core::tuple([]<typename Arg>(Arg&& arg) -> decltype(auto) {
+                                if constexpr (IsDefined::Call<
+                                    decltype(local::ReduceValue::Call<decltype(arg)>::call(std::forward<Arg>(arg)))
+                                >::Type::native()) {
+                                    return local::ReduceValue::Call<decltype(arg)>::call(std::forward<Arg>(arg));
+                                } else {
+                                    return std::forward<Arg>(arg);
+                                }
+                            }(std::forward<decltype(args)>(args))...);
+                        }, std::forward<TupleOfExp_>(tupleOfExp));
+
+                        using Length_ = typename core::Length::Call<TupleOfExp_>::Type;
+                        using Base__ = DispatchOffset<Exp_, decltype(res), void, Length_>;
+                        using Call_ = typename Base__::template Call<Exp_, decltype(res)>;
+
+                        return Call_::call(std::forward<Exp_>(exp), std::forward<decltype(res)>(res));
                     }
+
+                    using Type = decltype(call(std::declval<Exp_>(), std::declval<TupleOfExp_>()));
                 };
             };
         };

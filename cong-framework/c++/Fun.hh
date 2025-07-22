@@ -129,9 +129,9 @@ namespace cong::lang::core
         template <typename Arg1_>                                                                                      \
         struct Call                                                                                                    \
         {                                                                                                              \
-            using Type = typename ::cong::lang::core::Plain::Call<Arg1_>::Type::Member_&; /* @todo provide proper      \
+            using Type = typename ::cong::lang::core::Plain::Call<Arg1_>::Type::Member_&&; /* @todo provide proper     \
                                                                                              qualification */          \
-            static constexpr Type call(Arg1_ arg1) { return arg1.member_; /* @todo private access required */ }        \
+            static constexpr Type call(Arg1_&& arg1) { return std::forward<Arg1_>(arg1).member_; }                     \
         };                                                                                                             \
     }
 
@@ -154,11 +154,11 @@ namespace cong::lang::core
     // @todo better name (Id does not make sense for two arguments), rather a projection (from vararg)
     struct FunId
     {
-        template <typename Arg1_, typename... ArgS_>
+        template <typename Arg1_, typename...>
         struct Call
         {
-            using Type = Arg1_;
-            static constexpr Type call(Arg1_ arg1, ArgS_...) { return arg1; }
+            using Type = Arg1_&&;
+            static constexpr Type call(Arg1_&& arg1, ...) { return std::forward<Arg1_>(arg1); }
         };
     };
 
@@ -248,8 +248,8 @@ public:                                                                         
                                                                                                                        \
     public:                                                                                                            \
         using Type = typename Call_::Type;                                                                             \
-        static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp) {                                             \
-            return Call_::call(exp, tupleOfExp);                        \
+        static constexpr Type call(Exp_&& exp, TupleOfExp_&& tupleOfExp) {                                             \
+            return Call_::call(std::forward<Exp_>(exp), std::forward<TupleOfExp_>(tupleOfExp));                        \
         }                                                                                                              \
     }
 

@@ -11,7 +11,6 @@
 #include "Type.hh"
 
 #include <utility> // std::forward
-#include <Boolean/BooleanStatic.hh>
 
 namespace cong::lang
 {
@@ -76,19 +75,19 @@ namespace cong::lang
                 {
                 private:
                     using BindArg_ = lang::BindArg<TupleOfExp__>;
-                    using Transform_ = intern::TransformExp::Call<BindArg_, TupleOfExp_>;
-                    using ApplyValue_ = intern::ApplyValue::Call<Exp_, typename Transform_::Type>;
+                    using Transform_ = intern::TransformExp::Call<BindArg_, TupleOfExp__>;
+                    using ApplyValue_ = intern::ApplyValue::Call<Exp__, typename Transform_::Type>;
 
                 public:
                     using Type = typename ApplyValue_::Type;
 
                     static constexpr
                     Type
-                    call(Exp__ exp,
-                         TupleOfExp__ tupleOfExp)
+                    call(Exp__&& exp,
+                         TupleOfExp__&& tupleOfExp)
                     {
-                        return ApplyValue_::call(exp,
-                                                Transform_::call(BindArg_{tupleOfExp},
+                        return ApplyValue_::call(std::forward<Exp__>(exp),
+                                                Transform_::call(BindArg_{std::forward<TupleOfExp__>(tupleOfExp)},
                                                                  exp.tupleOfExp_));
                     }
                 };
@@ -109,7 +108,9 @@ namespace cong::lang
                     Type
                     call(Exp__ exp)
                     {
-                        return ApplyValue_::call(exp.exp_, exp.tupleOfExp_);
+                        return ApplyValue_::call(
+                            std::forward<decltype(exp.exp_)>(exp.exp_),
+                            std::forward<decltype(exp.tupleOfExp_)>(exp.tupleOfExp_));
                     }
                 };
             };

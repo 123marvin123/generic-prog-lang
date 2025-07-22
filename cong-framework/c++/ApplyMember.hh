@@ -68,11 +68,11 @@ Base__ \
       using Type = typename Call_::Type; \
       static constexpr \
       Type \
-      call(Exp_ exp, \
-           TupleOfExp_ tupleOfExp) \
+      call(Exp_&& exp, \
+           TupleOfExp_&& tupleOfExp) \
       { \
-        return Call_::call(exp, \
-                           tupleOfExp); \
+        return Call_::call(std::forward<Exp_>(exp), \
+                           std::forward<TupleOfExp_>(tupleOfExp)); \
       } \
     }; \
   }; \
