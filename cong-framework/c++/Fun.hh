@@ -244,7 +244,7 @@ public:                                                                         
     {                                                                                                                  \
     private:                                                                                                           \
         CONG_LANG_CORE_FOLD(CONG_LANG_CORE_LOCAL_LET, (), SEQLET_)                                                     \
-        using Call_ = typename BASE_::template Call<Exp_, TupleOfExp_>;                                                \
+        using Call_ = typename BASE_::template Call<Exp_, typename cong::lang::core::Plain::Call<TupleOfExp_>::Type>;  \
                                                                                                                        \
     public:                                                                                                            \
         using Type = typename Call_::Type;                                                                             \

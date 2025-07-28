@@ -22,41 +22,32 @@ namespace cong::lang
 
             struct ReduceValue
             {
-                template <typename Arg1_>
+                template <typename Arg1_, typename...>
                 struct Call
                 {
-                    static constexpr auto call(Arg1_ arg1)
-                    {
-                        return arg1.exp_;
-                    }
+                    using Type = typename core::Plain::Call<Arg1_>::Type::Type;
 
-                    using Type = decltype(call(std::declval<Arg1_>()));
+                    static constexpr Type call(Arg1_&& arg1)
+                    {
+                        return std::forward<Type>(arg1.exp_);
+                    }
                 };
             };
 
             using ApplySpace = core::FunStaticMake<core::NaturalStatic<0>>;
             using ApplyTime = core::FunStaticMake<core::NaturalStatic<1>>;
 
-            struct ApplyValue
-            {
-                template <typename Arg1_>
-                struct Call
-                {
-                    using Type = typename core::Plain::Call<Arg1_>::Type::Exp_&;
-                    static constexpr Type call(Arg1_ arg1)
-                    {
-                        return arg1.exp_;
-                    }
-                };
-            };
+            using ApplyValue = ReduceValue;
         private:
             typename core::ToNonRValRef::Call<Exp_>::Type exp_;
         public:
             constexpr
-            Quote(Exp_ exp)
+            explicit Quote(Exp_&& exp)
               : Base_{},
-                exp_{exp}
+                exp_{std::forward<Exp_>(exp)}
             {}
+
+            using Type = Exp_;
         };
 
     };
@@ -65,9 +56,9 @@ namespace cong::lang
     using Quote = intern::Exp<local::Quote<Exp_>>;
 
     template <typename Exp_>
-    static constexpr auto quote(Exp_&& e)
+    static constexpr Quote<Exp_> quote(Exp_&& e)
     {
-        return Quote<Exp_>{std::forward<Exp_>(e)};
+        return {std::forward<Exp_>(e)};
     }
 
 };

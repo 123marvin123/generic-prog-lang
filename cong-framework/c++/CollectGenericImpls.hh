@@ -48,7 +48,9 @@ namespace cong::lang::intern
     template <class Impl_, class Exp_, class TupleOfExp_, typename ActualExpArg, typename ActualTupleOfExpArg>
     auto get_impl_value_forwarded(ActualExpArg&& e, ActualTupleOfExpArg&& t)
     {
-        using ApplyTime_ = typename Impl_::template Call<Exp_, TupleOfExp_>::ApplyTime::template Call<Exp_, TupleOfExp_>;
+        using PlainTupleOfExp_ = typename core::Plain::Call<TupleOfExp_>::Type;
+        using ApplyTime_ = typename Impl_::template Call<Exp_, PlainTupleOfExp_>::ApplyTime::template Call<Exp_,
+        PlainTupleOfExp_>;
         const auto& result = intern::eval(ApplyTime_::call(
             std::forward<ActualExpArg>(e),
             std::forward<ActualTupleOfExpArg>(t)
@@ -144,7 +146,7 @@ namespace cong::lang::intern
         template <class Exp_, class TupleOfExp_>
         struct Call
         {
-            static auto call(Exp_ e, TupleOfExp_ t)
+            static auto call(Exp_&& e, TupleOfExp_&& t)
             {
                 if (core::Length::Call<TupleOfImpl_>::Type::native() == 0)
                 {
@@ -166,7 +168,7 @@ namespace cong::lang::intern
                     }
                     else
                     {
-                        return ActualImpl::template Call<Exp_, TupleOfExp_>::call(
+                        return ActualImpl::template Call<Exp_, typename core::Plain::Call<TupleOfExp_>::Type>::call(
                             std::forward<Exp_>(e),
                             std::forward<TupleOfExp_>(t)
                         );
@@ -268,7 +270,7 @@ namespace cong::lang::intern
         private:
             using NextTuple_ = std::conditional_t<
                 core::Truthy::Call<typename core::IsStatic<typename Impl_::template Call<
-                    Exp_, TupleOfExp_>::Type>::Type>::call(),
+                    Exp_, typename core::Plain::Call<TupleOfExp_>::Type>::Type>::Type>::call(),
                 typename PrependElement<Impl_, CurrentTuple_>::Type,
                 CurrentTuple_
             >;
@@ -288,7 +290,8 @@ namespace cong::lang::intern
     public:
         using Type = std::conditional_t<
             0 < std::tuple_size_v<ResultingTuple_>,
-            typename SelectBestStaticGenericImpl<ResultingTuple_, Exp_, TupleOfExp_>::Type,
+            typename SelectBestStaticGenericImpl<ResultingTuple_, Exp_,
+            typename core::Plain::Call<TupleOfExp_>::Type>::Type,
             core::Undefined<"No static generic implementation available">
         >;
     };
@@ -313,7 +316,7 @@ namespace cong::lang::intern
             using Impl_ = typename std::tuple_element<0, TupleRemainingImpls_>::type;
             using Remaining_ = std::conditional_t<
                 core::Falsy::Call<typename core::IsStatic<typename Impl_::template Call<
-                    Exp_, TupleOfExp_>::Type>::Type>::call(),
+                    Exp_, typename core::Plain::Call<TupleOfExp_>::Type>::Type>::Type>::call(),
                 typename PrependElement<Impl_, TupleDynamicImpls_>::Type,
                 TupleDynamicImpls_
             >;

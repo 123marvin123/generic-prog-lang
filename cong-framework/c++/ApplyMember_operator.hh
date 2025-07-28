@@ -55,10 +55,10 @@
   /* empty */
 
 #define CONG_LANG_LOCAL_OPERATOR_VALUE_Dynamic_1(OP_) \
-  static_cast<typename Type::Native>(OP_ p1.native())
+  static_cast<typename Type::Native>(OP_ eval(p1).native())
 
 #define CONG_LANG_LOCAL_OPERATOR_VALUE_Dynamic_2(OP_) \
-  static_cast<typename Type::Native>(p1.native() OP_ p2.native())
+  static_cast<typename Type::Native>(eval(p1).native() OP_ eval(p2).native())
 
 
 #define CONG_LANG_LOCAL_OPERATOR_APPLYMEMBER(PAREN_TEMP_PAR_, TEMP_, PAREN_TEMP_ARG_, NS_, Name_, name_, Op_, ARITY_, OFFSET_, PAREN_TYPE_, PAREN_VALUE_) \

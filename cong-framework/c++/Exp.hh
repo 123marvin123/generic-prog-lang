@@ -17,7 +17,7 @@ namespace cong::lang
         {
         };
 
-        template<typename Impl_>
+        template <typename Impl_>
         class Exp : public Impl_
         {
             using Base_ = Impl_;
@@ -231,46 +231,61 @@ namespace cong::lang
             struct Call
             {
             private:
-                struct IterateUntilFixed
+                // Type-only computation (no recursion issues)
+                template <typename T, int Depth = 0>
+                struct ComputeResultType
                 {
-                    template <class Exp__>
-                    static constexpr auto call(Exp__&& exp)
-                    {
-                        using PlainExp_ = typename core::Plain::Call<Exp__>::Type;
-                        using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
-                        using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
-                        using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
+                    using PlainExp_ = typename core::Plain::Call<T>::Type;
+                    using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
+                    using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
+                    using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
 
-                        if constexpr (IsSame_::native())
-                        {
-                            // Expression cannot be reduced further, return as-is
-                            return exp;
-                        }
-                        else
-                        {
-                            // Expression can be reduced, check if it's defined and continue
-                            if constexpr (IsDefined::Call<Reduced_>::Type::native())
-                            {
-                                // Continue reducing
-                                return IterateUntilFixed::call(ReduceValue::Call<Exp__>::call(exp));
-                            }
-                            else
-                            {
-                                using _ = EnsureDefined<Reduced_, PrintUndefined::Call<Reduced_>::call()>::Type;
-                                return exp;
-                            }
-                        }
-                    }
+                    // Helper struct to wrap types
+                    template <typename U>
+                    struct TypeWrapper
+                    {
+                        using Type = U;
+                    };
+
+                    // Base case: cannot reduce further
+                    using Type = typename std::conditional_t<
+                        IsSame_::native(),
+                        TypeWrapper<T>,
+                        std::conditional_t<
+                            !IsDefined::Call<Reduced_>::Type::native(),
+                            TypeWrapper<T>, // Error case - return original
+                            ComputeResultType<Reduced_, Depth + 1> // Recursive case
+                        >
+                    >::Type;
                 };
 
-            public:
-                template <typename Exp__>
-                static constexpr auto call(Exp__&& exp)
+                template <typename T>
+                static constexpr typename ComputeResultType<T>::Type call_impl(T&& exp)
                 {
-                    return IterateUntilFixed::call(std::forward<Exp__>(exp));
+                    using PlainExp_ = typename core::Plain::Call<T>::Type;
+                    using Reduced_ = typename ReduceValue::Call<PlainExp_>::Type;
+                    using PlainReducedExp_ = typename core::Plain::Call<Reduced_>::Type;
+                    using IsSame_ = typename core::IsSame::Call<PlainExp_, PlainReducedExp_>::Type;
+
+                    if constexpr (IsSame_::native())
+                    {
+                        return exp;
+                    }
+                    if constexpr (IsDefined::Call<Reduced_>::Type::native() == false)
+                    {
+                        using _ = EnsureDefined<Reduced_, PrintUndefined::Call<Reduced_>::call()>::Type;
+                        return exp;
+                    }
+                    return call_impl(ReduceValue::Call<T>::call(std::forward<T>(exp)));
                 }
 
-                using Type = decltype(call(std::declval<Exp_>()));
+            public:
+                using Type = typename ComputeResultType<Exp_>::Type;
+
+                static constexpr Type call(Exp_&& exp)
+                {
+                    return call_impl(std::forward<Exp_>(exp));
+                }
             };
         };
 
@@ -355,7 +370,7 @@ namespace cong::lang
                 public:
                     using Type = typename Eval_::Type;
 
-                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    static constexpr Type call(Exp_&& exp, TupleOfExp_&& tupleOfExp)
                     {
                         return Eval_::call(Bind_{Environment{}, ExpNew_{}, tupleOfExp});
                     }
@@ -365,11 +380,12 @@ namespace cong::lang
             template <class Fun_>
             struct ApplyByFun
             {
+            private:
                 template <typename Exp_, typename TupleOfExp_>
-                struct Call;
+                struct Dispatch;
 
                 template <typename Exp_, typename... ExpS_>
-                struct Call<Exp_, core::Tuple<ExpS_...>&&>
+                struct Dispatch<Exp_, core::Tuple<ExpS_...>>
                 {
                 private:
                     using Call_ = typename Fun_::template Call<ExpS_...>;
@@ -377,14 +393,16 @@ namespace cong::lang
                 public:
                     using Type = typename Call_::Type;
 
-                    static constexpr Type call(Exp_&&, auto&& tupleOfExp)
+                    static constexpr Type call(Exp_&&, core::Tuple<ExpS_...>&& tupleOfExp)
                     {
                         return std::apply(Call_::call, std::forward<decltype(tupleOfExp)>(tupleOfExp));
-                        /*return std::apply([](auto&&... expS)
-                        {
-                            return Call_::call(std::forward<decltype(expS)>(expS)...);
-                        }, std::forward<core::Tuple<ExpS_...>>(tupleOfExp));*/
                     }
+                };
+
+            public:
+                template <typename Exp_, typename TupleOfExp_>
+                struct Call : Dispatch<Exp_, typename core::Plain::Call<TupleOfExp_>::Type>
+                {
                 };
             };
         }; // namespace local

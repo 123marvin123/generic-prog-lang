@@ -18,7 +18,7 @@ Base__ \
 )
 
 #define CONG_LANG_INTERN_APPLYMEMBER_LOCAL_PARAM_LIST(ignore_, n, text_) \
-  BOOST_PP_CAT(BOOST_PP_CAT(Arg, BOOST_PP_INC(n)), _) \
+  BOOST_PP_CAT(BOOST_PP_CAT(Arg, BOOST_PP_INC(n)), _&&) \
   BOOST_PP_CAT(p, BOOST_PP_INC(n))
 
 #define CONG_LANG_INTERN_APPLYMEMBER_LOCAL_TEMPL_LIST(ignore_, n, text_) \
