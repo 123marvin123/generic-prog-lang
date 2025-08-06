@@ -260,10 +260,14 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression basic functionality", "[expre
     vec<s_ptr<Expression>> body_exprs;
     body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
     
-    const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
-    
-    REQUIRE(let_expr->get_identifier() == "x");
-    REQUIRE(let_expr->get_value() == value_expr);
+    vec<LetBinding> bindings;
+    bindings.emplace_back("x", value_expr);
+
+    const auto let_expr = LetExpression::create(sema_ptr, bindings, body_exprs);
+
+    REQUIRE(let_expr->get_bindings().size() == 1);
+    REQUIRE(let_expr->get_bindings()[0].identifier == "x");
+    REQUIRE(let_expr->get_bindings()[0].value == value_expr);
     REQUIRE(let_expr->get_body() == body_exprs);
     
     const auto result = let_expr->get_result();
@@ -282,8 +286,11 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression with multiple body expression
     body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 20, false));
     body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 30, false));
     
-    const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
-    
+    vec<LetBinding> bindings;
+    bindings.emplace_back("x", value_expr);
+
+    const auto let_expr = LetExpression::create(sema_ptr, bindings, body_exprs);
+
     const auto result = let_expr->get_result();
     REQUIRE(std::holds_alternative<const Concept*>(result));
 }
@@ -296,8 +303,11 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression C++ export", "[expression][le
     vec<s_ptr<Expression>> body_exprs;
     body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
     
-    auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
-    
+    vec<LetBinding> bindings;
+    bindings.emplace_back("x", value_expr);
+
+    auto let_expr = LetExpression::create(sema_ptr, bindings, body_exprs);
+
     std::string cpp_output = let_expr->to_cpp();
 
     REQUIRE(cpp_output.find("[&]() {") != std::string::npos);
@@ -314,14 +324,17 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression Python export", "[expression]
     vec<s_ptr<Expression>> body_exprs;
     body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
     
-    const auto let_expr = LetExpression::create(sema_ptr, "x", value_expr, body_exprs);
-    
+    vec<LetBinding> bindings;
+    bindings.emplace_back("x", value_expr);
+
+    const auto let_expr = LetExpression::create(sema_ptr, bindings, body_exprs);
+
     std::string python_output = let_expr->to_python();
 
-    REQUIRE(python_output.find("(lambda: (") != std::string::npos);
-    REQUIRE(python_output.find("setattr(locals(), 'x', Number(42))") != std::string::npos);
+    REQUIRE(python_output.find("(lambda x: (") != std::string::npos);
     REQUIRE(python_output.find("Number(100)") != std::string::npos);
-    REQUIRE(python_output.find(")[-1])()") != std::string::npos);
+    REQUIRE(python_output.find(")[-1])(") != std::string::npos);
+    REQUIRE(python_output.find("Number(42)") != std::string::npos);
 }
 
 TEST_CASE_METHOD(ExpressionFixture, "LetExpression invalid construction", "[expression][let]")
@@ -331,11 +344,18 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression invalid construction", "[expr
     const auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
     
     vec<s_ptr<Expression>> empty_body;
-    REQUIRE_THROWS_AS(LetExpression(sema_ptr, "x", value_expr, empty_body), std::runtime_error);
-    
+    vec<LetBinding> bindings;
+    bindings.emplace_back("x", value_expr);
+    REQUIRE_THROWS_AS(LetExpression(sema_ptr, bindings, empty_body), std::runtime_error);
+
     vec<s_ptr<Expression>> body_exprs;
     body_exprs.push_back(std::make_shared<IntegerExpression>(sema_ptr, 100, false));
-    REQUIRE_THROWS_AS(LetExpression(sema_ptr, "", value_expr, body_exprs), std::runtime_error);
 
-    REQUIRE_THROWS_AS(LetExpression(sema_ptr, "x", nullptr, body_exprs), std::runtime_error);
+    vec<LetBinding> empty_identifier_bindings;
+    empty_identifier_bindings.emplace_back("", value_expr);
+    REQUIRE_THROWS_AS(LetExpression(sema_ptr, empty_identifier_bindings, body_exprs), std::runtime_error);
+
+    vec<LetBinding> null_bindings;
+    null_bindings.emplace_back("x", nullptr);
+    REQUIRE_THROWS_AS(LetExpression(sema_ptr, null_bindings, body_exprs), std::runtime_error);
 }

@@ -247,4 +247,30 @@ namespace Seq {
             ))
         }
     }
+
+    fun sort(p1: Seq) -> Seq {
+        description { "sorts p(1) in ascending order" }
+        requires { Object::isModelOf(Seq::item(p1), Ordered::Ordered) }
+    }
+
+    fun median(p1: Seq) -> Object::Object {
+        description { "median of p(1)" }
+        requires { Object::isModelOf(Seq::item(p1), Number::Number) }
+
+        generic() {
+            let sorted = sort(p1), l = length(p1), middle = (Number::Natural) Number::div(l, 2_d) {
+                Boolean::cond(
+                    Number::isOdd(l),
+                    itemAt(sorted, middle),
+                    Number::div(
+                        Number::add(
+                            (Number::Number) itemAt(sorted, (Number::Natural) Number::sub(middle, 1_d)),
+                            (Number::Number) itemAt(sorted, middle)
+                        ),
+                        2_d
+                    )
+                )
+            }
+        }
+    }
 }

@@ -146,20 +146,19 @@ std::any ExpressionVisitor::visitArithmeticExpression(CongParser::ArithmeticExpr
 
 std::any ExpressionVisitor::visitLetExpression(CongParser::LetExpressionContext* ctx)
 {
-    vec<LetBinding> current_scope;
+    let_binding_stack.push(vec<LetBinding>{});
 
     for (const auto& binding : ctx->letBinding())
     {
         if (std::any res = visit(binding); res.has_value() && res.type() == typeid(LetBinding))
         {
             const auto& b = std::any_cast<LetBinding>(res);
-            current_scope.push_back(b);
+            let_binding_stack.top().push_back(b);
         }
     }
 
-    let_binding_stack.push(current_scope);
-
     vec<s_ptr<Expression>> body_expressions;
+    auto current_scope = let_binding_stack.top();
 
     auto* expr_block = ctx->body;
     for (auto* expr_ctx : expr_block->expression())
@@ -391,6 +390,26 @@ std::any ExpressionVisitor::visitQualifiedIdentifier(CongParser::QualifiedIdenti
     return utils::split_fully_qualified_identifier(ctx->getText());
 }
 
+std::any ExpressionVisitor::visitCastExpression(CongParser::CastExpressionContext* ctx)
+{
+    const std::any exp = visit(ctx->expression());
+    if (!exp.has_value() || exp.type() != typeid(Expression*))
+        throw SemaError("Invalid expression in cast", ctx->expression());
+
+    if (const auto fqi = visitQualifiedIdentifier(ctx->qualifiedIdentifier());
+        fqi.has_value() && fqi.type() == typeid(utils::FQIInfo))
+    {
+        const utils::FQIInfo& fqi_info = std::any_cast<utils::FQIInfo>(fqi);
+        if (opt<Concept*> c = utils::resolve_fully_qualified_identifier<Concept>(fqi_info, ns); c.has_value())
+        {
+            return utils::dyn_cast<Expression>(
+                new CastExpression(ns->get_sema(), c.value(),
+                    s_ptr<Expression>(std::any_cast<Expression*>(exp))));
+        }
+    }
+
+    throw SemaError("Invalid concept in cast", ctx->qualifiedIdentifier());
+}
 
 void ExpressionVisitor::checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx)
 const

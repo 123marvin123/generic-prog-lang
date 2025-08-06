@@ -7,10 +7,26 @@ namespace Number
         requires { Object::isModelOf(Seq::item(seq), Number::Number) }
         generic() {
             Seq::fold(
-                Number::add(_1, _2),
+                (a: Number, b: Number) => { Number::add(a, b) },
                 0,
                 seq
             )
+        }
+    }
+
+    fun isEven(n: Number::Natural) -> Boolean::Boolean {
+        description { "is p(1) even?" }
+        requires { Object::isModelOf(n, Number::Natural) }
+        generic() {
+            Object::isEqual(Number::mod(n, 2), 0)
+        }
+    }
+
+    fun isOdd(n: Number::Natural) -> Boolean::Boolean {
+        description { "is p(1) odd?" }
+        requires { Object::isModelOf(n, Number::Natural) }
+        generic() {
+            Object::isEqual(Number::mod(n, 2), 1)
         }
     }
 }

@@ -33,7 +33,11 @@ Concept{{ param.concept.name }}.instance()
             {% endfor +%}
             ],
             [{% for req in reqs +%}
-                lambda {{ GenericLambdaParams }}: {{ req.expression }}{% if not loop.last %}, {% endif %}
+                Precondition(
+                    "{{ req.name }}",
+                    "{{ req.description }}",
+                    lambda {{ GenericLambdaParams }}: {{ req.expression }}
+                ){% if not loop.last %}, {% endif %}
             {% endfor +%}
             ]
         )
@@ -42,7 +46,7 @@ def {{ sanitize(def.name) }}(*args):
     spec = Spec{{ Name_ }}()
 
     for x in spec.preconditions:
-        if not x(*args):
+        if not x.impl(*args):
             raise RuntimeError(f"Precondition not satisfied for {{Name_}}")
     
     return Bind(FunctionFromSpec(spec), *args)

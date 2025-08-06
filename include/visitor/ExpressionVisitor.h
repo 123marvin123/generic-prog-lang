@@ -14,8 +14,8 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitLiteralExpression(CongParser::LiteralExpressionContext* ctx) override;
 
-    std::any visitParameterOrConceptReferenceExpression(CongParser::ParameterOrConceptReferenceExpressionContext* ctx)
-    override;
+    std::any
+    visitParameterOrConceptReferenceExpression(CongParser::ParameterOrConceptReferenceExpressionContext* ctx) override;
 
     std::any visitCallExpression(CongParser::CallExpressionContext* ctx) override;
 
@@ -23,9 +23,9 @@ struct ExpressionVisitor final : AbstractVisitor
 
     std::any visitLetExpression(CongParser::LetExpressionContext* ctx) override;
 
-    std::any visitOpenBindingExpression(CongParser::OpenBindingExpressionContext *context) override;
+    std::any visitOpenBindingExpression(CongParser::OpenBindingExpressionContext* context) override;
 
-    std::any visitQuoteExpression(CongParser::QuoteExpressionContext *context) override;
+    std::any visitQuoteExpression(CongParser::QuoteExpressionContext* context) override;
 
     std::any visitEvalExpression(CongParser::EvalExpressionContext* context) override;
 
@@ -46,7 +46,7 @@ struct ExpressionVisitor final : AbstractVisitor
     std::any visitPlaceholderOrQualifiedId(CongParser::PlaceholderOrQualifiedIdContext* ctx) override;
     std::any visitPlaceholder(CongParser::PlaceholderContext* ctx) override;
     std::any visitQualifiedIdentifier(CongParser::QualifiedIdentifierContext* ctx) override;
-
+    std::any visitCastExpression(CongParser::CastExpressionContext* ctx) override;
 
 private:
     Namespace* ns;
@@ -56,12 +56,11 @@ private:
 
     // Check for name collisions with existing symbols
     void checkNameCollision(const std::string& identifier, antlr4::ParserRuleContext* ctx = nullptr) const;
-    
+
     // Find a let binding in the current scope stack
     [[nodiscard]]
     opt<LetBinding> findLetBinding(const std::string& identifier) const;
 
     [[nodiscard]]
-    opt<std::pair<LambdaExpression*, std::size_t>>
-    findLambdaParam(const std::string &string) const;
+    opt<std::pair<LambdaExpression*, std::size_t>> findLambdaParam(const std::string& string) const;
 };

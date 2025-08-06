@@ -241,7 +241,7 @@ void JinjaCppExport::register_function_functions()
                                    [](const RequiresStatement& exp)
                                    {
                                        jinja2::ValuesMap m{};
-                                       m["name"] = utils::sanitize_cpp_identifier(exp.get_name().value_or(""));
+                                       m["name"] = exp.get_name().value_or("");
                                        m["description"] = exp.get_desc().value_or("");
                                        m["expression"] = exp.get_expression()->to_cpp();
                                        return m;

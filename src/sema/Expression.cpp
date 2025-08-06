@@ -41,6 +41,12 @@ std::set<const Function*> Expression::get_depending_functions() const
         depending_functions.insert(inner_req.begin(), inner_req.end());
     }
 
+    if (const auto& self = utils::dyn_cast<LambdaExpression>(this))
+    {
+        const auto inner = self->get_body()->get_depending_functions();
+        depending_functions.insert(inner.begin(), inner.end());
+    }
+
     return depending_functions;
 }
 
@@ -419,7 +425,18 @@ std::string RequiresCallExpression::to_cpp() const noexcept
 
 std::string RequiresCallExpression::to_python() const noexcept
 {
-    throw std::runtime_error("not implemented"); // TODO
+    std::stringstream arg_list;
+    const auto& parameters = f->get_parameters();
+    for (int i = 0; i < parameters.size(); i++)
+    {
+        const FunctionParameter* p = parameters[i];
+        arg_list << p->get_identifier();
+        if (i + 1 < parameters.size())
+        {
+            arg_list << ", ";
+        }
+    }
+    return std::format("FunctionSpecification.check_precondition(self, \"{}\", {})", *get_stmnt().get_name(), arg_list.str());
 }
 
 std::string ConceptReferenceExpression::to_cpp() const noexcept
@@ -469,9 +486,18 @@ std::string QuoteExpression::to_cpp() const noexcept
     return std::format("::cong::lang::quote({})", inner_str);
 }
 
-std::string QuoteExpression::to_python() const noexcept
+std::string QuoteExpression::to_python() const noexcept { return std::format("Quote({})", get_inner()->to_python()); }
+
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> CastExpression::get_result() const
 {
-    return std::format("Quote({})", get_inner()->to_python());
+    return c;
+}
+
+std::string CastExpression::to_cpp() const noexcept { return val->to_cpp(); }
+
+std::string CastExpression::to_python() const noexcept
+{
+    return val->to_python();
 }
 
 std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> EvalExpression::get_result() const
@@ -514,8 +540,18 @@ std::string LambdaExpression::to_cpp() const noexcept
 
 std::string LambdaExpression::to_python() const noexcept
 {
-    // TODO
-    throw std::runtime_error("not implemented");
+    std::stringstream ss;
+
+    ss << "WrapLambda(lambda ";
+    for (auto it = params.begin(); it != params.end(); ++it)
+    {
+        ss << std::get<0>(*it);
+        if (it + 1 != params.end())
+            ss << ", ";
+    }
+    ss << ": " << body->to_python() << ")";
+
+    return ss.str();
 }
 
 std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>

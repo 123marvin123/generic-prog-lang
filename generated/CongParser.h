@@ -513,6 +513,18 @@ public:
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  CastExpressionContext : public ExpressionContext {
+  public:
+    CastExpressionContext(ExpressionContext *ctx);
+
+    antlr4::tree::TerminalNode *LPAREN();
+    QualifiedIdentifierContext *qualifiedIdentifier();
+    antlr4::tree::TerminalNode *RPAREN();
+    ExpressionContext *expression();
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  ParenthesizedExpressionContext : public ExpressionContext {
   public:
     ParenthesizedExpressionContext(ExpressionContext *ctx);
@@ -558,11 +570,13 @@ public:
 
     CongParser::ExpressionBlockContext *body = nullptr;
     antlr4::tree::TerminalNode *LET();
+    std::vector<LetBindingContext *> letBinding();
+    LetBindingContext* letBinding(size_t i);
     antlr4::tree::TerminalNode *LBRACE();
     antlr4::tree::TerminalNode *RBRACE();
     ExpressionBlockContext *expressionBlock();
-    std::vector<LetBindingContext *> letBinding();
-    LetBindingContext* letBinding(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };

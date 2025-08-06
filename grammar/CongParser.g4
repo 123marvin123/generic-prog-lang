@@ -107,8 +107,9 @@ expression
     | REQUIRES LPAREN STRING RPAREN # requiresCallExpression
     | fun=qualifiedIdentifier LPAREN (expression (COMMA expression)*)? RPAREN # callExpression
     | paramOrConcept=qualifiedIdentifier # parameterOrConceptReferenceExpression
-    | LET letBinding+ LBRACE body=expressionBlock RBRACE # letExpression
+    | LET letBinding (COMMA letBinding)* LBRACE body=expressionBlock RBRACE # letExpression
     | parameterList LAMBDA_ARROW LBRACE body=expression RBRACE # lambdaExpression
+    | LPAREN qualifiedIdentifier RPAREN expression # castExpression
     | OPEN_BINDING # openBindingExpression
     ;
 

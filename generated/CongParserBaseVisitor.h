@@ -118,6 +118,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitCastExpression(CongParser::CastExpressionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -72,6 +72,8 @@ public:
 
     virtual std::any visitArithmeticExpression(CongParser::ArithmeticExpressionContext *context) = 0;
 
+    virtual std::any visitCastExpression(CongParser::CastExpressionContext *context) = 0;
+
     virtual std::any visitParenthesizedExpression(CongParser::ParenthesizedExpressionContext *context) = 0;
 
     virtual std::any visitRequiresCallExpression(CongParser::RequiresCallExpressionContext *context) = 0;

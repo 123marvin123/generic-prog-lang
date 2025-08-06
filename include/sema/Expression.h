@@ -602,6 +602,28 @@ struct QuoteExpression final : CallMetafunExpression
     struct DebugVisitor;
 };
 
+struct CastExpression final : Expression
+{
+    CastExpression(Sema* sema, const Concept* c, const s_ptr<Expression>& value) : Expression(sema), c(c), val(value) {}
+
+    [[nodiscard]]
+    std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> get_result() const override;
+
+    static s_ptr<CastExpression> create(Sema* sema, const Concept* c, const s_ptr<Expression>& value)
+    {
+        return Expression::create<CastExpression>(sema, c, value);
+    }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override;
+
+    [[nodiscard]] std::string to_python() const noexcept override;
+
+    struct DebugVisitor;
+private:
+    const Concept* c;
+    const s_ptr<Expression> val;
+};
+
 struct EvalExpression final : CallMetafunExpression
 {
     EvalExpression(Sema* sema, const s_ptr<Expression>& value) : CallMetafunExpression(sema, value) {}
