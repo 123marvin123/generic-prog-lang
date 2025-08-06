@@ -3,6 +3,7 @@
 #include <CLI/CLI.hpp>
 #include "Decls.h"
 #include "jinja2cpp/error_info.h"
+#include <format>
 
 namespace utils
 {
