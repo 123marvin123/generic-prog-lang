@@ -43,10 +43,10 @@ namespace cong::lang
                     using Type = typename ApplyValue_::Type;
 
                     static constexpr
-                    Type call(BindArgExp_ bindArgExp, Exp_ exp)
+                    Type call(BindArgExp_&& bindArgExp, Exp_&& exp)
                     {
-                        return ApplyValue_::call(exp,
-                                                 bindArgExp.arg_);
+                        return ApplyValue_::call(std::forward<Exp_>(exp),
+                                                 std::forward<decltype(bindArgExp.arg_)>(bindArgExp.arg_));
                     }
                 };
             };

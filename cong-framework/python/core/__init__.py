@@ -4,9 +4,10 @@ from .val import Val
 from .bind import Bind
 from .primitive import Number, String, Boolean, Real
 from .proj import Proj
-from .base import Base
+from .base import Base, Undefined
 from .quote import Quote
 from .concept import ConceptWrapper
+from .function import CostFun, Precondition
 
 __all__ = [
     'Exp',
@@ -20,5 +21,8 @@ __all__ = [
     'Real',
     'Proj',
     'Quote',
-    'ConceptWrapper'
+    'ConceptWrapper',
+    'CostFun',
+    'Precondition',
+    'Undefined'
 ]

@@ -79,10 +79,11 @@ std::any ExpressionVisitor::visitParameterOrConceptReferenceExpression(CongParse
 
 std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContext* ctx)
 {
-    const utils::FQIInfo& info = utils::split_fully_qualified_identifier(ctx->fun->getText());
+    const std::string function_name = ctx->fun->getText();
+
+    // First, try to resolve as a regular function
+    const utils::FQIInfo& info = utils::split_fully_qualified_identifier(function_name);
     const opt<Function*> target_fun = utils::resolve_fully_qualified_identifier<Function>(info, ns);
-    if (!target_fun.has_value() || !target_fun.value())
-        throw SemaError(std::format("Could not find function {}", ctx->fun->getText()), ctx);
 
     vec<s_ptr<Expression>> subExpressions;
     subExpressions.reserve(ctx->expression().size());
@@ -96,21 +97,99 @@ std::any ExpressionVisitor::visitCallExpression(CongParser::CallExpressionContex
             throw SemaError(std::format("Could not parse expression {}", exp->getText()), exp);
     }
 
-    if (const auto& fun_params = target_fun.value()->get_parameters();
-        subExpressions.size() != fun_params.size())
-        throw SemaError(std::format("Function {} requires {} arguments but {} were provided.",
-                                     target_fun.value()->get_identifier(),
-                                     fun_params.size(), subExpressions.size()), ctx);
-
-    try
+    // If we found a function, use it
+    if (target_fun.has_value() && target_fun.value())
     {
-        return utils::dyn_cast<Expression>(new CallExpression(ns->get_sema(), target_fun.value(), subExpressions));
-    }
-    catch (const SemaError& e)
-    {
-        throw SemaError(std::format("Could not instantiate function call expression: {}", e.what()), ctx);
+        if (const auto& fun_params = target_fun.value()->get_parameters();
+            subExpressions.size() != fun_params.size())
+            throw SemaError(std::format("Function {} requires {} arguments but {} were provided.",
+                                         target_fun.value()->get_identifier(),
+                                         fun_params.size(), subExpressions.size()), ctx);
+
+        try
+        {
+            return utils::dyn_cast<Expression>(new CallExpression(ns->get_sema(), target_fun.value(), subExpressions));
+        }
+        catch (const SemaError& e)
+        {
+            throw SemaError(std::format("Could not instantiate function call expression: {}", e.what()), ctx);
+        }
     }
 
+    // Function not found, check if it's a function parameter or let-bound variable that could be a Map
+    if (!fun)
+        throw SemaError("We are not inside a function context", ctx);
+
+    // Check for let-bound variables first
+    if (const auto let_binding = findLetBinding(function_name))
+    {
+        // Check if the let-bound variable is of type Map
+        const auto bound_result = let_binding->value->get_result();
+        if (std::holds_alternative<const Concept*>(bound_result))
+        {
+            const auto* bound_concept = std::get<const Concept*>(bound_result);
+            if (bound_concept->matches_concept(ns->get_sema()->builtin_concept<Map>()))
+            {
+                // Create a LetVariableReferenceExpression for the map
+                auto map_expr = std::make_shared<LetVariableReferenceExpression>(
+                    ns->get_sema(), function_name, let_binding->value
+                );
+
+                try
+                {
+                    return utils::dyn_cast<Expression>(new MapCallExpression(ns->get_sema(), map_expr, subExpressions));
+                }
+                catch (const SemaError& e)
+                {
+                    throw SemaError(std::format("Could not instantiate map call expression: {}", e.what()), ctx);
+                }
+            }
+        }
+    }
+
+    // Check function parameters
+    for (const auto& param : fun->get_parameters())
+    {
+        if (param->get_identifier() == function_name)
+        {
+            // Check if this parameter is of type Map
+            if (const auto concrete_param = utils::dyn_cast<ConcreteFunctionParameter>(param))
+            {
+                const auto* param_type = concrete_param->get_type();
+                if (param_type->matches_concept(ns->get_sema()->builtin_concept<Map>()))
+                {
+                    // Create a FunctionParameterExpression for the map
+                    auto map_expr = std::make_shared<FunctionParameterExpression>(ns->get_sema(), param);
+
+                    try
+                    {
+                        return utils::dyn_cast<Expression>(new MapCallExpression(ns->get_sema(), map_expr, subExpressions));
+                    }
+                    catch (const SemaError& e)
+                    {
+                        throw SemaError(std::format("Could not instantiate map call expression: {}", e.what()), ctx);
+                    }
+                }
+            }
+            // For placeholder parameters, we also allow them to be called as Maps
+            else if (utils::dyn_cast<PlaceholderFunctionParameter>(param))
+            {
+                auto map_expr = std::make_shared<FunctionParameterExpression>(ns->get_sema(), param);
+
+                try
+                {
+                    return utils::dyn_cast<Expression>(new MapCallExpression(ns->get_sema(), map_expr, subExpressions));
+                }
+                catch (const SemaError& e)
+                {
+                    throw SemaError(std::format("Could not instantiate map call expression: {}", e.what()), ctx);
+                }
+            }
+        }
+    }
+
+    // Neither function nor callable Map found
+    throw SemaError(std::format("Could not find function or callable map {}", function_name), ctx);
 }
 
 std::any ExpressionVisitor::visitArithmeticExpression(CongParser::ArithmeticExpressionContext* ctx)
@@ -476,4 +555,3 @@ ExpressionVisitor::findLambdaParam(const std::string& string) const
 
     return std::nullopt;
 }
-

@@ -273,4 +273,28 @@ namespace Seq {
             }
         }
     }
+
+    fun anyOf(s: Seq, pred: Map::Map) -> Boolean::Boolean {
+        description { "Checks if any element in the sequence satisfies the predicate" }
+
+        requires(name: "predIsMap", description: "p(2) is a Map") { Object::isModelOf(pred, Map::Map) }
+        requires(name: "sIsSeq", description: "p(1) is a Seq") { Object::isModelOf(s, Seq::Seq) }
+
+        generic(time: length(s), space: length(s)) {
+            let bool_seq = eval(Seq::transform(pred, s)) {
+                eval(Set::hasElement(
+                    setOfItem(bool_seq),
+                    true _d
+                ))
+            }
+        }
+
+        generic(time: length(s), space: 1) {
+            let fn = (acc: Boolean::Boolean, x: Object::Object) => {
+                acc ? true _d : pred(x)
+            } {
+                eval(Seq::fold(fn, false _d, s))
+            }
+        }
+    }
 }

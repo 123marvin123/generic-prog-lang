@@ -37,10 +37,10 @@ namespace cong::lang
                     using Type = typename Call_::Type;
                     static constexpr
                     Type
-                    call(Exp_ exp,
-                         TupleOfExp_ tupleOfExp)
+                    call(Exp_&& exp,
+                         TupleOfExp_&& tupleOfExp)
                     {
-                        return Call_::call(tupleOfExp, Offset_{});
+                        return Call_::call(std::forward<TupleOfExp_>(tupleOfExp), Offset_{});
                     }
                 };
             };

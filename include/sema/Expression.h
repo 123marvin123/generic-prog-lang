@@ -716,6 +716,44 @@ private:
     std::size_t idx;
 };
 
+// New expression type for calling Map objects
+struct MapCallExpression final : Expression, Introspection<MapCallExpression>
+{
+    MapCallExpression(Sema* sema, s_ptr<Expression> map_expr, vec<s_ptr<Expression>> args);
+
+    MapCallExpression(const MapCallExpression& other) : Expression(other), map_expr(other.map_expr), args(other.args) {}
+
+    [[nodiscard]]
+    s_ptr<Expression> get_map_expression() const
+    {
+        return map_expr;
+    }
+
+    [[nodiscard]]
+    const vec<s_ptr<Expression>>& get_arguments() const
+    {
+        return args;
+    }
+
+    [[nodiscard]]
+    std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> get_result() const override;
+
+    static s_ptr<MapCallExpression> create(Sema* sema, s_ptr<Expression> map_expr, vec<s_ptr<Expression>> args)
+    {
+        return Expression::create<MapCallExpression>(sema, map_expr, std::move(args));
+    }
+
+    [[nodiscard]] std::string to_cpp() const noexcept override;
+
+    [[nodiscard]] std::string to_python() const noexcept override;
+
+    struct DebugVisitor;
+
+private:
+    s_ptr<Expression> map_expr;
+    vec<s_ptr<Expression>> args;
+};
+
 //@section DebugVisitor
 
 struct Expression::DebugVisitor final : BaseDebugVisitor
@@ -813,3 +851,13 @@ struct OpenBindingExpression::DebugVisitor final : BaseDebugVisitor
 
     void visitExpression(const Expression& e) override;
 };
+
+struct MapCallExpression::DebugVisitor final : BaseDebugVisitor
+{
+    explicit DebugVisitor(const int tabsize) : BaseDebugVisitor(tabsize) {}
+
+    void visit(const Expression& e) { visitExpression(e); }
+
+    void visitExpression(const Expression& e) override;
+};
+

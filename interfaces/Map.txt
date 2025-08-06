@@ -11,7 +11,7 @@ namespace Map {
         description { "map of (all elements of) p(1) to themselves" }
     }
 
-    fun map(p1: Set::Set, p2: Object::Object) -> Map::Map {
+    fun mapOf(p1: Set::Set, p2: Object::Object) -> Map::Map {
         description { "map of (all elements of) p(1) to p(2)" }
     }
 

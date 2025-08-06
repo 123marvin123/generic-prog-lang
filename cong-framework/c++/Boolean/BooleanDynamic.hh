@@ -33,6 +33,16 @@ namespace cong::lang {
                   : Base_{native__}
                 {}
 
+                bool operator<(const BooleanDynamic& other) const
+                {
+                    return this->native() < other.native();
+                }
+
+                bool operator==(const BooleanDynamic& other) const
+                {
+                    return this->native() == other.native();
+                }
+
                 CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
             };
 #define CONCEPT_ Boolean

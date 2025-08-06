@@ -333,7 +333,7 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression Python export", "[expression]
 
     REQUIRE(python_output.find("(lambda x: (") != std::string::npos);
     REQUIRE(python_output.find("Number(100)") != std::string::npos);
-    REQUIRE(python_output.find(")[-1])(") != std::string::npos);
+    REQUIRE(python_output.find("))(") != std::string::npos);
     REQUIRE(python_output.find("Number(42)") != std::string::npos);
 }
 
@@ -684,7 +684,7 @@ TEST_CASE_METHOD(ExpressionFixture, "EvalExpression export functionality", "[exp
     std::string python_output = eval_expr->to_python();
 
     REQUIRE(cpp_output.find("::cong::lang::intern::eval(") != std::string::npos);
-    REQUIRE(python_output.find("eval(") != std::string::npos);
+    REQUIRE(python_output.find("evaluate(") != std::string::npos);
 }
 
 // LambdaExpression Tests
@@ -733,4 +733,130 @@ TEST_CASE_METHOD(ExpressionFixture, "CallMetafunExpression invalid construction"
     // Should throw when inner expression is null
     REQUIRE_THROWS_AS(QuoteExpression(sema_ptr, nullptr), std::runtime_error);
     REQUIRE_THROWS_AS(EvalExpression(sema_ptr, nullptr), std::runtime_error);
+}
+
+// MapCallExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "MapCallExpression basic functionality", "[expression][mapcall]")
+{
+    INFO(sema->to_string());
+
+    // Create a mock Map expression (using a lambda which returns Map type)
+    vec<std::tuple<std::string, std::variant<PlaceholderFunctionParameter*, Concept*>>> params;
+    params.emplace_back(std::make_tuple(std::string("x"), static_cast<Concept*>(const_cast<Concept*>(sema->builtin_concept<Object>()))));
+
+    auto body = std::make_shared<BooleanExpression>(sema_ptr, true, false);
+    auto lambda_expr = std::make_shared<LambdaExpression>(sema_ptr, params, body);
+
+    // Create arguments for the map call
+    vec<s_ptr<Expression>> args;
+    args.push_back(std::make_shared<IntegerExpression>(sema_ptr, 42, false));
+
+    auto map_call = MapCallExpression::create(sema_ptr, lambda_expr, args);
+
+    REQUIRE(map_call->get_map_expression() == lambda_expr);
+    REQUIRE(map_call->get_arguments().size() == 1);
+    REQUIRE(map_call->get_arguments()[0] == args[0]);
+
+    // Map calls should return Object by default
+    const auto result = map_call->get_result();
+    REQUIRE(std::holds_alternative<const Concept*>(result));
+    REQUIRE(std::get<const Concept*>(result) == sema->builtin_concept<Object>());
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "MapCallExpression with multiple arguments", "[expression][mapcall]")
+{
+    INFO(sema->to_string());
+
+    // Create a mock Map expression
+    vec<std::tuple<std::string, std::variant<PlaceholderFunctionParameter*, Concept*>>> params;
+    params.emplace_back(std::make_tuple(std::string("x"), static_cast<Concept*>(const_cast<Concept*>(sema->builtin_concept<Object>()))));
+    params.emplace_back(std::make_tuple(std::string("y"), static_cast<Concept*>(const_cast<Concept*>(sema->builtin_concept<Object>()))));
+
+    auto body = std::make_shared<BooleanExpression>(sema_ptr, true, false);
+    auto lambda_expr = std::make_shared<LambdaExpression>(sema_ptr, params, body);
+
+    // Create multiple arguments
+    vec<s_ptr<Expression>> args;
+    args.push_back(std::make_shared<IntegerExpression>(sema_ptr, 42, false));
+    args.push_back(std::make_shared<StringExpression>(sema_ptr, "test"));
+    args.push_back(std::make_shared<BooleanExpression>(sema_ptr, true, false));
+
+    auto map_call = MapCallExpression::create(sema_ptr, lambda_expr, args);
+
+    REQUIRE(map_call->get_arguments().size() == 3);
+    REQUIRE(map_call->get_arguments()[0] == args[0]);
+    REQUIRE(map_call->get_arguments()[1] == args[1]);
+    REQUIRE(map_call->get_arguments()[2] == args[2]);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "MapCallExpression invalid construction", "[expression][mapcall]")
+{
+    INFO(sema->to_string());
+
+    vec<s_ptr<Expression>> args;
+    args.push_back(std::make_shared<IntegerExpression>(sema_ptr, 42, false));
+
+    // Should throw when map expression is null
+    REQUIRE_THROWS_AS(MapCallExpression(sema_ptr, nullptr, args), std::runtime_error);
+
+    // Should throw when trying to call a non-Map expression
+    auto non_map_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
+    REQUIRE_THROWS_AS(MapCallExpression(sema_ptr, non_map_expr, args), std::runtime_error);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "MapCallExpression export functionality", "[expression][mapcall][export]")
+{
+    INFO(sema->to_string());
+
+    // Create a mock Map expression
+    vec<std::tuple<std::string, std::variant<PlaceholderFunctionParameter*, Concept*>>> params;
+    params.emplace_back(std::make_tuple(std::string("x"), static_cast<Concept*>(const_cast<Concept*>(sema->builtin_concept<Object>()))));
+
+    auto body = std::make_shared<BooleanExpression>(sema_ptr, true, false);
+    auto lambda_expr = std::make_shared<LambdaExpression>(sema_ptr, params, body);
+
+    // Create arguments
+    vec<s_ptr<Expression>> args;
+    args.push_back(std::make_shared<IntegerExpression>(sema_ptr, 42, false));
+    args.push_back(std::make_shared<StringExpression>(sema_ptr, "hello"));
+
+    auto map_call = MapCallExpression::create(sema_ptr, lambda_expr, args);
+
+    std::string cpp_output = map_call->to_cpp();
+    std::string python_output = map_call->to_python();
+
+    // Should contain the map expression and arguments
+    REQUIRE(cpp_output.find("WrapLambda") != std::string::npos);
+    REQUIRE(cpp_output.find("NaturalStatic<42>") != std::string::npos);
+    REQUIRE(cpp_output.find("hello") != std::string::npos);
+
+    REQUIRE(python_output.find("WrapLambda") != std::string::npos);
+    REQUIRE(python_output.find("Number(42)") != std::string::npos);
+    REQUIRE(python_output.find("hello") != std::string::npos);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "MapCallExpression with no arguments", "[expression][mapcall]")
+{
+    INFO(sema->to_string());
+
+    // Create a mock Map expression that takes no arguments
+    vec<std::tuple<std::string, std::variant<PlaceholderFunctionParameter*, Concept*>>> params;
+    // Empty parameters for a zero-argument map
+
+    auto body = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
+    auto lambda_expr = std::make_shared<LambdaExpression>(sema_ptr, params, body);
+
+    // No arguments
+    vec<s_ptr<Expression>> args;
+
+    auto map_call = MapCallExpression::create(sema_ptr, lambda_expr, args);
+
+    REQUIRE(map_call->get_arguments().empty());
+
+    std::string cpp_output = map_call->to_cpp();
+    std::string python_output = map_call->to_python();
+
+    // Should have empty argument list
+    REQUIRE(cpp_output.find("()") != std::string::npos);
+    REQUIRE(python_output.find("()") != std::string::npos);
 }

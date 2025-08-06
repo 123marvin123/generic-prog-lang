@@ -30,14 +30,10 @@ namespace utils
     inline std::string cleanup_string_literal(const std::string& s)
     {
         // Check if s starts with " and ends with "
-        if (s.size() < 2 || s.front() != '"' || s.back() != '"')
+        if (s.size() < 2 || s[0] != '"' || s[s.size() - 1] != '"')
             return s;
 
-        std::string copy = s;
-        copy.erase(0, 1); // Remove the first "
-        copy.erase(copy.size() - 1); // Remove the last "
-
-        return copy;
+        return s.substr(1, s.size() - 2);
     }
 
     template <class T>

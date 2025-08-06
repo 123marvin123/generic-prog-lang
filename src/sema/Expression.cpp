@@ -89,6 +89,20 @@ std::set<const Concept*> Expression::get_depending_concepts() const
         depending_concepts.insert(inner_req.begin(), inner_req.end());
     }
 
+    if (const auto& self = utils::dyn_cast<MapCallExpression>(this))
+    {
+        // Collect dependencies from the map expression being called
+        const auto map_concepts = self->get_map_expression()->get_depending_concepts();
+        depending_concepts.insert(map_concepts.begin(), map_concepts.end());
+
+        // Collect dependencies from all arguments
+        for (const auto& arg : self->get_arguments())
+        {
+            const auto arg_concepts = arg->get_depending_concepts();
+            depending_concepts.insert(arg_concepts.begin(), arg_concepts.end());
+        }
+    }
+
     return depending_concepts;
 }
 
@@ -360,7 +374,7 @@ std::string LetExpression::to_python() const noexcept
         oss << body.back()->to_python();
     }
 
-    oss << ")[-1])(";
+    oss << "))(";
     for (auto it = bindings.begin(); it != bindings.end(); ++it)
     {
         oss << it->value->to_python();;
@@ -514,7 +528,7 @@ std::string EvalExpression::to_cpp() const noexcept
 std::string EvalExpression::to_python() const noexcept
 {
     // TODO
-    return std::format("eval({})", get_inner()->to_python());
+    return std::format("evaluate({})", get_inner()->to_python());
 }
 
 std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding> LambdaExpression::get_result() const
@@ -575,6 +589,63 @@ std::string LambdaVariableReferenceExpression::to_python() const noexcept
     return to_cpp();
 }
 
+MapCallExpression::MapCallExpression(Sema* sema, s_ptr<Expression> map_expr, vec<s_ptr<Expression>> args) :
+    Expression(sema), map_expr(std::move(map_expr)), args(std::move(args))
+{
+    if (!this->map_expr)
+        throw SemaError("Map expression must not be empty");
+
+    // Validate that the map expression is actually a Map type
+    const auto map_result = this->map_expr->get_result();
+    if (std::holds_alternative<const Concept*>(map_result))
+    {
+        const auto* map_concept = std::get<const Concept*>(map_result);
+        if (!map_concept->matches_concept(get_sema()->builtin_concept<Map>()))
+            throw SemaError("Expression is not callable - must be of type Map");
+    }
+}
+
+std::variant<const Concept*, const PlaceholderFunctionParameter*, OpenBinding>
+MapCallExpression::get_result() const
+{
+    // Map calls return Object by default (could be refined based on Map specialization)
+    return get_sema()->builtin_concept<Object>();
+}
+
+std::string MapCallExpression::to_cpp() const noexcept
+{
+    vec<std::string> str_args{};
+    str_args.reserve(args.size());
+    for (const auto& arg : args)
+        str_args.push_back(arg->to_cpp());
+
+    std::string joined_args;
+    if (!str_args.empty())
+    {
+        joined_args = std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
+                        [](std::string a, const std::string& b) { return std::move(a) + ", " + b; });
+    }
+
+    return std::format("{}({})", map_expr->to_cpp(), joined_args);
+}
+
+std::string MapCallExpression::to_python() const noexcept
+{
+    vec<std::string> str_args{};
+    str_args.reserve(args.size());
+    for (const auto& arg : args)
+        str_args.push_back(arg->to_python());
+
+    std::string joined_args;
+    if (!str_args.empty())
+    {
+        joined_args = std::accumulate(std::next(str_args.begin()), str_args.end(), str_args[0],
+                        [](std::string a, const std::string& b) { return std::move(a) + ", " + b; });
+    }
+
+    return std::format("{}({})", map_expr->to_python(), joined_args);
+}
+
 void Expression::DebugVisitor::visitExpression(const Expression& e)
 {
     if (const auto& cast = utils::dyn_cast<Introspection<BaseConstantExpression>>(&e))
@@ -590,6 +661,8 @@ void Expression::DebugVisitor::visitExpression(const Expression& e)
     else if (const auto& cast = utils::dyn_cast<Introspection<LetExpression>>(&e))
         ss << cast->to_string(tabsize);
     else if (const auto& cast = utils::dyn_cast<Introspection<LetVariableReferenceExpression>>(&e))
+        ss << cast->to_string(tabsize);
+    else if (const auto& cast = utils::dyn_cast<Introspection<MapCallExpression>>(&e))
         ss << cast->to_string(tabsize);
     else
         throw std::runtime_error("Expression type not handled.");
@@ -703,4 +776,42 @@ void OpenBindingExpression::DebugVisitor::visitExpression(const Expression& e)
     const auto& exp = dynamic_cast<const OpenBindingExpression&>(e);
 
     ss << spaces() << termcolor::blue << "_" << exp.N << termcolor::reset;
+}
+
+void MapCallExpression::DebugVisitor::visitExpression(const Expression& e)
+{
+    const auto& map_call = dynamic_cast<const MapCallExpression&>(e);
+
+    ss << spaces() << termcolor::magenta << "map_call(" << termcolor::reset;
+    ss << map_call.get_map_expression()->to_string(0);
+
+    ss << termcolor::magenta << ")(" << termcolor::reset;
+
+    tabsize += 2;
+    const unsigned long length = std::string(tabsize, ' ').length();
+    bool breakNext = false;
+    for (auto it = map_call.get_arguments().begin(); it != map_call.get_arguments().end(); ++it)
+    {
+        std::string output = (*it)->to_string(tabsize);
+
+        if (output.length() - length < 20)
+        {
+            output.erase(0, length);
+            breakNext = false;
+        }
+        else
+        {
+            ss << "\n";
+            breakNext = true;
+        }
+
+        ss << output << termcolor::reset;
+        if (it + 1 != map_call.get_arguments().end())
+            ss << ",";
+    }
+    tabsize -= 2;
+
+    if (breakNext)
+        ss << "\n" << spaces();
+    ss << termcolor::magenta << ")" << termcolor::reset;
 }

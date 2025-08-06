@@ -18,7 +18,7 @@
 
 namespace Map
 {
-    struct SpecMap;
+    struct ConceptMap;
 }
 
 namespace cong::lang
@@ -30,7 +30,7 @@ namespace cong::lang
             template<class Fn_>
             struct AnonymousFunctionImpl : Base
             {
-                using Satisfies = core::Tuple<Map::SpecMap>;
+                using Satisfies = core::Tuple<Map::ConceptMap>;
                 using Base_ = Base;
 
                 using ReduceSpace = core::FunStaticMake<core::Zero>;

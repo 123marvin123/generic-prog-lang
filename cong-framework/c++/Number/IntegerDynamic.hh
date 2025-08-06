@@ -30,6 +30,16 @@ namespace cong::lang {
             : Base_{native__}
             {}
 
+            bool operator <(const IntegerDynamic& a) const
+            {
+                return this->native() < a.native();
+            }
+
+            bool operator==(const IntegerDynamic& a) const
+            {
+                return this->native() == a.native();
+            }
+
             CONG_LANG_INTERN_APPLYMEMBER_DEFAULT;
         };
 

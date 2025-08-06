@@ -154,3 +154,67 @@ class _CostFun(Base):
 
 def CostFun(*args):
     return _CostFun(*args)
+
+class _Precondition(Base):
+    """Represents a precondition with name, description and implementation"""
+
+    def __init__(self, name, description, impl_func):
+        self.name = name
+        self.description = description
+        self.impl = impl_func
+
+    def __str__(self):
+        return f"Precondition({self.name}: {self.description})"
+
+    def reduce_space(self):
+        return Number(0)
+
+    def reduce_time(self):
+        return Number(0)
+
+    def reduce_value(self):
+        return super().reduce_value()
+
+    def apply_space(self, *args):
+        return super().apply_space(*args)
+
+    def apply_time(self, *args):
+        return super().apply_time(*args)
+
+    def apply_value(self, *args):
+        return self.impl(*args)
+
+def Precondition(*args):
+    return Exp(_Precondition(*args))
+
+class _WrapLambda(Base):
+    """Represents a precondition with name, description and implementation"""
+
+    def __init__(self, impl_func):
+        if not callable(impl_func):
+            raise TypeError("impl_func must be a callable function")
+        self.impl = impl_func
+
+    def __str__(self):
+        return f"AnonymousFunction({self.impl.__name__})"
+
+    def reduce_space(self):
+        return Number(0)
+
+    def reduce_time(self):
+        return Number(0)
+
+    def reduce_value(self):
+        return super().reduce_value()
+
+    def apply_space(self, *args):
+        return super().apply_space(*args)
+
+    def apply_time(self, *args):
+        return super().apply_time(*args)
+
+    def apply_value(self, *args):
+        return self.impl(*args)
+
+def WrapLambda(*args):
+    return Exp(_WrapLambda(*args))

@@ -1,7 +1,8 @@
 {% from "macros/python/function.j2" import FunctionDefinition with context %}
 
 from core.function import FunctionSpecification, FunctionFromSpec, GenericFunction
-from core import Bind, Proj, Quote, Boolean, Number, String, Real, ConceptWrapper
+from core import Bind, Proj, Quote, Boolean, Number, String, Real, ConceptWrapper, CostFun, Precondition, Undefined, evaluate
+from core.wrap_lambda import WrapLambda
 
 {% for param in needed_files.functions %}
 {% set ParamName = sanitize(param.name) %}

@@ -86,7 +86,6 @@ namespace cong::lang
                     call(Exp__&& exp,
                          TupleOfExp__&& tupleOfExp)
                     {
-
                         return ApplyValue_::call(
                             std::forward<Exp__>(exp),
                             Transform_::call(
@@ -113,7 +112,8 @@ namespace cong::lang
                     Type
                     call(Exp__&& exp)
                     {
-                        return ApplyValue_::call(std::forward<decltype(exp.exp_)>(exp.exp_),
+                        return ApplyValue_::call(
+                            std::forward<decltype(exp.exp_)>(exp.exp_),
                             std::forward<decltype(exp.tupleOfExp_)>(exp.tupleOfExp_));
                     }
                 };
@@ -125,6 +125,9 @@ namespace cong::lang
             typename core::ToTupleNonRValRef::Call<TupleOfExp_>::Type tupleOfExp_;
 
         public:
+            using TupleOfExp = TupleOfExp_;
+            using Exp = Exp_;
+
             constexpr
             Bind()
                 : env_{},

@@ -310,12 +310,16 @@ namespace cong::lang
                 {
                     using Type = core::Tuple<typename ApplyValue::Call<Exp_, ItemS_>::Type...>;
 
-                    static constexpr Type call(Exp_ exp, TupleOfExp_ tupleOfExp)
+                    static constexpr Type call(Exp_&& exp, TupleOfExp_&& tupleOfExp)
                     {
-                        return std::apply([&exp](ItemS_&... itemS)
+                        return std::apply([&exp](ItemS_&&... itemS)
                         {
-                            return core::tuple(ApplyValue::Call<Exp_, ItemS_>::call(exp, itemS)...);
-                        }, tupleOfExp);
+                            return core::tuple(
+                                ApplyValue::Call<Exp_, ItemS_>::call(
+                                    std::forward<Exp_>(exp),
+                                    std::forward<ItemS_>(itemS))
+                            ...);
+                        }, std::forward<TupleOfExp_>(tupleOfExp));
                     }
                 };
             };

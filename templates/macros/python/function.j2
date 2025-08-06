@@ -23,7 +23,7 @@ Concept{{ param.concept.name }}.instance()
                 GenericFunction(
                     lambda {{ GenericLambdaParams }}: {{ impl.expression }}{{ ', ' if ((impl.time_complexity | list | length) + (impl.space_complexity | list | length)) > 0 }}
                 {% if impl.time_complexity | list | length > 0 %}
-                    CostFun(lambda {{ GenericLambdaParams }}: {{ impl.time_complexity }}){{', ' if space_complexity | list | length > 0 }}
+                    CostFun(lambda {{ GenericLambdaParams }}: {{ impl.time_complexity }}){{', ' if impl.space_complexity | list | length > 0 }}
                 {% endif %}
                 {% if impl.space_complexity | list | length > 0 %}
                     CostFun(lambda {{ GenericLambdaParams }}: {{ impl.space_complexity }})
@@ -46,8 +46,12 @@ def {{ sanitize(def.name) }}(*args):
     spec = Spec{{ Name_ }}()
 
     for x in spec.preconditions:
-        if not x.impl(*args):
-            raise RuntimeError(f"Precondition not satisfied for {{Name_}}")
+        res = x.apply_value(*args).reduce_value()
+        if res is not None and not isinstance(res, Undefined):
+            if not res.value:
+                raise RuntimeError(f"Precondition {x.name} ({x.description}) not satisfied for {{Name_}}")
+        else:
+            raise RuntimeError(f"Could not check Precondition {x.name} ({x.description}) with args {args}")
     
     return Bind(FunctionFromSpec(spec), *args)
 

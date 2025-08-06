@@ -72,10 +72,10 @@ namespace cong::lang::core
                                               typename Plain::Call<Tuple_>::Type
             >&;
 
-            static Type call(Tuple_& tuple,
-                             Offset_)
+            static Type call(Tuple_&& tuple,
+                             Offset_&&)
             {
-                return std::get<Offset_::native()>(tuple);
+                return std::get<Offset_::native()>(std::forward<Tuple_>(tuple));
             }
         };
     };
