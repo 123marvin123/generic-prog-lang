@@ -359,3 +359,378 @@ TEST_CASE_METHOD(ExpressionFixture, "LetExpression invalid construction", "[expr
     null_bindings.emplace_back("x", nullptr);
     REQUIRE_THROWS_AS(LetExpression(sema_ptr, null_bindings, body_exprs), std::runtime_error);
 }
+
+// String Expression Tests
+TEST_CASE_METHOD(ExpressionFixture, "StringExpression basic functionality", "[expression][string]")
+{
+    INFO(sema->to_string());
+
+    const std::string test_value = "hello world";
+    const auto string_expr = StringExpression::create(sema_ptr, test_value);
+
+    REQUIRE(string_expr->eval() == test_value);
+    REQUIRE(string_expr->is_constant());
+    REQUIRE(sema->builtin_concept<std::string>() == std::get<const Concept*>(string_expr->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "StringExpression export functionality", "[expression][string][export]")
+{
+    INFO(sema->to_string());
+
+    const std::string test_value = "test";
+    const auto string_expr = StringExpression::create(sema_ptr, test_value);
+
+    std::string cpp_output = string_expr->to_cpp();
+    std::string python_output = string_expr->to_python();
+
+    REQUIRE(cpp_output == test_value);
+    REQUIRE(python_output == test_value);
+}
+
+// Real Expression Tests
+TEST_CASE_METHOD(ExpressionFixture, "RealExpression basic functionality", "[expression][real]")
+{
+    INFO(sema->to_string());
+
+    const double test_value = 3.14159;
+    const auto real_expr = RealExpression::create(sema_ptr, test_value, false);
+
+    REQUIRE(real_expr->eval() == test_value);
+    REQUIRE(real_expr->is_constant());
+    REQUIRE_FALSE(real_expr->is_dynamic());
+    REQUIRE(sema->builtin_concept<double>() == std::get<const Concept*>(real_expr->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "RealExpression dynamic vs static", "[expression][real]")
+{
+    INFO(sema->to_string());
+
+    const double test_value = 2.718;
+    const auto static_expr = RealExpression::create(sema_ptr, test_value, false);
+    const auto dynamic_expr = RealExpression::create(sema_ptr, test_value, true);
+
+    REQUIRE_FALSE(static_expr->is_dynamic());
+    REQUIRE(dynamic_expr->is_dynamic());
+    REQUIRE(static_expr->eval() == dynamic_expr->eval());
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "RealExpression export functionality", "[expression][real][export]")
+{
+    INFO(sema->to_string());
+
+    const double test_value = 1.5;
+    const auto static_expr = RealExpression::create(sema_ptr, test_value, false);
+    const auto dynamic_expr = RealExpression::create(sema_ptr, test_value, true);
+
+    std::string static_cpp = static_expr->to_cpp();
+    std::string dynamic_cpp = dynamic_expr->to_cpp();
+    std::string python_output = static_expr->to_python();
+
+    REQUIRE(static_cpp.find("::cong::lang::RealStatic<1.5>{}") != std::string::npos);
+    REQUIRE(dynamic_cpp.find("::cong::lang::RealDynamic{1.5}") != std::string::npos);
+    REQUIRE(python_output == "Real(1.5)");
+}
+
+// Integer Expression Tests
+TEST_CASE_METHOD(ExpressionFixture, "IntegerExpression basic functionality", "[expression][integer]")
+{
+    INFO(sema->to_string());
+
+    const long test_value = 42;
+    const auto int_expr = IntegerExpression::create(sema_ptr, test_value, false);
+
+    REQUIRE(int_expr->eval() == test_value);
+    REQUIRE(int_expr->is_constant());
+    REQUIRE_FALSE(int_expr->is_dynamic());
+    REQUIRE(sema->builtin_concept<long>() == std::get<const Concept*>(int_expr->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "IntegerExpression positive and negative values", "[expression][integer]")
+{
+    INFO(sema->to_string());
+
+    const auto positive_expr = IntegerExpression::create(sema_ptr, 100, false);
+    const auto negative_expr = IntegerExpression::create(sema_ptr, -50, false);
+    const auto zero_expr = IntegerExpression::create(sema_ptr, 0, false);
+
+    REQUIRE(positive_expr->eval() == 100);
+    REQUIRE(negative_expr->eval() == -50);
+    REQUIRE(zero_expr->eval() == 0);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "IntegerExpression export functionality", "[expression][integer][export]")
+{
+    INFO(sema->to_string());
+
+    const auto positive_static = IntegerExpression::create(sema_ptr, 42, false);
+    const auto positive_dynamic = IntegerExpression::create(sema_ptr, 42, true);
+    const auto negative_static = IntegerExpression::create(sema_ptr, -10, false);
+    const auto negative_dynamic = IntegerExpression::create(sema_ptr, -10, true);
+
+    REQUIRE(positive_static->to_cpp().find("::cong::lang::NaturalStatic<42>{}") != std::string::npos);
+    REQUIRE(positive_dynamic->to_cpp().find("::cong::lang::NaturalDynamic{42ul}") != std::string::npos);
+    REQUIRE(negative_static->to_cpp().find("::cong::lang::IntegerStatic<-10>{}") != std::string::npos);
+    REQUIRE(negative_dynamic->to_cpp().find("::cong::lang::IntegerDynamic{-10l}") != std::string::npos);
+
+    REQUIRE(positive_static->to_python() == "Number(42)");
+    REQUIRE(negative_static->to_python() == "Number(-10)");
+}
+
+// Boolean Expression Tests
+TEST_CASE_METHOD(ExpressionFixture, "BooleanExpression basic functionality", "[expression][boolean]")
+{
+    INFO(sema->to_string());
+
+    const auto true_expr = BooleanExpression::create(sema_ptr, true, false);
+    const auto false_expr = BooleanExpression::create(sema_ptr, false, false);
+
+    REQUIRE(true_expr->eval() == true);
+    REQUIRE(false_expr->eval() == false);
+    REQUIRE(true_expr->is_constant());
+    REQUIRE(false_expr->is_constant());
+    REQUIRE(sema->builtin_concept<bool>() == std::get<const Concept*>(true_expr->get_result()));
+    REQUIRE(sema->builtin_concept<bool>() == std::get<const Concept*>(false_expr->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "BooleanExpression export functionality", "[expression][boolean][export]")
+{
+    INFO(sema->to_string());
+
+    const auto true_static = BooleanExpression::create(sema_ptr, true, false);
+    const auto false_dynamic = BooleanExpression::create(sema_ptr, false, true);
+
+    REQUIRE(true_static->to_cpp().find("::cong::lang::BooleanStatic<true>{}") != std::string::npos);
+    REQUIRE(false_dynamic->to_cpp().find("::cong::lang::BooleanDynamic{false}") != std::string::npos);
+
+    REQUIRE(true_static->to_python() == "Boolean(True)");
+    REQUIRE(false_dynamic->to_python() == "Boolean(False)");
+}
+
+// LetVariableReferenceExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "LetVariableReferenceExpression basic functionality", "[expression][letvar]")
+{
+    INFO(sema->to_string());
+
+    const std::string identifier = "test_var";
+    auto bound_value = std::make_shared<IntegerExpression>(sema_ptr, 123, false);
+
+    const auto let_var_ref = LetVariableReferenceExpression::create(sema_ptr, identifier, bound_value);
+
+    REQUIRE(let_var_ref->get_identifier() == identifier);
+    REQUIRE(let_var_ref->get_bound_value() == bound_value);
+    REQUIRE(let_var_ref->get_result() == bound_value->get_result());
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LetVariableReferenceExpression invalid construction", "[expression][letvar]")
+{
+    INFO(sema->to_string());
+
+    auto bound_value = std::make_shared<IntegerExpression>(sema_ptr, 123, false);
+
+    REQUIRE_THROWS_AS(LetVariableReferenceExpression(sema_ptr, "", bound_value), std::runtime_error);
+    REQUIRE_THROWS_AS(LetVariableReferenceExpression(sema_ptr, "valid_name", nullptr), std::runtime_error);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LetVariableReferenceExpression export functionality", "[expression][letvar][export]")
+{
+    INFO(sema->to_string());
+
+    const std::string identifier = "my_variable";
+    auto bound_value = std::make_shared<StringExpression>(sema_ptr, "test");
+
+    const auto let_var_ref = LetVariableReferenceExpression::create(sema_ptr, identifier, bound_value);
+
+    REQUIRE(let_var_ref->to_cpp() == identifier);
+    REQUIRE(let_var_ref->to_python() == identifier);
+}
+
+// ConceptReferenceExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "ConceptReferenceExpression basic functionality", "[expression][concept]")
+{
+    INFO(sema->to_string());
+
+    const auto* string_concept = sema->builtin_concept<std::string>();
+    const auto concept_ref = ConceptReferenceExpression::create(sema_ptr, string_concept);
+
+    REQUIRE(concept_ref->get_concept() == string_concept);
+    REQUIRE(string_concept == std::get<const Concept*>(concept_ref->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "ConceptReferenceExpression invalid construction", "[expression][concept]")
+{
+    INFO(sema->to_string());
+
+    REQUIRE_THROWS_AS(ConceptReferenceExpression(sema_ptr, nullptr), std::runtime_error);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "ConceptReferenceExpression export functionality", "[expression][concept][export]")
+{
+    INFO(sema->to_string());
+
+    const auto* bool_concept = sema->builtin_concept<bool>();
+    const auto concept_ref = ConceptReferenceExpression::create(sema_ptr, bool_concept);
+
+    std::string cpp_output = concept_ref->to_cpp();
+    std::string python_output = concept_ref->to_python();
+
+    REQUIRE(cpp_output.find("::cong::lang::intern::Exp<") != std::string::npos);
+    REQUIRE(cpp_output.find("ConceptBoolean>{}") != std::string::npos);
+    REQUIRE(python_output.find("ConceptWrapper(ConceptBoolean)") != std::string::npos);
+}
+
+// OpenBindingExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "OpenBindingExpression basic functionality", "[expression][openbinding]")
+{
+    INFO(sema->to_string());
+
+    const unsigned int binding_index = 5;
+    const auto open_binding = OpenBindingExpression::create(sema_ptr, binding_index);
+
+    REQUIRE(open_binding->is_constant());
+
+    const auto result = open_binding->get_result();
+    REQUIRE(std::holds_alternative<OpenBinding>(result));
+    REQUIRE(std::get<OpenBinding>(result).N == binding_index);
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "OpenBindingExpression export functionality", "[expression][openbinding][export]")
+{
+    INFO(sema->to_string());
+
+    const auto open_binding = OpenBindingExpression::create(sema_ptr, 3);
+
+    std::string cpp_output = open_binding->to_cpp();
+    std::string python_output = open_binding->to_python();
+
+    REQUIRE(cpp_output == "::cong::lang::Proj<3>{}");
+    REQUIRE(python_output == "Proj(3)");
+}
+
+// QuoteExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "QuoteExpression basic functionality", "[expression][quote]")
+{
+    INFO(sema->to_string());
+
+    auto inner_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
+    const auto quote_expr = QuoteExpression::create(sema_ptr, inner_expr);
+
+    REQUIRE(quote_expr->get_inner() == inner_expr);
+    REQUIRE(quote_expr->get_result() == inner_expr->get_result());
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "QuoteExpression export functionality", "[expression][quote][export]")
+{
+    INFO(sema->to_string());
+
+    auto inner_expr = std::make_shared<StringExpression>(sema_ptr, "test");
+    const auto quote_expr = QuoteExpression::create(sema_ptr, inner_expr);
+
+    std::string cpp_output = quote_expr->to_cpp();
+    std::string python_output = quote_expr->to_python();
+
+    REQUIRE(cpp_output.find("::cong::lang::quote(") != std::string::npos);
+    REQUIRE(cpp_output.find("test") != std::string::npos);
+    REQUIRE(python_output.find("Quote(") != std::string::npos);
+    REQUIRE(python_output.find("test") != std::string::npos);
+}
+
+// CastExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "CastExpression basic functionality", "[expression][cast]")
+{
+    INFO(sema->to_string());
+
+    const auto* target_concept = sema->builtin_concept<double>();
+    auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
+
+    const auto cast_expr = CastExpression::create(sema_ptr, target_concept, value_expr);
+
+    REQUIRE(target_concept == std::get<const Concept*>(cast_expr->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "CastExpression export functionality", "[expression][cast][export]")
+{
+    INFO(sema->to_string());
+
+    const auto* target_concept = sema->builtin_concept<double>();
+    auto value_expr = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
+
+    const auto cast_expr = CastExpression::create(sema_ptr, target_concept, value_expr);
+
+    // Cast expressions should pass through to the underlying value's export
+    REQUIRE(cast_expr->to_cpp() == value_expr->to_cpp());
+    REQUIRE(cast_expr->to_python() == value_expr->to_python());
+}
+
+// EvalExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "EvalExpression basic functionality", "[expression][eval]")
+{
+    INFO(sema->to_string());
+
+    auto inner_expr = std::make_shared<BooleanExpression>(sema_ptr, true, false);
+    const auto eval_expr = EvalExpression::create(sema_ptr, inner_expr);
+
+    REQUIRE(eval_expr->get_inner() == inner_expr);
+    REQUIRE(eval_expr->get_result() == inner_expr->get_result());
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "EvalExpression export functionality", "[expression][eval][export]")
+{
+    INFO(sema->to_string());
+
+    auto inner_expr = std::make_shared<IntegerExpression>(sema_ptr, 123, false);
+    const auto eval_expr = EvalExpression::create(sema_ptr, inner_expr);
+
+    std::string cpp_output = eval_expr->to_cpp();
+    std::string python_output = eval_expr->to_python();
+
+    REQUIRE(cpp_output.find("::cong::lang::intern::eval(") != std::string::npos);
+    REQUIRE(python_output.find("eval(") != std::string::npos);
+}
+
+// LambdaExpression Tests
+TEST_CASE_METHOD(ExpressionFixture, "LambdaExpression basic functionality", "[expression][lambda]")
+{
+    INFO(sema->to_string());
+
+    // Create a simple lambda with one parameter
+    vec<std::tuple<std::string, std::variant<PlaceholderFunctionParameter*, Concept*>>> params;
+    params.emplace_back(std::make_tuple(std::string("x"), static_cast<Concept*>(const_cast<Concept*>(sema->builtin_concept<long>()))));
+
+    auto body = std::make_shared<IntegerExpression>(sema_ptr, 42, false);
+    auto lambda_expr = std::make_shared<LambdaExpression>(sema_ptr, params, body);
+
+    REQUIRE(lambda_expr->get_params().size() == 1);
+    REQUIRE(lambda_expr->get_body() == body);
+    REQUIRE(sema->builtin_concept<Map>() == std::get<const Concept*>(lambda_expr->get_result()));
+}
+
+TEST_CASE_METHOD(ExpressionFixture, "LambdaExpression export functionality", "[expression][lambda][export]")
+{
+    INFO(sema->to_string());
+
+    vec<std::tuple<std::string, std::variant<PlaceholderFunctionParameter*, Concept*>>> params;
+    params.emplace_back(std::make_tuple(std::string("param1"), static_cast<Concept*>(const_cast<Concept*>(sema->builtin_concept<long>()))));
+    params.emplace_back(std::make_tuple(std::string("param2"), static_cast<Concept*>(const_cast<Concept*>(sema->builtin_concept<bool>()))));
+
+    auto body = std::make_shared<BooleanExpression>(sema_ptr, true, false);
+    auto lambda_expr = std::make_shared<LambdaExpression>(sema_ptr, params, body);
+
+    std::string cpp_output = lambda_expr->to_cpp();
+    std::string python_output = lambda_expr->to_python();
+
+    REQUIRE(cpp_output.find("cong::lang::intern::WrapLambda([&](") != std::string::npos);
+    REQUIRE(cpp_output.find("auto&& param1, auto&& param2") != std::string::npos);
+
+    REQUIRE(python_output.find("WrapLambda(lambda ") != std::string::npos);
+    REQUIRE(python_output.find("param1, param2") != std::string::npos);
+}
+
+// CallMetafunExpression Tests (base class)
+TEST_CASE_METHOD(ExpressionFixture, "CallMetafunExpression invalid construction", "[expression][metafun]")
+{
+    INFO(sema->to_string());
+
+    // Should throw when inner expression is null
+    REQUIRE_THROWS_AS(QuoteExpression(sema_ptr, nullptr), std::runtime_error);
+    REQUIRE_THROWS_AS(EvalExpression(sema_ptr, nullptr), std::runtime_error);
+}
